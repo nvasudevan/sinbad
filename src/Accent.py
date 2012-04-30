@@ -21,36 +21,50 @@
 
 
 import os, subprocess, tempfile
+import Utils
+
 
 
 def compile(old_gp, old_lp):
+    # We do all the icky stuff in a temporary directory.
     td = tempfile.mkdtemp()
 
     # Accent and lex doen't allow us to specify *where* the output files
-    # it generates should be put. We therefore have to rely on hackery.
+    # it generates should be put. We therefore temporarily chdir to 'td'.
+    cwd = os.getcwd()
+    os.chdir(td)
+
+    # Accent
 
     new_gp = os.path.join(td, os.path.split(old_gp)[1])
     r = subprocess.call(["cp", old_gp, new_gp])
     if r != 0:
-        error("Copy failed.\n", r)
-    r = os.system("cd %s ; ${ACCENT_DIR}/accent/accent %s" % (td, new_gp))
+        Utils.error("Copy failed.\n", r)
+    r = os.system("${ACCENT_DIR}/accent/accent %s" % new_gp)
     if r != 0:
-        error("accent failed.\n", r)
+        Utils.error("accent failed.\n", r)
+
+    # lex
 
     new_lp = os.path.join(td, os.path.split(old_lp)[1])
     r = subprocess.call(["cp", old_lp, new_lp])
     if r != 0:
-        error("Copy failed.\n", r)
-    r = os.system("cd %s ; flex %s" % (td, new_lp))
+        Utils.error("Copy failed.\n", r)
+    r = os.system("lex %s" % new_lp)
     if r != 0:
-        error("lex failed.\n", r)
+        Utils.error("lex failed.\n", r)
+
+    # cc
 
     parser = os.path.join(td, "parser")
-    r = os.system(" ".join(["cc -w", "-o", parser, \
-      os.path.join(td, "yygrammar.c"), os.path.join(td, "lex.yy.c"), \
-      "${ACCENT_DIR}/exmplaccent/auxil.c", "${ACCENT_DIR}/entire/entire.c"]))
+    r = subprocess.call(["cc", "-w", "-o", parser, \
+      "yygrammar.c", "lex.yy.c", \
+      os.path.expandvars("${ACCENT_DIR}/exmplaccent/auxil.c"), \
+      os.path.expandvars("${ACCENT_DIR}/entire/entire.c")])
     if r != 0:
-        error("cc failed.\n", r)
+        Utils.error("cc failed.\n", r)
+
+    os.chdir(cwd)
 
     return parser
 

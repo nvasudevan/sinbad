@@ -1,0 +1,14 @@
+================================================================================
+  SinBAD
+================================================================================
+
+SinBAD is an experimental Search-Based gramar Ambiguity Detection tool.
+
+To run it, you will first need to download the ACCENT compiler compiler
+<http://accent.compilertools.net/>, decompress and build it. Set the
+ACCENT_DIR environment variable to point to the top-level accent/ directory.
+You will also need Python or PyPy installed.
+
+  $ export ACCENT_DIR=<path to accent top-level directory>
+  $ cd src/
+  $ ./sinbad -h

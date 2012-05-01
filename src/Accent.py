@@ -29,6 +29,15 @@ def compile(old_gp, old_lp):
     # We do all the icky stuff in a temporary directory.
     td = tempfile.mkdtemp()
 
+    new_gp = os.path.join(td, os.path.split(old_gp)[1])
+    r = subprocess.call(["cp", old_gp, new_gp])
+    if r != 0:
+        Utils.error("Copy failed.\n", r)
+    new_lp = os.path.join(td, os.path.split(old_lp)[1])
+    r = subprocess.call(["cp", old_lp, new_lp])
+    if r != 0:
+        Utils.error("Copy failed.\n", r)
+
     # Accent and lex doen't allow us to specify *where* the output files
     # it generates should be put. We therefore temporarily chdir to 'td'.
     cwd = os.getcwd()
@@ -36,20 +45,12 @@ def compile(old_gp, old_lp):
 
     # Accent
 
-    new_gp = os.path.join(td, os.path.split(old_gp)[1])
-    r = subprocess.call(["cp", old_gp, new_gp])
-    if r != 0:
-        Utils.error("Copy failed.\n", r)
     r = os.system("${ACCENT_DIR}/accent/accent %s" % new_gp)
     if r != 0:
         Utils.error("accent failed.\n", r)
 
     # lex
 
-    new_lp = os.path.join(td, os.path.split(old_lp)[1])
-    r = subprocess.call(["cp", old_lp, new_lp])
-    if r != 0:
-        Utils.error("Copy failed.\n", r)
     r = os.system("lex %s" % new_lp)
     if r != 0:
         Utils.error("lex failed.\n", r)

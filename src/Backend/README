@@ -1,0 +1,44 @@
+================================================================================
+ Brief backends description
+================================================================================
+
+Random1
+  Builds up a string by randomly walking the input CFG and taking random
+  choices at all opportunities.
+    + Simple
+    - Runs out of stack space on any non-trivial example.
+
+
+Random2 [builds on Random1]
+  When a given rule has been called "enough" times in a given path down the
+  tree, prefer sequences which contain only terminals (on the basis that this
+  will stop the tree getting too much bigger).
+    + Fairly simple
+    - Runs out of stack space on most non-trivial examples.
+
+
+Random3 [builds on Random2]
+  Rules are statically calculated as being of "finite depth" or not. Finite
+  depth means that all the rules sequences contain only a) terminals b)
+  references to other rules which are finite depth.
+    - Most CFGs seem to have few rules which are of finite depth, so it
+      still tends to run out of stack space on most non-trivial examples.
+
+
+Random4 [builds on Random3]
+  Rather than classifying whole rules as being of "finite depth" or not, do
+  so on a per-sequence basis.
+    ~ Doesn't seem to be much of a difference re: Random3.
+
+
+Dynamic1 [builds, more or less, on Random2]
+  When the current stack depth of called rules is "enough", pick low-scoring
+  sequences. Scores range from 0 to +ve. All rules have a count of how many
+  times they have been entered and exited (entered >= exited; if entered ==
+  exited, then the rule in question is not on the current stack). Terminals
+  score 0; non-terms where entered = 0 score 0 (an attempt to increase
+  diversity); otherwise non-terms score (1 - exited / entered). One of the
+  lowest scoring sequences is then randomly chosen.
+    + Runs on a wider range of examples.
+    ~ Very sensitive to when the call stack depth is "enough"
+    - Still runs out of stack on many examples.

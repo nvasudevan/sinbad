@@ -20,6 +20,9 @@
 # IN THE SOFTWARE.
 
 
-import Length1, Random1
+import Random1, Random2
 
-BACKENDS = {"length1" : Length1.Calc, "random1" : Random1.Calc}
+BACKENDS = {
+  "random1" : Random1.Calc,
+  "random2" : Random2.Calc
+}

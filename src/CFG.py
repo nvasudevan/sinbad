@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import re
+import copy, re
 
 
 
@@ -38,6 +38,13 @@ class CFG:
         self._rules_dict = {}
         for r in rules:
             self._rules_dict[r.name] = r
+
+
+    def clone(self):
+        """ Returns a complete clone of this CFG. The clone and anything it
+            points to can be changed in arbitrary ways without affecting
+            the original. """
+        return copy.deepcopy(self)
 
 
     def get_rule(self, name):

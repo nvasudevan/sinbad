@@ -20,6 +20,29 @@
 # IN THE SOFTWARE.
 
 
+import sys
+
+
 def error(msg, c):
     sys.stderr.write(msg)
     sys.exit(c)
+
+
+def min_max(l):
+    assert len(l) > 0
+    min = max = l[0]
+    minc = maxc = 1
+    for e in l[1:]:
+        if e == min:
+            minc += 1
+        elif e < min:
+            min = e
+            minc = 1
+
+        if e == max:
+            maxc += 1
+        elif e > max:
+            max = e
+            maxc = 1
+
+    return min, minc, max, maxc

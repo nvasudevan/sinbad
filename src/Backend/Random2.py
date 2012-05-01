@@ -41,6 +41,8 @@ class Calc:
             out = Accent.run(self._sin.parser, s)
             if Accent.was_ambiguous(out):
                 print "Ambiguity found:\n"
+                print s
+                print
                 print "".join(out)
                 return True
         return False

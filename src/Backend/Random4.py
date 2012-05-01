@@ -31,38 +31,37 @@ class Calc:
         self._cfg = sin.cfg.clone()
 
         for rule in self._cfg.rules:
-            rule.finite_depth = False
+            rule.fd_seqs = [False] * len(rule.seqs)
 
-        # Calculate whether a given rule will definitely only recurse to a finite
-        # depth. Note this doesn't mean it will only recurse 1 level: it may
-        # recurse upto N levels, but there is a definite upper bound on N.
+        # Calculate whether a given sequence will definitely only recurse to a
+        # finite depth. Note this doesn't mean it will only recurse 1 level: it
+        # may recurse upto N levels, but there is a definite upper bound on N.
         #
         # Calculating this goes as follows. A rule whose sequences contain only
         # terminals is of finite depth. A rule whose sequences contain only
         # terminals or references to rules which are of finite depth is, itself,
         # of finite depth. Because of the latter rule, we iterate over all the
-        # rules until we reach a fixed point.
+        # sequences until we reach a fixed point.
         while 1:
             changed = False
             for rule in self._cfg.rules:
-                if rule.finite_depth:
-                    # If a rule is already known to be of finite depth, there's
-                    # no point doing everything again.
-                    continue
+                for i in range(len(rule.seqs)):
+                    if rule.fd_seqs[i]:
+                        # If this sequence is known to have a finite depth
+                        # path, there's no point doing everything again.
+                        continue
 
-                for seq in rule.seqs:
-                    finite_depth = True
-                    for e in seq:
+                    fd_path = True
+                    for e in rule.seqs[i]:
                         if isinstance(e, CFG.Non_Term_Ref):
                             ref_rule = self._cfg.get_rule(e.name)
-                            if not ref_rule.finite_depth:
-                                finite_depth = False
+                            if False in ref_rule.fd_seqs:
+                                fd_path = False
                                 break
-                    if not finite_depth:
-                        break
-                else:
-                    rule.finite_depth = True
-                    changed = True
+
+                    if fd_path:
+                        rule.fd_seqs[i] = True
+                        changed = True
             if not changed:
                 break
 
@@ -104,20 +103,15 @@ class Calc:
             # ensure that we will only recurse a fixed number of times from this
             # point. If so, pick one of those randomly; otherwise, pick one of
             # the other sequences randomly.
-            term_seqs = []
-            for seq in rule.seqs:
-                for e in seq:
-                    if isinstance(e, CFG.Non_Term_Ref):
-                        ref_rule = self._cfg.get_rule(e.name)
-                        if not ref_rule.finite_depth:
-                            break
-                else:
-                    term_seqs.append(seq)
+            fd_seqs = []
+            for i in range(len(rule.seqs)):
+                if rule.fd_seqs[i]:
+                    fd_seqs.append(rule.seqs[i])
 
-            if len(term_seqs) == 0:
+            if len(fd_seqs) == 0:
                 seq = random.choice(rule.seqs)
             else:
-                seq = random.choice(term_seqs)
+                seq = random.choice(fd_seqs)
         else:
             seq = random.choice(rule.seqs)
 

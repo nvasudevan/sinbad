@@ -22,7 +22,7 @@
 # IN THE SOFTWARE.
 
 
-import getopt, os, sys
+import datetime, getopt, os, sys
 import Accent, Backend, CFG, Lexer
 
 
@@ -85,6 +85,14 @@ class Sinbad:
         self.parser = Accent.compile(gp, lp)
         bend = Backend.BACKENDS[bend_name](self)
         return bend.run()
+
+
+    def start_timer(self):
+        return datetime.datetime.now()
+
+
+    def timer_elapsed(self, t):
+        return not (t + datetime.timedelta(seconds=30) > datetime.datetime.now())
 
 
 

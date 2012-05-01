@@ -35,13 +35,15 @@ class Calc:
 
 
     def run(self):
-        while 1:
+        timer = self._sin.start_timer()
+        while not self._sin.timer_elapsed(timer):
             s = self.next()
             out = Accent.run(self._sin.parser, s)
             if Accent.was_ambiguous(out):
                 print "Ambiguity found:\n"
                 print "".join(out)
                 return True
+        return False
 
 
     def next(self):

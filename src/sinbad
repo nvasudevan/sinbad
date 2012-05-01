@@ -23,7 +23,7 @@
 
 
 import datetime, getopt, os, sys
-import Accent, Backend, CFG, Lexer
+import Accent, Backends, CFG, Lexer
 
 
 
@@ -36,7 +36,7 @@ class Sinbad:
             if opt[0] == "-b":
                 if opt[1] in backends:
                     self.usage("Backend '%s' specified more than once." % opt[1])
-                if opt[1] not in Backend.BACKENDS:
+                if opt[1] not in Backends.BACKENDS:
                     self.usage("Unknown backend '%s'." % opt[1])
                 backends.append(opt[1])
             elif opt[0] == "-h":
@@ -83,7 +83,7 @@ class Sinbad:
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
         self.parser = Accent.compile(gp, lp)
-        bend = Backend.BACKENDS[bend_name](self)
+        bend = Backends.BACKENDS[bend_name](self)
         return bend.run()
 
 

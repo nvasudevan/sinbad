@@ -26,62 +26,66 @@ import getopt, os, sys
 import Accent, Backend, CFG, Lexer
 
 
-def find_ambiguity(gp, lp, bend_name):
-    print "===> %s : %s" % (gp, bend_name)
-    lex = Lexer.parse(open(lp, "r").read())
-    cfg = CFG.parse(lex, open(gp, "r").read())
-    parser = Accent.compile(gp, lp)
-    bend = Backend.BACKENDS[bend_name](cfg, parser)
-    bend.run()
+
+class Sinbad:
+
+    def __init__(self):
+        opts, args = getopt.getopt(sys.argv[1 : ], "hb:")
+        backends = []
+        for opt in opts:
+            if opt[0] == "-b":
+                if opt[1] in backends:
+                    self.usage("Backend '%s' specified more than once." % opt[1])
+                if opt[1] not in Backend.BACKENDS:
+                    self.usage("Unknown backend '%s'." % opt[1])
+                backends.append(opt[1])
+            elif opt[0] == "-h":
+                self.usage()
+            else:
+                self.usage("Unknown argument '%s'" % opt[0])
+
+        if len(backends) == 0:
+            self.usage("No backend specified.")
+        if len(args) == 0:
+            self.usage("Not enough arguments.")
+        if len(args) % 2 != 0:
+            self.usage("Some grammars are missing lexers.")
+
+        i = 0
+        while i < len(args):
+            for backend in backends:
+                self.check_file(args[i])
+                self.check_file(args[i + 1])
+                if self.find_ambiguity(args[i], args[i + 1], backend):
+                    break
+            i += 2
 
 
-def check_file(p):
-    if not os.path.isfile(p):
-        sys.stderr.write("Can not read in %s\n" % p)
-        sys.exit(1)
+    def usage(self, msg = None):
+	    if msg is not None:
+		    sys.stderr.write(msg + "\n\n")
+
+	    sys.stderr.write("sinbad -b <backend 1> [... -b " \
+          "<backend n>] <grammar 1> <lexer 1> " \
+          "[... <grammar n> <lexer n>]\n")
+	    sys.exit(1)
 
 
-def usage(msg = None):
-
-	if msg is not None:
-		sys.stderr.write(msg + "\n\n")
-
-	sys.stderr.write("sinbad -b <backend 1> [... -b " \
-      "<backend n>] <grammar 1> <lexer 1> " \
-      "[... <grammar n> <lexer n>]\n")
-	sys.exit(1)
+    def check_file(self, p):
+        if not os.path.isfile(p):
+            sys.stderr.write("Can not read in %s\n" % p)
+            sys.exit(1)
 
 
-def main():
-    opts, args = getopt.getopt(sys.argv[1 : ], "hb:")
-    backends = []
-    for opt in opts:
-        if opt[0] == "-b":
-            if opt[1] in backends:
-                usage("Backend '%s' specified more than once." % opt[1])
-            if opt[1] not in Backend.BACKENDS:
-                usage("Unknown backend '%s'." % opt[1])
-            backends.append(opt[1])
-        elif opt[0] == "-h":
-            usage()
-        else:
-            usage("Unknown argument '%s'" % opt[0])
-
-    if len(backends) == 0:
-        usage("No backend specified.")
-    if len(args) == 0:
-        usage("Not enough arguments.")
-    if len(args) % 2 != 0:
-        usage("Some grammars are missing lexers.")
-
-    i = 0
-    while i < len(args):
-        for backend in backends:
-            check_file(args[i])
-            check_file(args[i + 1])
-            find_ambiguity(args[i], args[i + 1], backend)
-        i += 2
+    def find_ambiguity(self, gp, lp, bend_name):
+        sys.setrecursionlimit(5000)
+        print "===> %s : %s" % (gp, bend_name)
+        self.lex = Lexer.parse(open(lp, "r").read())
+        self.cfg = CFG.parse(self.lex, open(gp, "r").read())
+        self.parser = Accent.compile(gp, lp)
+        bend = Backend.BACKENDS[bend_name](self)
+        return bend.run()
 
 
 
-main()
+Sinbad()

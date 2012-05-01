@@ -26,15 +26,15 @@ import Accent, CFG
 
 
 class Calc:
-    def __init__(self, cfg, parser):
-        self._cfg = cfg
-        self._parser = parser
+    def __init__(self, sin):
+        self._sin = sin
+        self._cfg = sin.cfg
 
 
     def run(self):
         while 1:
             s = self.next()
-            out = Accent.run(self._parser, s)
+            out = Accent.run(self._sin.parser, s)
             if Accent.was_ambiguous(out):
                 print "Ambiguity found:\n"
                 print "".join(out)

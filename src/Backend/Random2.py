@@ -26,9 +26,9 @@ import Accent, CFG, Utils
 
 
 class Calc:
-    def __init__(self, cfg, parser):
-        self._cfg = cfg.clone()
-        self._parser = parser
+    def __init__(self, sin):
+        self._sin = sin
+        self._cfg = sin.cfg.clone()
 
         for rule in self._cfg.rules:
             rule.depth = 0
@@ -37,7 +37,7 @@ class Calc:
     def run(self):
         while 1:
             s = self.next()
-            out = Accent.run(self._parser, s)
+            out = Accent.run(self._sin.parser, s)
             if Accent.was_ambiguous(out):
                 print "Ambiguity found:\n"
                 print "".join(out)

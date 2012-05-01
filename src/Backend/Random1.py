@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import random
+import random, sys
 import Accent, CFG
 
 
@@ -34,10 +34,12 @@ class Calc:
     def run(self):
         timer = self._sin.start_timer()
         while not self._sin.timer_elapsed(timer):
+            sys.stdout.write(".")
+            sys.stdout.flush()
             s = self.next()
             out = Accent.run(self._sin.parser, s)
             if Accent.was_ambiguous(out):
-                print "Ambiguity found:\n"
+                print "\nAmbiguity found:\n"
                 print s
                 print
                 print "".join(out)
@@ -46,11 +48,9 @@ class Calc:
 
     def next(self):
         self._s = []
-        while 1:
+        timer = self._sin.start_timer()
+        while not self._sin.timer_elapsed(timer):
             self._dive(self._cfg.get_rule(self._cfg.start_rulen))
-
-            if random.random() > 0.5:
-                break
 
         return " ".join(self._s)
 

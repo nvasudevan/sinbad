@@ -20,6 +20,42 @@
 # IN THE SOFTWARE.
 
 
-import Length1, Random1
+import random
+import Accent, CFG
 
-FITNESS_FUNCS = {"length1" : Length1.Calc, "random1" : Random1.Calc}
+
+
+class Calc:
+    def __init__(self, cfg, parser):
+        self._cfg = cfg
+        self._parser = parser
+
+
+    def run(self):
+        while 1:
+            s = self.next()
+            out = Accent.run(self._parser, s)
+            if Accent.was_ambiguous(out):
+                print "Ambiguity found:\n"
+                print "".join(out)
+                return True
+
+
+    def next(self):
+        self._s = []
+        while 1:
+            self._dive(self._cfg.get_rule(self._cfg.start_rulen))
+
+            if random.random() > 0.5:
+                break
+
+        return " ".join(self._s)
+
+
+    def _dive(self, rule):
+        seq = random.choice(rule.seqs)
+        for e in seq:
+            if isinstance(e, CFG.Non_Term_Ref):
+                self._dive(self._cfg.get_rule(e.name))
+            else:
+                self._s.append(self._cfg.gen_token(e.tok))

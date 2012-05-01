@@ -23,22 +23,16 @@
 
 
 import getopt, os, sys
-import Accent, CFG, Fitness, Lexer
+import Accent, Backend, CFG, Lexer
 
 
-def find_ambiguity(gp, lp, ff_name):
-    print "===> %s : %s" % (gp, ff_name)
+def find_ambiguity(gp, lp, bend_name):
+    print "===> %s : %s" % (gp, bend_name)
     lex = Lexer.parse(open(lp, "r").read())
     cfg = CFG.parse(lex, open(gp, "r").read())
     parser = Accent.compile(gp, lp)
-    ff_calc = Fitness.FITNESS_FUNCS[ff_name](cfg)
-    while 1:
-        s = ff_calc.next()
-        out = Accent.run(parser, s)
-        if Accent.was_ambiguous(out):
-            print "Ambiguity found:\n"
-            print "".join(out)
-            return
+    bend = Backend.BACKENDS[bend_name](cfg, parser)
+    bend.run()
 
 
 def check_file(p):
@@ -52,29 +46,29 @@ def usage(msg = None):
 	if msg is not None:
 		sys.stderr.write(msg + "\n\n")
 
-	sys.stderr.write("sinbad -f <fitness function 1> [... -f " \
-      "<fitness function n>] <grammar 1> <lexer 1> " \
+	sys.stderr.write("sinbad -b <backend 1> [... -b " \
+      "<backend n>] <grammar 1> <lexer 1> " \
       "[... <grammar n> <lexer n>]\n")
 	sys.exit(1)
 
 
 def main():
-    opts, args = getopt.getopt(sys.argv[1 : ], "hf:")
-    fitnesses = []
+    opts, args = getopt.getopt(sys.argv[1 : ], "hb:")
+    backends = []
     for opt in opts:
-        if opt[0] == "-f":
-            if opt[1] in fitnesses:
-                usage("Fitness function '%s' specified more than once." % opt[1])
-            if opt[1] not in Fitness.FITNESS_FUNCS:
-                usage("Unknown fitness function '%s'." % opt[1])
-            fitnesses.append(opt[1])
+        if opt[0] == "-b":
+            if opt[1] in backends:
+                usage("Backend '%s' specified more than once." % opt[1])
+            if opt[1] not in Backend.BACKENDS:
+                usage("Unknown backend '%s'." % opt[1])
+            backends.append(opt[1])
         elif opt[0] == "-h":
             usage()
         else:
             usage("Unknown argument '%s'" % opt[0])
 
-    if len(fitnesses) == 0:
-        usage("No fitness function specified.")
+    if len(backends) == 0:
+        usage("No backend specified.")
     if len(args) == 0:
         usage("Not enough arguments.")
     if len(args) % 2 != 0:
@@ -82,10 +76,10 @@ def main():
 
     i = 0
     while i < len(args):
-        for fitness in fitnesses:
+        for backend in backends:
             check_file(args[i])
             check_file(args[i + 1])
-            find_ambiguity(args[i], args[i + 1], fitness)
+            find_ambiguity(args[i], args[i + 1], backend)
         i += 2
 
 

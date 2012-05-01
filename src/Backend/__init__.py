@@ -20,31 +20,6 @@
 # IN THE SOFTWARE.
 
 
-import random
-import CFG
+import Length1, Random1
 
-
-
-class Calc:
-    def __init__(self, cfg):
-        self._cfg = cfg
-
-
-    def next(self):
-        self._s = []
-        while 1:
-            self._dive(self._cfg.get_rule(self._cfg.start_rulen))
-
-            if random.random() > 0.5:
-                break
-
-        return " ".join(self._s)
-
-
-    def _dive(self, rule):
-        seq = random.choice(rule.seqs)
-        for e in seq:
-            if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name))
-            else:
-                self._s.append(self._cfg.gen_token(e.tok))
+BACKENDS = {"length1" : Length1.Calc, "random1" : Random1.Calc}

@@ -21,42 +21,21 @@
 
 
 import math, random, sys
-import Accent, CFG, Utils
+import Accent, Backend, CFG, Utils
 
 
 
-class Calc:
+class Calc(Backend.Simple):
     def __init__(self, sin):
-        self._sin = sin
-        self._cfg = sin.cfg.clone()
+        Backend.Simple.__init__(self, sin)
 
         for rule in self._cfg.rules:
             rule.depth = 0
 
 
-    def run(self):
-        timer = self._sin.start_timer()
-        while not self._sin.timer_elapsed(timer):
-            sys.stdout.write(".")
-            sys.stdout.flush()
-            s = self.next()
-            out = Accent.run(self._sin.parser, s)
-            if Accent.was_ambiguous(out):
-                print "\nAmbiguity found:\n"
-                print s
-                print
-                print "".join(out)
-                return True
-        return False
-
-
     def next(self):
         self._s = []
-        while 1:
-            self._dive(self._cfg.get_rule(self._cfg.start_rulen))
-
-            if random.random() > 0.5:
-                break
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen))
 
         return " ".join(self._s)
 

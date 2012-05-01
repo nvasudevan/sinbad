@@ -20,23 +20,27 @@
 # IN THE SOFTWARE.
 
 
-import random, sys
-import Accent, Backend, CFG
+import sys
+import Accent
 
 
-
-class Calc(Backend.Simple):
-    def next(self):
-        self._s = []
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen))
-
-        return " ".join(self._s)
+class Simple:
+    def __init__(self, sin):
+        self._sin = sin
+        self._cfg = sin.cfg.clone()
 
 
-    def _dive(self, rule):
-        seq = random.choice(rule.seqs)
-        for e in seq:
-            if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name))
-            else:
-                self._s.append(self._cfg.gen_token(e.tok))
+    def run(self):
+        timer = self._sin.start_timer()
+        while not self._sin.timer_elapsed(timer):
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            s = self.next()
+            out = Accent.run(self._sin.parser, s)
+            if Accent.was_ambiguous(out):
+                print "\nAmbiguity found with input:\n"
+                print s
+                print
+                print "".join(out)
+                return True
+

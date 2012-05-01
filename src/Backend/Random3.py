@@ -31,6 +31,39 @@ class Calc:
         self._cfg = sin.cfg.clone()
 
         for rule in self._cfg.rules:
+            rule.finite_depth = False
+
+        # Calculate whether a given rule will definitely only recurse to a finite
+        # depth. Note this doesn't mean it will only recurse 1 level: it may
+        # recurse upto N levels, but there is a definite upper bound on N.
+        #
+        # Calculating this goes as follows. A rule whose sequences contain only
+        # terminals is of finite depth. A rule whose sequences contain only
+        # terminals or references to rules which are of finite depth is, itself,
+        # of finite depth. Because of the latter rule, we iterate over all the
+        # rules until we reach a fixed point.
+        while 1:
+            changed = False
+            for rule in self._cfg.rules:
+                if rule.finite_depth:
+                    continue
+                for seq in rule.seqs:
+                    finite_depth = True
+                    for e in seq:
+                        if isinstance(e, CFG.Non_Term_Ref):
+                            ref_rule = self._cfg.get_rule(e.name)
+                            if not ref_rule.finite_depth:
+                                finite_depth = False
+                                break
+                    if not finite_depth:
+                        break
+                else:
+                    rule.finite_depth = True
+                    changed = True
+            if not changed:
+                break
+
+        for rule in self._cfg.rules:
             rule.depth = 0
 
 
@@ -64,14 +97,17 @@ class Calc:
 
         if 1 - math.pow(math.e, -(random.randrange(rule.depth) / 2.5)) > 0.6:
             # If we've exceeded the depth threshold, see if there are sequences
-            # which only contain terminals, to ensure that we don't recurse any
-            # further. If so, pick one of those randomly; otherwise, pick one of
+            # which only contain terminals or finite depth non-terminals, to
+            # ensure that we will only recurse a fixed number of times from this
+            # point. If so, pick one of those randomly; otherwise, pick one of
             # the other sequences randomly.
             term_seqs = []
             for seq in rule.seqs:
                 for e in seq:
                     if isinstance(e, CFG.Non_Term_Ref):
-                        break
+                        ref_rule = self._cfg.get_rule(e.name)
+                        if not ref_rule.finite_depth:
+                            break
                 else:
                     term_seqs.append(seq)
 

@@ -144,7 +144,7 @@ class _Parser:
         i += 6
         while self._cfg[i] != ";":
             i += 1
-        return i
+        return i + 1
 
 
     def _rule(self, i):

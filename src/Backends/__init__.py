@@ -20,12 +20,13 @@
 # IN THE SOFTWARE.
 
 
-import Random1, Random2, Random3, Random4, Dynamic1
+import Random1, Random2, Random3, Random4, Dynamic1, Dynamic2
 
 BACKENDS = {
   "random1"  : Random1.Calc,
   "random2"  : Random2.Calc,
   "random3"  : Random3.Calc,
   "random4"  : Random4.Calc,
-  "dynamic1" : Dynamic1.Calc
+  "dynamic1" : Dynamic1.Calc,
+  "dynamic2" : Dynamic2.Calc
 }

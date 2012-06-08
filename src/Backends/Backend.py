@@ -35,7 +35,7 @@ class Simple:
         while not self._sin.timer_elapsed(timer):
             sys.stdout.write(".")
             sys.stdout.flush()
-            s = self.next()
+            s = self.next(timer)
             out = Accent.run(self._sin.parser, s)
             if Accent.was_ambiguous(out):
                 print "\nAmbiguity found with input:\n"

@@ -37,7 +37,7 @@ Dynamic1 [builds, more or less, on Random2]
   times they have been entered and exited (entered >= exited; if entered ==
   exited, then the rule in question is not on the current stack). Terminals
   score 0; non-terms where entered = 0 score 0 (an attempt to increase
-  diversity); otherwise non-terms score (1 - exited / entered). One of the
+  diversity); otherwise non-terms score (1 - exited * 1.0/ entered). One of the
   lowest scoring sequences is then randomly chosen.
     + Runs on a wider range of examples.
     ~ Very sensitive to when the call stack depth is "enough"

@@ -33,15 +33,18 @@ class Calc(Backend.Simple):
             rule.entered = rule.exited = 0
 
 
-    def next(self):
+    def next(self, timer):
         self._s = []
         self._depth = 0
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen))
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer)
 
         return " ".join(self._s)
 
 
-    def _dive(self, rule):
+    def _dive(self, rule, timer):
+        if self._sin.timer_elapsed(timer):
+            sys.exit(1)
+
         self._depth += 1
 
         rule.entered += 1
@@ -60,7 +63,7 @@ class Calc(Backend.Simple):
                         if ref_rule.entered == 0:
                             score += 0
                         else:
-                            score += 1 - (ref_rule.exited / ref_rule.entered)
+                            score += 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
                 scores.append(score)
 
             minsc = min(scores)
@@ -75,7 +78,7 @@ class Calc(Backend.Simple):
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name))
+                self._dive(self._cfg.get_rule(e.name), timer)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
 

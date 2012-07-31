@@ -1,0 +1,12 @@
+--- ParallelDerivationGenerator.java.modified	2012-07-31 16:59:46.712810987 +0100
++++ ParallelDerivationGenerator.java	2012-07-31 16:22:32.736851892 +0100
+@@ -105,9 +105,6 @@
+ 		if (incremental) {
+ 			while (length <= config.derivGenMaxDepth && !monitor.canceling()) {
+ 				detect();
+-				if (ambiguities.size() > 0) {
+-                                    System.exit(0);
+-				}
+ 				monitor.worked(1);
+ 				++length;
+ 				possibleAmbiguities.set(length, new Relation<Symbol, SymbolString>());

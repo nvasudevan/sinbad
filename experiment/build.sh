@@ -77,6 +77,16 @@ else
 fi
 echo "===> Working in $wrkdir"
 
+# Download SinBAD
+
+echo "\\n===> Fetching SinBAD tool\\n"
+
+cd $wrkdir
+git clone git@github.com:nvasudevan/sinbad.git
+cd sinbad
+git checkout 72f0480b20
+cd $wrkdir
+
 # Download ACLA
 
 echo "\\n===> Fetching ACLA tool\\n"
@@ -95,22 +105,14 @@ svn co http://svn.meta-environment.org/AmbiDexter/trunk
 mv trunk AmbiDexter
 mkdir -p AmbiDexter/build/META-INF
 echo "Main-Class: nl.cwi.sen1.AmbiDexter.Main" > AmbiDexter/build/META-INF/MANIFEST.MF
-patch -b -R -p0 AmbiDexter/src/nl/cwi/sen1/AmbiDexter/derivgen/ParallelDerivationGenerator.java < ~/codespace/grammars/scripts/AmbiDexter.patch || exit $?
+patch -b -R -p0 AmbiDexter/src/nl/cwi/sen1/AmbiDexter/derivgen/ParallelDerivationGenerator.java < $wrkdir/sinbad/experiment/patches/AmbiDexter.patch || exit $?
 cd AmbiDexter/src
 javac nl/cwi/sen1/AmbiDexter/*.java || exit $?
 find . -type f -name "*.class" | cpio -pdm ../build/
 cd ../build
 jar cmf META-INF/MANIFEST.MF AmbiDexter.jar nl
 
-# Download SinBAD
 
-echo "\\n===> Fetching SinBAD tool\\n"
-
-cd $wrkdir
-git clone git@github.com:nvasudevan/sinbad.git
-cd sinbad
-git checkout 3b600e3d1c
-cd $wrkdir
 
 
 

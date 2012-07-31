@@ -1,0 +1,2 @@
+random_grammar_generator.py -- Python program to generate random grammars; to use usage run it with "-h".
+grammars -- contains our 1000 random grammars generated using random_grammar_generator.py

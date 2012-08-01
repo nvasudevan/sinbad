@@ -77,6 +77,16 @@ else
 fi
 echo "===> Working in $wrkdir"
 
+# Download ACCENT tools -- accent, amber and entire parser
+
+echo "\\n===> Fetching ACCENT tools\\n"
+
+cd $wrkdir
+wget http://accent.compilertools.net/accent.tar
+tar xf accent.tar
+cd accent/accent
+./build
+
 # Download SinBAD
 
 echo "\\n===> Fetching SinBAD tool\\n"

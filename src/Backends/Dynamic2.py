@@ -67,21 +67,21 @@ class Calc(Backend.Simple):
                     rules[key] = rule_seqs
 
 
-    def next(self, timer):
+    def next(self, timer, depth):
         self._s = []
         self._depth = 0
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer)
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer, depth)
 
         return " ".join(self._s)
 
 
-    def _dive(self, rule, timer):
+    def _dive(self, rule, timer, depth):
         if self._sin.timer_elapsed(timer):
                 sys.exit(1)
                 
         self._depth += 1
 
-        if self._depth > 10:
+        if self._depth > depth:
             # On exceeding the depth threshold, use the terminating_indices
             seq = rule.seqs[self.terminating_indices[rule.name]]
         else:
@@ -89,7 +89,7 @@ class Calc(Backend.Simple):
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name), timer)
+                self._dive(self._cfg.get_rule(e.name), timer, depth)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
 

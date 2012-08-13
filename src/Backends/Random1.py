@@ -26,17 +26,20 @@ import Accent, Backend, CFG
 
 
 class Calc(Backend.Simple):
-    def next(self):
+    def next(self, timer, depth=None):
         self._s = []
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen))
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer, depth)
 
         return " ".join(self._s)
 
 
-    def _dive(self, rule):
+    def _dive(self, rule, timer, depth=None):
+        if self._sin.timer_elapsed(timer):
+            sys.exit(1)
+    
         seq = random.choice(rule.seqs)
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name))
+                self._dive(self._cfg.get_rule(e.name), timer, depth)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))

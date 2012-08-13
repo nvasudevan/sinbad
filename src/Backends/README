@@ -45,5 +45,4 @@ Dynamic1 [builds, more or less, on Random2]
 
 Dynamic2 [builds, more or less, on Dynamic1]
   Generate a dict, which for each non-term, will map to a sequence that will terminate the quickest.
-    + We apply the above mapping when we have reached a certain threshold depth (this threshold is now
-      based on absolute value rather than basing this on math.pow).
+    + We apply the above mapping when we have reached a certain threshold depth.

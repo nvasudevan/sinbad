@@ -69,17 +69,17 @@ class Calc(Backend.Simple):
             rule.depth = 0
 
 
-    def next(self):
+    def next(self, timer, depth):
         self._s = []
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen))
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer, depth)
 
         return " ".join(self._s)
 
 
-    def _dive(self, rule):
+    def _dive(self, rule, timer, depth):
         rule.depth += 1
 
-        if 1 - math.pow(math.e, -(random.randrange(rule.depth) / 2.5)) > 0.6:
+        if rule.depth > depth:
             # If we've exceeded the depth threshold, see if there are sequences
             # which only contain terminals or finite depth non-terminals, to
             # ensure that we will only recurse a fixed number of times from this
@@ -104,7 +104,7 @@ class Calc(Backend.Simple):
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name))
+                self._dive(self._cfg.get_rule(e.name), timer, depth)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
 

@@ -30,8 +30,9 @@ import Accent, Backends, CFG, Lexer
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1 : ], "hb:")
+        opts, args = getopt.getopt(sys.argv[1 : ], "hb:t:d:")
         backends = []
+        self.duration, self.t_depth = None, None
         for opt in opts:
             if opt[0] == "-b":
                 if opt[1] in backends:
@@ -39,6 +40,10 @@ class Sinbad:
                 if opt[1] not in Backends.BACKENDS:
                     self.usage("Unknown backend '%s'." % opt[1])
                 backends.append(opt[1])
+            elif opt[0] == "-t":
+                self.duration = int(opt[1])                
+            elif opt[0] == "-d":
+                self.t_depth = int(opt[1])                
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -46,6 +51,10 @@ class Sinbad:
 
         if len(backends) == 0:
             self.usage("No backend specified.")
+        if self.duration == None:
+        	self.usage("Specify the duration (-t N) of search.")
+    	if self.t_depth == None:
+    		self.usage("Specify the threshold depth (-d N) to favour termination.")            
         if len(args) == 0:
             self.usage("Not enough arguments.")
         if len(args) % 2 != 0:
@@ -65,7 +74,8 @@ class Sinbad:
 	    if msg is not None:
 		    sys.stderr.write(msg + "\n\n")
 
-	    sys.stderr.write("sinbad -b <backend 1> [... -b " \
+	    sys.stderr.write("sinbad -t <time in seconds> " 
+	      "-d <threshold depth> -b <backend 1> [... -b " \
           "<backend n>] <grammar 1> <lexer 1> " \
           "[... <grammar n> <lexer n>]\n")
 	    sys.exit(1)
@@ -84,7 +94,7 @@ class Sinbad:
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
         self.parser = Accent.compile(gp, lp)
         bend = Backends.BACKENDS[bend_name](self)
-        return bend.run()
+        return bend.run(self.t_depth)
 
 
     def start_timer(self):
@@ -92,7 +102,7 @@ class Sinbad:
 
 
     def timer_elapsed(self, t):
-        return not (t + datetime.timedelta(seconds=30) > datetime.datetime.now())
+        return not (t + datetime.timedelta(seconds=self.duration) > datetime.datetime.now())
 
 
 

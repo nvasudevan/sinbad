@@ -33,15 +33,15 @@ class Calc(Backend.Simple):
             rule.entered = rule.exited = 0
 
 
-    def next(self, timer):
+    def next(self, timer, depth):
         self._s = []
         self._depth = 0
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer)
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer, depth)
 
         return " ".join(self._s)
 
 
-    def _dive(self, rule, timer):
+    def _dive(self, rule, timer, depth):
         if self._sin.timer_elapsed(timer):
             sys.exit(1)
 
@@ -49,7 +49,7 @@ class Calc(Backend.Simple):
 
         rule.entered += 1
 
-        if 1 - math.pow(math.e, -(random.randrange(self._depth) / 5.0)) > 0.5:
+        if self._depth > depth:
             # If we've exceeded the depth threshold, see if there are sequences
             # which only contain terminals, to ensure that we don't recurse any
             # further. If so, pick one of those randomly; otherwise, pick one of
@@ -78,7 +78,7 @@ class Calc(Backend.Simple):
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name), timer)
+                self._dive(self._cfg.get_rule(e.name), timer, depth)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
 

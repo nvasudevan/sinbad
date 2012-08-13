@@ -54,29 +54,21 @@ class UniformGrammarDistributor:
 	# we either change a token or add a empty alternative
 	#def modify_seq(self, seq):
 	def modify_rule(self, rule):
-		print "++ " , rule		
 		_which = random.choice([0,1]) # 0 - empty, 1 - modify token
 		if _which == 0:
 			last_seq = rule.seqs[rule.seqs.__len__()-1]
-			print last_seq
 			if last_seq.__len__() != 0: # add emplty sequence if the last seq is not empty
 				rule.seqs.append([])
-				print "empty: " , rule.seqs
 		else:
 			i_seq = random.randint(0, rule.seqs.__len__() - 1) # pick a random sequence
 			seq = rule.seqs[i_seq]
-			print "++ " , seq
 			tokens = [rule.name for rule in self.cfg.rules if rule.name != 'root']
 			tokens += self.lex.keys()
 			random.shuffle(tokens)
 			_tok = random.choice(tokens)
-			print "_tok: " , _tok
-			print self.lex.keys()
 			if self.lex.keys().__contains__(_tok):
-				print "term"
 				tok = CFG.Term(_tok)
 			else:
-				print "nonterm"
 				tok = CFG.Non_Term_Ref(_tok)
 	
 			if seq.__len__() == 0:  # for empty sequence
@@ -84,7 +76,6 @@ class UniformGrammarDistributor:
 			else:
 				i = random.randint(0, seq.__len__() - 1) # pick a random token
 				seq[i] = tok
-			print "-- " , seq
         
 
 	# Given a grammar, we generate grammar with one variation:
@@ -98,9 +89,7 @@ class UniformGrammarDistributor:
 	
 		for key in modify_keys:
 			rule = cloned_g.get_rule(key)
-			print "------ %s -------" % key
 			self.modify_rule(rule)
-			print "\n"
 
 		return cloned_g
 

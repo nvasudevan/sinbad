@@ -168,6 +168,14 @@ class _Parser:
 
             assert self._cfg[i] == "|"
             i += 1
+            
+            i_tmp = i
+            i_tmp = self._ws(i_tmp)
+            if self._cfg[i_tmp] == ";":
+                # an empty sequence (e.g: "|;")
+                seqs.append([])
+                return i_tmp + 1, Rule(name, seqs)
+                 
 
 
     def _seq(self, i):

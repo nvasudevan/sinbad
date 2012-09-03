@@ -45,7 +45,7 @@ class Sinbad:
             elif opt[0] == "-d":
                 self.t_depth = int(opt[1])               
             elif opt[0] == "-n":
-                self.variations = int(opt[1])                
+                self.variations = int(opt[1])
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -104,7 +104,7 @@ class Sinbad:
 
 
     def find_ambiguity(self, gp, lp, bend_name):
-        sys.setrecursionlimit(5000)
+        sys.setrecursionlimit(500)
         print "===> %s : %s" % (gp, bend_name)
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())

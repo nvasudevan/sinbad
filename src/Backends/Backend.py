@@ -35,12 +35,17 @@ class Simple:
         while not self._sin.timer_elapsed(timer):
             sys.stdout.write(".")
             sys.stdout.flush()
-            s = self.next(timer, depth)
-            out = Accent.run(self._sin.parser, s)
-            if Accent.was_ambiguous(out):
-                print "\nAmbiguity found with input:\n"
-                print s
-                print
-                print "".join(out)
-                return True
+            try:
+                s = self.next(timer, depth)
+                out = Accent.run(self._sin.parser, s)
+                if Accent.was_ambiguous(out):
+                    print "\nAmbiguity found with input:\n"
+                    print s
+                    print
+                    print "".join(out)
+                    return True
+            except KeyError as k_error:
+                pass
+            except RuntimeError:
+                print "R"
 

@@ -27,9 +27,9 @@ import Accent, Backend, CFG, Utils, sets
 class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
-        # Iterate through the production rules to figure out the quickest terminating sequences
+        rules, self.terminating_indices,rules_to_remove = {}, {}, []
+        
         # first identify terminal-only sequences
-        rules, self.terminating_indices = {}, {}
         for rule in self._cfg.rules:
             rule_seqs = []
             for ind,seq in enumerate(rule.seqs):
@@ -40,32 +40,31 @@ class Calc(Backend.Simple):
                 if len(_seq) == 0:
                     if not self.terminating_indices.__contains__(rule.name):
                         self.terminating_indices[rule.name] = ind
+                        rules_to_remove.append(rule.name)
                 rule_seqs.append(_seq)
             if not self.terminating_indices.__contains__(rule.name):
                 rules[rule.name] = rule_seqs
-                
-        # Now iterate until we can't reduce any more.
-        # For few cases, at the end of this reduction process, we may still be left with rules
-        _found_rules = True
-        while _found_rules:
-            _found_rules = False
+
+        while len(rules_to_remove) > 0:
+            rules_to_remove = []
             for key in rules.keys():
                 rule_seqs = []
                 for ind,seq in enumerate(rules[key]):
                     _seq = []
                     for e in seq:
-                        if not e in self.terminating_indices.keys():
+                        if e not in self.terminating_indices.keys():
                             _seq.append(e)
-                    if len(_seq) == 0:
-                        if not self.terminating_indices.__contains__(key):
-                            self.terminating_indices[key] = ind
-                            _found_rules = True
+                    if len(_seq)== 0:
+                        self.terminating_indices[key] = ind
+                        rules_to_remove.append(key)
                         break
-                    else:
-                        rule_seqs.append(_seq)
-                if not self.terminating_indices.__contains__(rule.name):
-                    rules[key] = rule_seqs
+                    rule_seqs.append(_seq)
+                    
+                rules[key] = rule_seqs
 
+            for del_key in rules_to_remove:
+                del rules[del_key]
+            
 
     def next(self, timer, depth):
         self._s = []
@@ -82,7 +81,7 @@ class Calc(Backend.Simple):
         self._depth += 1
 
         if self._depth > depth:
-            # On exceeding the depth threshold, use the terminating_indices
+            # On exceeding the depth threshold, favour alternatives
             seq = rule.seqs[self.terminating_indices[rule.name]]
         else:
             seq = random.choice(rule.seqs)

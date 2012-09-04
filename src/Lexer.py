@@ -88,4 +88,5 @@ def parse(lexer):
 if __name__ == "__main__":
     import sys
     for p in sys.argv[1:]:
-        print parse(open("r").read())
+        toks = parse(open(p, "r").read())
+        print toks.keys()

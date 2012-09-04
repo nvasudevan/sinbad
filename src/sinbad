@@ -30,9 +30,9 @@ import Accent, Backends, CFG, Lexer, UniformGrammarDistributor
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1 : ], "hb:t:d:n:")
+        opts, args = getopt.getopt(sys.argv[1 : ], "hb:t:d:")
         backends = []
-        self.duration, self.t_depth, self.variations = None, None, None
+        self.duration, self.t_depth = None, None
         for opt in opts:
             if opt[0] == "-b":
                 if opt[1] in backends:
@@ -44,8 +44,6 @@ class Sinbad:
                 self.duration = int(opt[1])                
             elif opt[0] == "-d":
                 self.t_depth = int(opt[1])               
-            elif opt[0] == "-n":
-                self.variations = int(opt[1])
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -56,9 +54,7 @@ class Sinbad:
         if self.duration == None:
         	self.usage("Specify the duration (-t N) of search.")
     	if self.t_depth == None:
-    		self.usage("Specify the threshold depth (-d N) to favour termination.")
-        if self.variations == None:
-        	self.usage("Specify the number of variations (-n Ns) to try.")            
+    		self.usage("Specify the threshold depth (-d N) to favour an alternative.")
         if len(args) == 0:
             self.usage("Not enough arguments.")
         if len(args) % 2 != 0:
@@ -71,18 +67,6 @@ class Sinbad:
             for backend in backends:
                 if self.find_ambiguity(args[i], args[i + 1], backend):
                     break
-                    
-            # now we generate the variations and find ambiguity
-            UniformGrammarDistributor.generate(args[i], args[i + 1], self.variations)
-            g_dir, g_file = os.path.dirname(args[i]), os.path.basename(args[i])
-            cnt = 1
-            while cnt <= self.variations:
-                _cfg =  '%s/%s_%s.spec' % (g_dir, os.path.splitext(g_file)[0], cnt)
-                self.check_file(_cfg)
-                for backend in backends:
-	                if self.find_ambiguity(_cfg, args[i + 1], backend):
-		                break
-                cnt += 1                
             i += 2
 
 
@@ -90,7 +74,7 @@ class Sinbad:
 	    if msg is not None:
 		    sys.stderr.write(msg + "\n\n")
 
-	    sys.stderr.write("sinbad -n <no of variations> -t <time in seconds> " 
+	    sys.stderr.write("sinbad -t <time in seconds> " 
 	      "-d <threshold depth> -b <backend 1> [... -b " \
           "<backend n>] <grammar 1> <lexer 1> " \
           "[... <grammar n> <lexer n>]\n")

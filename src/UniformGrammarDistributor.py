@@ -30,13 +30,26 @@ class UniformGrammarDistributor:
 	def __init__(self, gf, lf, cnt):
 		self.lex = Lexer.parse(open(lf, "r").read())
 		self.cfg = CFG.parse(self.lex, open(gf, "r").read())
+		self.symbolic_tokens = []
+		gf_lines = open(gf, "r").readlines()
+		#tokenline = ""
+		header = "%nodefault\n\n"
+		for line in gf_lines:
+		    if line.startswith("%token"):
+		        #tokenline = line
+		        self.symbolic_tokens = line[6:line.index(";")].replace(" ","").split(",")
+		        header = "{0}\n%nodefault\n\n".format(line)
+		        break
+		
+		#print self.symbolic_tokens; print "--"; print self.lex.keys() #sys.exit(1)
 		g_dir, g_file = os.path.dirname(gf), os.path.basename(gf)
 		self.variations_cnt = cnt
 		i = 1
 		while i <= self.variations_cnt:
+			print "-- %s -- " % i		
 			_cfg = self.modify_grammar()
 			_f_file = open(('%s/%s_%s.spec' % (g_dir, os.path.splitext(g_file)[0], i)),"w")
-			_f_file.write("%nodefault\n\n")
+			_f_file.write(header)
 			_f_file.write(self.cfg_repr(_cfg))
 			_f_file.close()
 			i += 1
@@ -47,7 +60,23 @@ class UniformGrammarDistributor:
 		for rule in cfg.rules:
 		    rule_seqs = []
 		    for seq in rule.seqs:
-		        rule_seqs.append(" ".join([str(x) for x in seq]))
+		        #rule_seqs.append(" ".join([str(x) for x in seq]))
+		        _seq = []
+		        for tok in seq:
+		            if isinstance(tok, CFG.Term):
+		                _tok = tok
+		                _tok = str(_tok).replace("'","")
+		                #print "tok,_tok: " , tok, _tok
+		                if self.symbolic_tokens.__contains__(_tok):
+		                    #print "in symbolic token: " , _tok
+		                    _seq.append(_tok)
+		                    #print "-- " , _seq
+		                    continue
+
+		            _seq.append(tok)
+		        
+		        rule_seqs.append(" ".join([str(x) for x in _seq]))
+
 		    _cfg_repr += (('%s : %s' % (rule.name, " | ".join(rule_seqs))) + "\n;\n")
 		return _cfg_repr
             
@@ -57,7 +86,7 @@ class UniformGrammarDistributor:
 		_which = random.choice([0,1]) # 0 - empty, 1 - modify token
 		if _which == 0:
 			last_seq = rule.seqs[rule.seqs.__len__()-1]
-			if last_seq.__len__() != 0: # add emplty sequence if the last seq is not empty
+			if last_seq.__len__() != 0: # add empty sequence if the last seq is NOT empty
 				rule.seqs.append([])
 		else:
 			i_seq = random.randint(0, rule.seqs.__len__() - 1) # pick a random sequence
@@ -78,18 +107,22 @@ class UniformGrammarDistributor:
 				seq[i] = tok
         
 
-	# Given a grammar, we generate grammar with one variation:
+	# Given a grammar, we generate grammar with two variations:
+	# - add an empty alternative
 	# - pick a random sequence and then replace a random token with another (term or nonterm)
+	# We modify 10% of the rules
 	def modify_grammar(self):
 		cloned_g = self.cfg.clone()
 		rule_keys = [rule.name for rule in cloned_g.rules]
-		f_modify = 0.1 # modify 10% of the rules
+		f_modify = 0.1
 		modify_count = random.randint(1, int(math.ceil(rule_keys.__len__() * f_modify)))
 		modify_keys = random.sample(rule_keys, modify_count)
 	
 		for key in modify_keys:
 			rule = cloned_g.get_rule(key)
+			print "++ :: " , rule
 			self.modify_rule(rule)
+			print "-- :: " , rule
 
 		return cloned_g
 

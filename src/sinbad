@@ -23,7 +23,7 @@
 
 
 import datetime, getopt, os, sys
-import Accent, Backends, CFG, Lexer, UniformGrammarDistributor
+import Accent, Backends, CFG, Lexer, MutateGrammar
 
 
 

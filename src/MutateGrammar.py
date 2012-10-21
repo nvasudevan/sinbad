@@ -25,7 +25,7 @@
 import getopt, sys, os, random, math
 import CFG, Lexer
 
-class UniformGrammarDistributor:
+class MutateGrammar:
 
 	def __init__(self, gf, lf, cnt):
 		self.lex = Lexer.parse(open(lf, "r").read())
@@ -49,7 +49,7 @@ class UniformGrammarDistributor:
 			_f_file.write(self.cfg_repr(_cfg))
 			_f_file.close()
 			i += 1
-
+			
 
 	def cfg_repr(self, cfg):
 		_cfg_repr = ""
@@ -71,61 +71,57 @@ class UniformGrammarDistributor:
 
 		    _cfg_repr += (('%s : %s' % (rule.name, " | ".join(rule_seqs))) + "\n;\n")
 		return _cfg_repr
-            
-	# we either change a token or add a empty alternative
-	#def modify_seq(self, seq):
-	def modify_rule(self, rule):
-		_which = random.choice([0,1]) # 0 - empty, 1 - modify token
-		if _which == 0:
-			last_seq = rule.seqs[rule.seqs.__len__()-1]
-			if last_seq.__len__() != 0: # add empty sequence if the last seq is NOT empty
-				rule.seqs.append([])
-		else:
-			i_seq = random.randint(0, rule.seqs.__len__() - 1) # pick a random sequence
-			seq = rule.seqs[i_seq]
-			tokens = [rule.name for rule in self.cfg.rules if rule.name != 'root']
-			tokens += self.lex.keys()
-			random.shuffle(tokens)
-			_tok = random.choice(tokens)
-			if self.lex.keys().__contains__(_tok):
-				tok = CFG.Term(_tok)
-			else:
-				tok = CFG.Non_Term_Ref(_tok)
-	
-			if seq.__len__() == 0:  # for empty sequence
-				seq.append(tok)
-			else:
-				i = random.randint(0, seq.__len__() - 1) # pick a random token
-				seq[i] = tok
-        
 
-	# Given a grammar, we generate grammar with two variations:
-	# - add an empty alternative
-	# - pick a random sequence and then replace a random token with another (term or nonterm)
-	# We modify a rule
+
+	def modify_seq(self, rule):
+		i_seq = random.randint(0, rule.seqs.__len__()-1)
+		seq =  rule.seqs[i_seq]
+		tokens = [rule.name for rule in self.cfg.rules if rule.name != 'root']
+		tokens += self.lex.keys()
+		random.shuffle(tokens)
+		_tok = random.choice(tokens)
+		if self.lex.keys().__contains__(_tok):
+			tok = CFG.Term(_tok)
+		else:
+			tok = CFG.Non_Term_Ref(_tok)
+            
+		if seq.__len__() == 0: 
+			seq.append(tok)
+		else:
+			i = random.randint(0, seq.__len__() - 1) # pick a random token
+			seq[i] = tok
+                 
+    
 	def modify_grammar(self):
 		cloned_g = self.cfg.clone()
 		rule_keys = [rule.name for rule in cloned_g.rules]
 		key_to_modify = random.choice(rule_keys)
 		print key_to_modify
 		rule = cloned_g.get_rule(key_to_modify)
-		print "++ rule: %s", rule
-		self.modify_rule(rule)
-		print "-- rule: %s", rule
+		print "++ rule: ", rule
+		_which = random.choice([0,1])
+		if (_which == 0) and (not rule.seqs.__contains__([])):
+			rule.seqs.append([])
+		else: 	
+			self.modify_seq(rule)
+			
+		print "-- rule: ", rule
 	    
 		return cloned_g
 
-def generate(cfg, lex, cnt):
-	UniformGrammarDistributor(cfg, lex, cnt)
 
+def generate(cfg, lex, cnt):
+	MutateGrammar(cfg, lex, cnt)
+	
+	
 if __name__ == "__main__":
 	opts, args = getopt.getopt(sys.argv[1 : ], "hn:")
 	cnt = None
 	if len(args) == 0:
-	    sys.stderr.write("uniform_grammar_distribution.py -n <number of variations to generate> <grammar> <lexer> \n")
+	    sys.stderr.write("MutateGrammar.py -n <number of variations to generate> <grammar> <lexer> \n")
 	    sys.exit(1)
 	if len(args) % 2 != 0:
-	    sys.stderr.write("uniform_grammar_distribution.py -n <number of variations to generate> <grammar> <lexer> \n")
+	    sys.stderr.write("MutateGrammar.py -n <number of variations to generate> <grammar> <lexer> \n")
 	    sys.exit(1)
 	for opt in opts:
 		if opt[0] == "-n":

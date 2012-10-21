@@ -1,0 +1,11 @@
+--- build.xml.modified	2012-10-21 22:27:19.668078270 +0100
++++ build.xml	2012-10-21 22:27:04.078642784 +0100
+@@ -25,7 +25,7 @@
+ 
+ 	<target name="compile">
+ 		<mkdir dir="build" />
+-		<javac srcdir="src" includes="**" source="1.6" target="1.6" destdir="build" encoding="cp1252" optimize="${optimize}" debug="${debug}">
++		<javac srcdir="src" includes="**" source="1.6" target="1.6" destdir="build" optimize="${optimize}" debug="${debug}">
+ 			<classpath refid="classpath"/>
+ 		</javac>
+ 	</target>

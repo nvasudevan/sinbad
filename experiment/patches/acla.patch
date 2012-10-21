@@ -1,0 +1,18 @@
+--- AmbiguityAnalyzer.java.modified	2012-10-21 21:01:58.393291704 +0100
++++ AmbiguityAnalyzer.java	2012-10-21 21:58:29.377198101 +0100
+@@ -265,7 +265,6 @@
+ 								out.println("    matched as \"" + escape(decode(overlap.getX())) + "\" <--> \"" + 
+ 										escape(decode(overlap.getAY())) + "\" or \"" + escape(decode(overlap.getXA())) + 
+ 										"\" <--> \"" + escape(decode(overlap.getY())) + "\"");
+-							    System.exit(1);
+ 								certain_horizontal_ambiguities++;
+ 							} else
+ 								potential_horizontal_ambiguities++;
+@@ -340,7 +339,6 @@
+ 							out.println("*** " + (certain ? "" : "potential ") + "vertical ambiguity: " + describeVertical(nt, p1, p2));
+ 							if (certain) {
+ 								out.println("    ambiguous string: \"" + escape(decode(overlap.getString())) + "\"");
+-								System.exit(1);
+ 								certain_vertical_ambiguities++;
+ 							} else
+ 								potential_vertical_ambiguities++;

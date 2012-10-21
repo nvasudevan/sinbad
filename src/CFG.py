@@ -155,6 +155,12 @@ class _Parser:
         assert self._cfg[i] == ":"
         i += 1
         seqs = []
+        # check for empty alternatve at the start of a rule
+        k = self._ws(i)
+        if self._cfg[k] in "|":
+            seqs.append([])
+            i = k + 1
+        	
         while i < len(self._cfg):
             i = self._ws(i)
             j, seq = self._seq(i)
@@ -168,15 +174,15 @@ class _Parser:
 
             assert self._cfg[i] == "|"
             i += 1
-            
-            i_tmp = i
-            i_tmp = self._ws(i_tmp)
-            if self._cfg[i_tmp] == ";":
-                # an empty sequence (e.g: "|;")
+            k = self._ws(i)
+            # if the previous symbol was "|" and the next symbol is "|" or ";" -> empty alternative
+            if (self._cfg[i-1] == "|") and (self._cfg[k] in "|;"):
                 seqs.append([])
-                return i_tmp + 1, Rule(name, seqs)
-                 
-
+                i = k + 1
+                # we return if we reach end of rule
+                if self._cfg[k] == ";":
+                    return i, Rule(name, seqs) 
+               
 
     def _seq(self, i):
         elems = []
@@ -197,6 +203,7 @@ class _Parser:
                 elems.append(Term(name))
                 i = m.end(0)
                 continue
+            
 
             if self._cfg[i] in "|;":
                 return i, elems

@@ -31,12 +31,11 @@ class Simple:
 
 
     def run(self, depth):
-        timer = self._sin.start_timer()
-        while not self._sin.timer_elapsed(timer):
+        while True:
             sys.stdout.write(".")
             sys.stdout.flush()
             try:
-                s = self.next(timer, depth)
+                s = self.next(depth)
                 out = Accent.run(self._sin.parser, s)
                 if Accent.was_ambiguous(out):
                     print "\nAmbiguity found with input:\n"

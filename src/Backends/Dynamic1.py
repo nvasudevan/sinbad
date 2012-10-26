@@ -33,18 +33,15 @@ class Calc(Backend.Simple):
             rule.entered = rule.exited = 0
 
 
-    def next(self, timer, depth):
+    def next(self, depth):
         self._s = []
         self._depth = 0
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen), timer, depth)
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)
 
         return " ".join(self._s)
 
 
-    def _dive(self, rule, timer, depth):
-        if self._sin.timer_elapsed(timer):
-            sys.exit(1)
-
+    def _dive(self, rule, depth):
         self._depth += 1
 
         rule.entered += 1
@@ -78,7 +75,7 @@ class Calc(Backend.Simple):
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name), timer, depth)
+                self._dive(self._cfg.get_rule(e.name), depth)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
 

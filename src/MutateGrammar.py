@@ -27,9 +27,10 @@ import CFG, Lexer
 
 class MutateGrammar:
 
-	def __init__(self, gf, lf, cnt):
+	def __init__(self, gf, lf, mutype, cnt):
 		self.lex = Lexer.parse(open(lf, "r").read())
 		self.cfg = CFG.parse(self.lex, open(gf, "r").read())
+		self.mutype = mutype
 		self.symbolic_tokens = []
 		gf_lines = open(gf, "r").readlines()
 		header = "%nodefault\n\n"
@@ -40,11 +41,16 @@ class MutateGrammar:
 		        break
 		
 		g_dir, g_file = os.path.dirname(gf), os.path.basename(gf)
+		mu_g_dir = g_dir + "/" + self.mutype
+		if not os.path.exists(mu_g_dir):
+			os.makedirs(mu_g_dir)
+		
+		print "type: %s, cnt: %s" % (self.mutype, cnt)
 		self.variations_cnt = cnt
 		i = 1
 		while i <= self.variations_cnt:
 			_cfg = self.modify_grammar()
-			_f_file = open(('%s/%s_%s.spec' % (g_dir, os.path.splitext(g_file)[0], i)),"w")
+			_f_file = open(('%s/%s_%s.acc' % (mu_g_dir, os.path.splitext(g_file)[0], i)),"w")
 			_f_file.write(header)
 			_f_file.write(self.cfg_repr(_cfg))
 			_f_file.close()
@@ -88,8 +94,13 @@ class MutateGrammar:
 		if seq.__len__() == 0: 
 			seq.append(tok)
 		else:
-			i = random.randint(0, seq.__len__() - 1) # pick a random token
-			seq[i] = tok
+			i = random.randint(0, seq.__len__() - 1)
+			if self.mutype == 'type2':
+				seq[i] = tok
+			elif self.mutype == 'type3':
+				seq.insert(i,tok)
+			elif self.mutype == 'type4':
+				del seq[i]
                  
     
 	def modify_grammar(self):
@@ -99,36 +110,56 @@ class MutateGrammar:
 		print key_to_modify
 		rule = cloned_g.get_rule(key_to_modify)
 		print "++ rule: ", rule
-		_which = random.choice([0,1])
-		if (_which == 0) and (not rule.seqs.__contains__([])):
+
+		if self.mutype == 'type1':
 			rule.seqs.append([])
-		else: 	
+		elif self.mutype in ['type2','type3','type4']:
 			self.modify_seq(rule)
+		else:
+			pass
 			
 		print "-- rule: ", rule
 	    
 		return cloned_g
 
 
-def generate(cfg, lex, cnt):
-	MutateGrammar(cfg, lex, cnt)
+def generate(cfg, lex, mutype, cnt):
+	MutateGrammar(cfg, lex, mutype, cnt)
+	
+
+def usage(msg=None):
+	if msg is not None:
+		sys.stderr.write(msg)
+		
+	sys.stderr.write("MutateGrammar.py " \
+	"-t <type of mutation> " \
+	"-n <number of variations to generate> <grammar> <lexer> " \
+	"\n\n - type of mutation can be one of the following: " \
+	"\n   - type1 - add empty alternative" \
+	"\n   - type2 - mutate symbol" \
+	"\n   - type3 - add a symbol" \
+	"\n   - type4 - remove a symbol\n\n")
+	sys.exit(1)
 	
 	
 if __name__ == "__main__":
-	opts, args = getopt.getopt(sys.argv[1 : ], "hn:")
-	cnt = None
-	if len(args) == 0:
-	    sys.stderr.write("MutateGrammar.py -n <number of variations to generate> <grammar> <lexer> \n")
-	    sys.exit(1)
-	if len(args) % 2 != 0:
-	    sys.stderr.write("MutateGrammar.py -n <number of variations to generate> <grammar> <lexer> \n")
-	    sys.exit(1)
+	opts, args = getopt.getopt(sys.argv[1 : ], "hn:t:")
+	mutype,cnt = None,None
+
+	if len(args) != 2:
+	    usage()
 	for opt in opts:
-		if opt[0] == "-n":
+		if opt[0] == "-t":
+			mutype = opt[1]
+		elif opt[0] == "-n":
 			cnt = int(opt[1])
 		
-	if cnt == None:
-		sys.stderr.write("Provide -n <no of variations> \n\n")
-		sys.exit(1)
+	if mutype == None:
+		usage("\nProvide -t <type of mutation> \n\n")
+	elif mutype not in ['type1','type2','type3','type4']:
+		usage("\nMutation type can only be of type1 or type2 or type3 or type4\n\n")
+	elif cnt == None:
+		usage("\nProvide -n <no of variants to generate> \n\n")
+		
         
-	generate(args[0], args[1], cnt)
+	generate(args[0], args[1], mutype, cnt)

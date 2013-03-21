@@ -153,14 +153,20 @@ class _Parser:
             return i, None
         i = self._ws(j)
         assert self._cfg[i] == ":"
-        i += 1
+
         seqs = []
-        # check for empty alternatve at the start of a rule
-        k = self._ws(i)
-        if self._cfg[k] in "|":
-            seqs.append([])
-            i = k + 1
-        	
+        while True:
+            j = self._empty_seq(i)
+            if j > i:
+                seqs.append([])
+                i = j
+                if self._cfg[i] == ";":
+                    i += 1
+                    return i, Rule(name, seqs)
+            else: 
+                i += 1
+                break
+                            	
         while i < len(self._cfg):
             i = self._ws(i)
             j, seq = self._seq(i)
@@ -173,16 +179,26 @@ class _Parser:
                 return i + 1, Rule(name, seqs)
 
             assert self._cfg[i] == "|"
-            i += 1
-            k = self._ws(i)
-            # if the previous symbol was "|" and the next symbol is "|" or ";" -> empty alternative
-            if (self._cfg[i-1] == "|") and (self._cfg[k] in "|;"):
-                seqs.append([])
-                i = k + 1
-                # we return if we reach end of rule
-                if self._cfg[k] == ";":
-                    return i, Rule(name, seqs) 
-               
+
+            while True:
+                j = self._empty_seq(i)
+                if j > i:
+                    seqs.append([])
+                    i = j
+                    if self._cfg[i] == ";":
+                        i += 1
+                        return i, Rule(name, seqs)
+                else: 
+                    i += 1
+                    break
+            
+            
+    def _empty_seq(self, i):
+        k = self._ws(i+1)
+        if (self._cfg[i] in ":|") and (self._cfg[k] in "|;"):
+            return k
+        else:
+            return i
 
     def _seq(self, i):
         elems = []

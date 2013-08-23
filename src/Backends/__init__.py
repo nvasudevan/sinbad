@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import Purerandom, Random2, Random3, Random4, Dynamic1, Dynamic2
+import Purerandom, Random2, Random3, Random4, Dynamic1, Dynamic2, Dynamic3
 
 BACKENDS = {
   "purerandom"  : Purerandom.Calc,
@@ -28,5 +28,6 @@ BACKENDS = {
   "random3"  : Random3.Calc,
   "random4"  : Random4.Calc,
   "dynamic1" : Dynamic1.Calc,
-  "dynamic2" : Dynamic2.Calc
+  "dynamic2" : Dynamic2.Calc,
+  "dynamic3" : Dynamic3.Calc
 }

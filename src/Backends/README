@@ -46,3 +46,8 @@ Dynamic1 [builds, more or less, on Random2]
 Dynamic2 [builds, more or less, on Dynamic1]
   Generate a dict, which for each non-term, will map to a sequence that will terminate the quickest.
     + We apply the above mapping when we have reached a certain threshold depth.
+
+Dynamic3 [builds on Dynamic1]
+  Uses the score from Dynamic1, and then uses weights based on two things:
+  1) How much a sequence has been used
+  2) Percentage of finished derivations of a sequence

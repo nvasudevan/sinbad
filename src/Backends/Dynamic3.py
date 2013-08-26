@@ -36,7 +36,7 @@ class Calc(Backend.Simple):
     def next(self, depth):
         self._s = []
         self._depth = 0
-        self.finishratio_fct=1.5
+        #self.finishratio_fct=1.0
         self.tolerance = 1e-30
         self.seqs_entered, self.seqs_exited = {},{}
         for rule in self._cfg.rules:
@@ -58,10 +58,7 @@ class Calc(Backend.Simple):
 
     def _dive(self, rule, depth):
         self._depth += 1
-
         rule.entered += 1
-        #print "RULE[%s]: %s [%s/%s]" % (str(self._depth),rule,str(rule.entered),str(rule.exited))
-        #print "seq entry/exit[%s/%s]\n" % (self.seqs_entered[rule.name],self.seqs_exited[rule.name])
         
         if self._depth > depth:
             # If we've exceeded the depth threshold, see if there are sequences
@@ -69,10 +66,9 @@ class Calc(Backend.Simple):
             # further. If so, pick one of those randomly; otherwise, pick one of
             # the other sequences randomly.
             scores = []
-            #useratios,finishratios = [],[]
             wgtratios = []
             for i,seq in enumerate(rule.seqs):
-                score = 0
+                score = self.tolerance
                 for e in seq:
                     if isinstance(e, CFG.Non_Term_Ref):
                         ref_rule = self._cfg.get_rule(e.name)
@@ -82,28 +78,16 @@ class Calc(Backend.Simple):
                             score += 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
                             
                 # terminals-only seqs will have score=0. They get more weight
-                invscore = 1/(score+self.tolerance)
-                scores.append(invscore)
-                useratio,finishratio = 1.0,1.0
+                invscore = 1/(score)
+                finishratio = 1.0
                 
-                # useratio keeps track of how much a sequence has been entered
                 # finishratio keeps track of %age of finished derivations for a seq
                 # Add tolerance to exited value to distinguish between cases,
                 # where exited/entered is 0/10, and 0/1000. Former gets more weight.   
-                #if sum(self.seqs_entered[rule.name]) > 0 and self.seqs_entered[rule.name][i] > 0:
                 if self.seqs_entered[rule.name][i] > 0:
-                    useratio = (self.seqs_entered[rule.name][i]*1.0)/sum(self.seqs_entered[rule.name])
-                    finishratio = (self.seqs_exited[rule.name][i] + self.tolerance)/self.seqs_entered[rule.name][i]
+                    finishratio = (self.seqs_exited[rule.name][i] + self.tolerance)/sum(self.seqs_entered[rule.name])
                     
-                #useratios.append(useratio)
-                
-                # finishratios are given more weight.
-                #finishratios.append(finishratio**self.finishratio_fct)
-                
-                wgtratios.append(invscore * useratio * (finishratio**self.finishratio_fct))
-
-            #print "RULE: %s \n%s,\nuseratios: %s\nfinishratios: %s\nwgtratios: %s" % (rule,scores,useratios,finishratios,wgtratios)
-
+                wgtratios.append(invscore * finishratio)
 
             i_seq = self._wtind(wgtratios)
             seq = rule.seqs[i_seq]
@@ -112,7 +96,6 @@ class Calc(Backend.Simple):
             seq = rule.seqs[i_seq]
 
         self.seqs_entered[rule.name][i_seq] += 1
-        #print "seq: %s \n" % seq
         
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):

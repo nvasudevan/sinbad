@@ -33,19 +33,18 @@ class Calc(Backend.Simple):
             rule.entered = rule.exited = 0
 
 
-    def next(self, depth):
+    def next(self, depth, wgt):
         self._s = []
         self._depth = 0
-        #self.finishratio_fct=1.0
-        self.tolerance = 1e-30
         self.seqs_entered, self.seqs_exited = {},{}
         for rule in self._cfg.rules:
             self.seqs_entered[rule.name] = ([0] * len(rule.seqs))
             self.seqs_exited[rule.name] =  ([0] * len(rule.seqs))
-            
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)
+                    
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth, wgt)
 
         return " ".join(self._s)
+
 
     def _wtind(self, scores):
         total = sum(scores)
@@ -55,55 +54,64 @@ class Calc(Backend.Simple):
             rndscore -= sc
             if rndscore <= 0:
                 return i
-
-    def _dive(self, rule, depth):
+                
+                
+    def _dive(self, rule, depth, wgt):
         self._depth += 1
+
         rule.entered += 1
-        
+
         if self._depth > depth:
             # If we've exceeded the depth threshold, see if there are sequences
             # which only contain terminals, to ensure that we don't recurse any
             # further. If so, pick one of those randomly; otherwise, pick one of
             # the other sequences randomly.
-            scores = []
-            wgtratios = []
-            for i,seq in enumerate(rule.seqs):
-                score = self.tolerance
+            scores, wgtscores = [],[]
+            for seq in rule.seqs:
+                maxscore = 0
                 for e in seq:
+                    score = 0
                     if isinstance(e, CFG.Non_Term_Ref):
                         ref_rule = self._cfg.get_rule(e.name)
                         if ref_rule.entered == 0:
-                            score += 0
+                            score = 0
                         else:
-                            score += 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
-                            
-                # terminals-only seqs will have score=0. They get more weight
-                invscore = 1/(score)
-                finishratio = 1.0
-                
-                # finishratio keeps track of %age of finished derivations for a seq
-                # Add tolerance to exited value to distinguish between cases,
-                # where exited/entered is 0/10, and 0/1000. Former gets more weight.   
-                if self.seqs_entered[rule.name][i] > 0:
-                    finishratio = (self.seqs_exited[rule.name][i] + self.tolerance)/sum(self.seqs_entered[rule.name])
+                            score = 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
                     
-                wgtratios.append(invscore * finishratio)
+                    if score > maxscore:
+                        maxscore = score
 
-            i_seq = self._wtind(wgtratios)
+                scores.append(maxscore)
+
+            wgtscores = [(1-_sc) for _sc in scores]
+            
+            if random.random() < wgt:
+                if sum(wgtscores) > 0:
+                    i_seq = self._wtind(wgtscores)
+                else:
+                    i_seq = random.randrange(0,len(rule.seqs))
+            else:
+                minsc = min(scores)
+                i_min_seqs = [] 
+                for i in range(len(rule.seqs)):
+                    if scores[i] == minsc:
+                        i_min_seqs.append(i)
+                
+                i_seq = random.choice(i_min_seqs)
+                
             seq = rule.seqs[i_seq]
+            
         else:
             i_seq = random.randrange(0,len(rule.seqs))
             seq = rule.seqs[i_seq]
 
-        self.seqs_entered[rule.name][i_seq] += 1
-        
+                
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name), depth)
+                self._dive(self._cfg.get_rule(e.name), depth, wgt)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
 
         rule.exited += 1
-        self.seqs_exited[rule.name][i_seq] += 1
         
         self._depth -= 1

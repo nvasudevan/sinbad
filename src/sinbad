@@ -30,9 +30,10 @@ import Accent, Backends, CFG, Lexer
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:")
+        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:")
         backends = []
         self.t_depth = None
+        self.wgt = None
         for opt in opts:
             if opt[0] == "-b":
                 if opt[1] in backends:
@@ -41,7 +42,9 @@ class Sinbad:
                     self.usage("Unknown backend '%s'." % opt[1])
                 backends.append(opt[1])
             elif opt[0] == "-d":
-                self.t_depth = int(opt[1])               
+                self.t_depth = int(opt[1])  
+            elif opt[0] == "-w":
+                self.wgt = float(opt[1])             
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -73,7 +76,7 @@ class Sinbad:
 	    if msg is not None:
 		    sys.stderr.write(msg + "\n\n")
 
-	    sys.stderr.write("sinbad -d <threshold depth> -b <backend 1> [... -b " \
+	    sys.stderr.write("sinbad -d <threshold depth> -w <weight> -b <backend 1> [... -b " \
           "<backend n>] <grammar 1> <lexer 1> " \
           "[... <grammar n> <lexer n>]\n")
 	    sys.exit(1)
@@ -86,13 +89,12 @@ class Sinbad:
 
 
     def find_ambiguity(self, gp, lp, bend_name):
-        sys.setrecursionlimit(500)
         print "===> %s : %s" % (gp, bend_name)
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
         self.parser = Accent.compile(gp, lp)
         bend = Backends.BACKENDS[bend_name](self)
-        return bend.run(self.t_depth)
+        return bend.run(self.t_depth, self.wgt)
 
 
 Sinbad()

@@ -41,13 +41,16 @@ Dynamic1 [builds, more or less, on Random2]
   lowest scoring sequences is then randomly chosen.
     + Runs on a wider range of examples.
     ~ Very sensitive to when the call stack depth is "enough"
-    - Still runs out of stack on many examples.
+    - Runs out of stack on few examples.
 
 Dynamic2 [builds, more or less, on Dynamic1]
   Generate a dict, which for each non-term, will map to a sequence that will terminate the quickest.
     + We apply the above mapping when we have reached a certain threshold depth.
 
-Dynamic3 [builds on Dynamic1]
-  Uses the score from Dynamic1, and then uses weights based on two things:
-  1) How much a sequence has been used
-  2) Percentage of finished derivations of a sequence
+Dynamic3 [based on Dynamic1]
+  Uses max score instead of a cumulative score to select an alternative
+
+Dynamic4 [builds on Dynamic3]
+  Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
+  Randomly select a number in [0,1). 
+  If number < wgt, use RWS, else follow Dynamic3

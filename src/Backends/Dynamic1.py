@@ -33,7 +33,7 @@ class Calc(Backend.Simple):
             rule.entered = rule.exited = 0
 
 
-    def next(self, depth, wgt):
+    def next(self, depth, wgt = None):
         self._s = []
         self._depth = 0
         self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)

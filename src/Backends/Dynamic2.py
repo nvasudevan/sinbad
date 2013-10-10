@@ -66,7 +66,7 @@ class Calc(Backend.Simple):
                 del rules[del_key]
             
 
-    def next(self, depth):
+    def next(self, depth, wgt = None):
         self._s = []
         self._depth = 0
         self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)

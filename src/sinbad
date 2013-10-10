@@ -73,12 +73,12 @@ class Sinbad:
 
 
     def usage(self, msg = None):
-	    if msg is not None:
-		    sys.stderr.write(msg + "\n\n")
+        if msg is not None:
+            sys.stderr.write(msg + "\n\n")
 
-	    sys.stderr.write("sinbad -d <threshold depth> -w <weight> -b <backend 1> [... -b " \
-          "<backend n>] <grammar 1> <lexer 1> " \
-          "[... <grammar n> <lexer n>]\n")
+            sys.stderr.write("sinbad -d <threshold depth> -w <weight> -b <backend 1> [... -b " \
+            "<backend n>] <grammar 1> <lexer 1> " \
+            "[... <grammar n> <lexer n>]\n")
 	    sys.exit(1)
 
 

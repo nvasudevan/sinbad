@@ -42,27 +42,16 @@ class Calc(Backend.Simple):
         return " ".join(self._s)
 
 
-    def rws(self, scores):
-        total = sum(scores)
-        rndscore = random.random() * total
-        
-        for i,sc in enumerate(scores):
-            rndscore -= sc
-            if rndscore <= 0:
-                return i
-                
-                
     def _dive(self, rule, depth, wgt):
         self._depth += 1
 
         rule.entered += 1
-
         if self._depth > depth:
             # If we've exceeded the depth threshold, see if there are sequences
             # which only contain terminals, to ensure that we don't recurse any
             # further. If so, pick one of those randomly; otherwise, pick one of
             # the other sequences randomly.
-            scores, wgtscores = [],[]
+            scores = []
             for seq in rule.seqs:
                 maxscore = 0
                 for e in seq:
@@ -73,33 +62,29 @@ class Calc(Backend.Simple):
                             score = 0
                         else:
                             score = 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
-                    
+
                     if score > maxscore:
                         maxscore = score
 
                 scores.append(maxscore)
 
-            
             if random.random() < wgt:
                 wgtscores = [(1-_sc) for _sc in scores]
                 if sum(wgtscores) > 0:
-                    i_seq = self.rws(wgtscores)
+                    i = Utils.rws(wgtscores)
+                    seq = rule.seqs[i]
                 else:
-                    i_seq = random.randrange(0,len(rule.seqs))
+                    seq = random.choice(rule.seqs)
             else:
                 minsc = min(scores)
-                i_min_seqs = [] 
+                min_seqs = []
                 for i in range(len(rule.seqs)):
                     if scores[i] == minsc:
-                        i_min_seqs.append(i)
+                        min_seqs.append(rule.seqs[i])
                 
-                i_seq = random.choice(i_min_seqs)
-                
-            seq = rule.seqs[i_seq]
-            
+                seq = random.choice(min_seqs)
         else:
             seq = random.choice(rule.seqs)
-
                 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):

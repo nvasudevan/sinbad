@@ -49,6 +49,17 @@ def min_max(l):
     return min, minc, max, maxc
 
 
+def rws(scores):
+    """select a score based on roulette wheel selection"""
+    total = sum(scores)
+    rndscore = random.random() * total
+
+    for i,sc in enumerate(scores):
+        rndscore -= sc
+        if rndscore <= 0:
+            return i
+
+
 def find_terminating_indices(cfg_rules):
     """ Returns a map containing rule to index, where index refers to one of
         the sequence of the rule, which when selected guarantees termination"""

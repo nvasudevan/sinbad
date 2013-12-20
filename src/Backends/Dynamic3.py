@@ -46,7 +46,6 @@ class Calc(Backend.Simple):
         self._depth += 1
 
         rule.entered += 1
-
         if self._depth > depth:
             # If we've exceeded the depth threshold, see if there are sequences
             # which only contain terminals, to ensure that we don't recurse any
@@ -63,20 +62,19 @@ class Calc(Backend.Simple):
                             score = 0
                         else:
                             score = 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
-                    
+
                     if score > maxscore:
                         maxscore = score
 
                 scores.append(maxscore)
 
             minsc = min(scores)
-            min_seqs = [] 
+            min_seqs = []
             for i in range(len(rule.seqs)):
                 if scores[i] == minsc:
                     min_seqs.append(rule.seqs[i])
 
             seq = random.choice(min_seqs)
-
         else:
             seq = random.choice(rule.seqs)
 

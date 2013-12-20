@@ -27,44 +27,8 @@ import Accent, Backend, CFG, Utils, sets
 class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
-        rules, self.terminating_indices,rules_to_remove = {}, {}, []
+        self.terminating_indices = Utils.find_terminating_indices(self._cfg.rules)
         
-        # first identify terminal-only sequences
-        for rule in self._cfg.rules:
-            rule_seqs = []
-            for ind,seq in enumerate(rule.seqs):
-                _seq = []
-                for e in seq:
-                    if isinstance(e, CFG.Non_Term_Ref):
-                        _seq.append(e.name)
-                if len(_seq) == 0:
-                    if not self.terminating_indices.__contains__(rule.name):
-                        self.terminating_indices[rule.name] = ind
-                        rules_to_remove.append(rule.name)
-                rule_seqs.append(_seq)
-            if not self.terminating_indices.__contains__(rule.name):
-                rules[rule.name] = rule_seqs
-
-        while len(rules_to_remove) > 0:
-            rules_to_remove = []
-            for key in rules.keys():
-                rule_seqs = []
-                for ind,seq in enumerate(rules[key]):
-                    _seq = []
-                    for e in seq:
-                        if e not in self.terminating_indices.keys():
-                            _seq.append(e)
-                    if len(_seq)== 0:
-                        self.terminating_indices[key] = ind
-                        rules_to_remove.append(key)
-                        break
-                    rule_seqs.append(_seq)
-                    
-                rules[key] = rule_seqs # if key not in self.terminating_indices.keys(), and remove the del lines below
-
-            for del_key in rules_to_remove:
-                del rules[del_key]
-            
 
     def next(self, depth, wgt = None):
         self._s = []

@@ -20,7 +20,8 @@
 # IN THE SOFTWARE.
 
 
-import sys
+import sys, random
+import CFG
 
 
 def error(msg, c):
@@ -46,3 +47,27 @@ def min_max(l):
             maxc = 1
 
     return min, minc, max, maxc
+
+
+def find_terminating_indices(cfg_rules):
+    """ Returns a map containing rule to index, where index refers to one of
+        the sequence of the rule, which when selected guarantees termination"""
+    terminating_indices = {}
+    found = True
+    while (found):
+        found = False
+        for rule in cfg_rules:
+            rule_seqs = []
+            for i,seq in enumerate(rule.seqs):
+                _seq = []
+                for e in seq:
+                    if isinstance(e, CFG.Non_Term_Ref):
+                        if e.name not in terminating_indices.keys():
+                            _seq.append(e.name)
+
+                if len(_seq) == 0:
+                    if not terminating_indices. __contains__(rule.name):
+                        found = True
+                        terminating_indices[rule.name] = i
+
+    return terminating_indices

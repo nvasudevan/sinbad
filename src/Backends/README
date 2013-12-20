@@ -48,9 +48,28 @@ Dynamic2 [builds, more or less, on Dynamic1]
     + We apply the above mapping when we have reached a certain threshold depth.
 
 Dynamic3 [based on Dynamic1]
-  Uses max score instead of a cumulative score to select an alternative
+  Whereas in Dynamic1 we used a cumulative score to favour an alternative, in Dynamic3 
+  we identify and use the max score associated with one of the non-terminals for an alternative
 
 Dynamic4 [builds on Dynamic3]
   Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
-  Randomly select a number in [0,1). 
+  To favour an Randomly select a number in [0,1). 
   If number < wgt, use RWS, else follow Dynamic3
+
+Dynamic5 [builds on Dynamic3]
+  Uses a weight to favour an alternative based on the deterministic approach used
+  in Dynamic2: for each rule, we know exactly which sequence to choose that guarantees
+  termination.
+  If number < wgt, use deterministic approach to select sequence, otherwise use Dynamic3
+
+Dynamic6 [builds on  Dynamic3]
+  Approach is same as Dynamic5 but the deterministic part to favour alternatives is
+  slightly different: whereas in case of Dynamcic5, we had only one sequence to choose from,
+  in case of Dynamic6, where possible we may have multiple sequences (all guarantees termination)
+
+Dynamic7 [builds on Dynamic1]
+  Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
+  To favour an Randomly select a number in [0,1). 
+  If number < wgt, use RWS, else follow Dynamic1
+   
+  

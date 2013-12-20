@@ -30,7 +30,7 @@ import Accent, Backends, CFG, Lexer
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:")
+        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:r:")
         backends = []
         self.t_depth = None
         self.wgt = None
@@ -45,6 +45,8 @@ class Sinbad:
                 self.t_depth = int(opt[1])  
             elif opt[0] == "-w":
                 self.wgt = float(opt[1])             
+            elif opt[0] == "-r":
+                sys.setrecursionlimit(int(opt[1]))
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -76,8 +78,8 @@ class Sinbad:
         if msg is not None:
             sys.stderr.write(msg + "\n\n")
 
-            sys.stderr.write("sinbad -d <threshold depth> -w <weight> -b <backend 1> [... -b " \
-            "<backend n>] <grammar 1> <lexer 1> " \
+            sys.stderr.write("sinbad -d <threshold depth> -w <weight> -b <backend 1> \
+            "[-r <recursion limit>] [... -b  <backend n>] <grammar 1> <lexer 1> " \
             "[... <grammar n> <lexer n>]\n")
 	    sys.exit(1)
 

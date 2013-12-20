@@ -82,3 +82,29 @@ def find_terminating_indices(cfg_rules):
                         terminating_indices[rule.name] = i
 
     return terminating_indices
+
+def find_terminating_indices2(cfg_rules):
+    """ Essentially same ideas as above but with small variation: for each rule,
+        we have multiple indices referring to sequences for guaranteed termination"""
+    terminating_indices = {}
+    found = True
+    while (found):
+        found = False
+        for rule in cfg_rules:
+            indices = []
+            for i,seq in enumerate(rule.seqs):
+                _seq = []
+                for e in seq:
+                    if isinstance(e, CFG.Non_Term_Ref):
+                        if e.name not in terminating_indices.keys():
+                            _seq.append(e.name)
+
+                if len(_seq) == 0:
+                    if not terminating_indices. __contains__(rule.name):
+                        indices.append(i)
+
+            if len(indices) > 0:
+                found = True
+                terminating_indices[rule.name] = indices
+
+    return terminating_indices

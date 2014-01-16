@@ -31,6 +31,7 @@ class Simple:
 
 
     def run(self, depth, wgt):
+        recursion = 0
         while True:
             sys.stdout.write(".")
             sys.stdout.flush()
@@ -38,7 +39,7 @@ class Simple:
                 s = self.next(depth, wgt)
                 out = Accent.run(self._sin.parser, s)
                 if Accent.was_ambiguous(out):
-                    print "\nAmbiguity found with input:\n"
+                    print "\nambiguity[%s]" %  str(recursion)
                     print s
                     print
                     print "".join(out)
@@ -46,6 +47,6 @@ class Simple:
             except KeyError as k_error:
                 pass
             except RuntimeError:
-                print "\nRecursion limit reached: %s" % str(sys.getrecursionlimit())
-                sys.exit(1)
+                recursion += 1 
+                pass
 

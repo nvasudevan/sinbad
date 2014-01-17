@@ -60,6 +60,35 @@ def rws(scores):
             return i
 
 
+def rank_simple(vector):
+    return sorted(range(len(vector)), key=vector.__getitem__)
+
+def rankdata(a):
+    n = len(a)
+    ivec=rank_simple(a)
+    svec=[a[rank] for rank in ivec]
+    sumranks = 0
+    dupcount = 0
+    newarray = [0]*n
+    for i in xrange(n):
+        sumranks += i
+        dupcount += 1
+        if i==n-1 or svec[i] != svec[i+1]:
+            averank = sumranks / float(dupcount) + 1
+            for j in xrange(i-dupcount+1,i+1):
+                newarray[ivec[j]] = averank
+            sumranks = 0
+            dupcount = 0
+    return newarray
+    
+def rbrws(scores):
+    """ Rank based roulette wheel selection 
+        e.g: scores of [0.1,0.3,0.2] will result in a rank of [1,3,2]"""
+    ranks = rankdata(scores)
+    i = rws(ranks)
+    return i
+
+
 def find_terminating_indices(cfg_rules):
     """ Returns a map containing rule to index, where index refers to one of
         the sequence of the rule, which when selected guarantees termination"""

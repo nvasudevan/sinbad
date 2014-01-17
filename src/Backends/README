@@ -72,4 +72,7 @@ Dynamic7 [builds on Dynamic1]
   To favour an Randomly select a number in [0,1). 
   If number < wgt, use RWS, else follow Dynamic1
    
-  
+Dynamic8 [builds on Dynamic3]
+  Uses a weight to favour an alternative based on rank based Roulette Wheel Selection (RWS)
+  To favour an Randomly select a number in [0,1).
+  If number < wgt, rank the scores, and then use roulette wheel selection on the ranked scores

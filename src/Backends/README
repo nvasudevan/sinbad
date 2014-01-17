@@ -82,6 +82,15 @@ Dynamic8 [builds on Dynamic3]
 
 Dynamic9 [builds on Dynamic3]
   Uses a weight to favour an alternative based on average scores
-  To favour an Randomly select a number in [0,1).
-  If number < wgt, calculate average scores (score/seq.entered), and then use 
+  To favour, randomly select a number in [0,1).
+  If < wgt, calculate average scores (score/seq.entered), and then use 
   roulette wheel selection on the average scores
+  For > wgt, use Dynamic3
+
+Dynamic10 [builds on Dynamic9]
+  Instead of calculating average scores, we use a inverse score (1/seq.entered).
+  The idea is to select those alternatives that have been used less.
+  To favour, randomly select a number in [0,1).
+  If < wgt, calculate inverse scores (1/seq.entered), and then use 
+  roulette wheel selection on the inverse scores
+  For > wgt, use Dynamic3

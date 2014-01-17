@@ -2,7 +2,7 @@
   SinBAD
 ================================================================================
 
-SinBAD is an experimental Search-Based gramar Ambiguity Detection tool.
+SinBAD is an experimental Search-Based grammar Ambiguity Detection tool.
 
 To run it, you will first need to download the ACCENT compiler compiler
 <http://accent.compilertools.net/>, decompress and build it. Set the

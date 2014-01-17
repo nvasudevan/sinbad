@@ -22,7 +22,7 @@
 
 import Purerandom, Random2, Random3, Random4
 import Dynamic1, Dynamic2, Dynamic3, Dynamic4, Dynamic5, Dynamic6, Dynamic7
-import Dynamic8, Dynamic9
+import Dynamic8, Dynamic9, Dynamic10
 
 BACKENDS = {
   "purerandom"  : Purerandom.Calc,
@@ -37,5 +37,6 @@ BACKENDS = {
   "dynamic6" : Dynamic6.Calc,
   "dynamic7" : Dynamic7.Calc,
   "dynamic8" : Dynamic8.Calc,
-  "dynamic9" : Dynamic9.Calc
+  "dynamic9" : Dynamic9.Calc,
+  "dynamic10" : Dynamic10.Calc
 }

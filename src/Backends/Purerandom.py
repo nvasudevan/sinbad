@@ -26,7 +26,7 @@ import Accent, Backend, CFG
 
 
 class Calc(Backend.Simple):
-    def next(self, depth=None):
+    def next(self, depth=None, wgt=None):
         self._s = []
         self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)
 

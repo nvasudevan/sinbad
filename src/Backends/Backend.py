@@ -37,6 +37,8 @@ class Simple:
             sys.stdout.flush()
             try:
                 s = self.next(depth, wgt)
+                sys.stdout.write("sentence: %s\n" % s)
+                sys.stdout.flush()
                 out = Accent.run(self._sin.parser, s)
                 if Accent.was_ambiguous(out):
                     print "\nambiguity[%s]" %  str(recursion)
@@ -44,6 +46,26 @@ class Simple:
                     print
                     print "".join(out)
                     return True
+            except KeyError as k_error:
+                pass
+            except RuntimeError:
+                recursion += 1 
+                pass
+
+
+    def ambisen(self, depth, wgt):
+        recursion = 0
+        while True:
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            try:
+                s = self.next(depth, wgt)
+                sys.stdout.flush()
+                out = Accent.run(self._sin.parser, s)
+                if Accent.was_ambiguous(out):
+#                    print
+#                    print "".join(out)
+                    return True, s, out
             except KeyError as k_error:
                 pass
             except RuntimeError:

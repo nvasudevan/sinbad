@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 
-import datetime, getopt, os, sys
+import os, sys, tempfile
 import Accent, Backends, CFG, Lexer
 import AmbiParse 
-import re
+import tempfile
 
 
 class AmbiMin:
@@ -26,14 +26,43 @@ class AmbiMin:
         return bend.ambisen(self.t_depth, self.wgt)
 
 
-                
+    def write_cfg(self, cfg, gp, tokenline):
+        gf = open(gp,'w')
+        if tokenline != "":
+            gf.write('%s\n\n' % tokenline) 
+        gf.write('%nodefault\n\n')
+        rhs = " | ". join(alt for alt in cfg['root'])
+        gf.write("%s : %s\n;\n" % ('root', rhs))
+        for k in (nt for nt in cfg.keys() if nt != 'root'):
+            rhs = " | ". join(alt for alt in cfg[k])
+            #print "%s: %s;" % (k, rhs)
+            gf.write("%s : %s\n;\n" % (k, rhs))
+               
+        gf.close() 
+
 
     def minimise_ambiguity(self, gp, lp):
+        tokenline = ""
+        for l in open(gp,'r'):
+            if l.startswith('%token'):
+                tokenline = l
+                
         is_amb, sen, acc_out = self.find_ambiguity(gp, lp)
         curramblen = len(sen)
         print "ambiguous sentence: %s [%s]" % (sen,curramblen)
 
         mincfg = AmbiParse.parse(self.cfg, acc_out) 
+        # write the cfg and run ACCENT
+        n = 1
+        while n < 5: 
+            new_gp = "%s.%s.acc" % (gp.split('.')[0],str(n))
+            print "\n=> " , new_gp
+            self.write_cfg(mincfg, new_gp, tokenline)
+            is_amb, sen, acc_out = self.find_ambiguity(new_gp, lp)
+            curramblen = len(sen)
+            print "ambiguous sentence: %s [%s]" % (sen,curramblen)
+            n += 1
+
 
 
 AmbiMin()

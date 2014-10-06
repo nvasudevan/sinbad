@@ -3,6 +3,7 @@
 import re
 from sets import Set
 
+
 class AmbiParse:
 
     def __init__(self, out):
@@ -134,15 +135,12 @@ class AmbiParse:
                     cfg[lhs].add(rhs)
                 i = i + 1
             
-        for k in cfg.keys():
-            rhs = " | ". join(t for t in cfg[k])
-            print "%s: %s;" % (k, rhs)
-                
+        return cfg
 
 
 def parse(cfg, out):
     ambiparse = AmbiParse(out)
-    vamb_pat = "Two different ``[a-zA-Z0-9_-]'' derivation trees for the same phrase."
+    vamb_pat = "Two different ``[a-zA-Z0-9_-]*'' derivation trees for the same phrase."
     vamb = False
     for l in iter(ambiparse.parseout.splitlines()):
         if re.match(vamb_pat, l):
@@ -157,7 +155,7 @@ def parse(cfg, out):
         print "Amb type: horizontal"
         amb1,amb2 = ambiparse.parse_hamb()
 
-    ambiparse.min_cfg([amb1,amb2])
+    return ambiparse.min_cfg([amb1,amb2])
 
 
 if __name__ == "__main__":

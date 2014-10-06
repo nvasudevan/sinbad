@@ -43,7 +43,6 @@ class AmbiParse:
                 minamb.append(ltokens[0])
                 
         ambstr = " ".join(x for x in minamb)
-        print "ambstr: %s" % ambstr
         return minamb
 
 

@@ -13,6 +13,8 @@ class AmbiMin:
         self.lf = sys.argv[2]
         self.backend = sys.argv[3]
         self.t_depth = int(sys.argv[4])
+        self.wgt = float(sys.argv[5])
+        print "wgt: %s" % self.wgt
         self.wgt = None
         self.minimise_ambiguity(self.gf, self.lf)
 
@@ -41,6 +43,19 @@ class AmbiMin:
         gf.close() 
 
 
+    def print_stats(self, gp, sen):
+        # number of rules, symbols, sentence length    
+        cfg = CFG.parse(self.lex, open(gp, "r").read())
+        no_rules = len(cfg.rules)
+        no_symbols = 0 
+        for rule in cfg.rules:
+            for seq in rule.seqs:
+                no_symbols += len(seq)
+                 
+        print "ambiguous sentence: %s" % (sen)
+        print "\nstats:: %s, len: %s, no rules: %s, no symbols: %s" % (os.path.split(gp)[1],len(sen), str(no_rules), str(no_symbols))
+
+
     def minimise_ambiguity(self, gp, lp):
         tokenline = ""
         for l in open(gp,'r'):
@@ -49,18 +64,17 @@ class AmbiMin:
                 
         is_amb, sen, acc_out = self.find_ambiguity(gp, lp)
         curramblen = len(sen)
-        print "ambiguous sentence: %s [%s]" % (sen,curramblen)
+        self.print_stats(gp, sen)
 
         mincfg = AmbiParse.parse(self.cfg, acc_out) 
         # write the cfg and run ACCENT
         n = 1
         while n < 5: 
             new_gp = "%s.%s.acc" % (gp.split('.')[0],str(n))
-            print "\n=> " , new_gp
+            print "\n=> " , os.path.split(new_gp)[1]
             self.write_cfg(mincfg, new_gp, tokenline)
             is_amb, sen, acc_out = self.find_ambiguity(new_gp, lp)
-            curramblen = len(sen)
-            print "ambiguous sentence: %s [%s]" % (sen,curramblen)
+            self.print_stats(new_gp, sen)
             n += 1
 
 

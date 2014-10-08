@@ -14,6 +14,7 @@ class AmbiMin:
         self.backend = sys.argv[3]
         self.t_depth = int(sys.argv[4])
         self.wgt = float(sys.argv[5])
+        self.mincnt = int(sys.argv[6])
         print "wgt: %s" % self.wgt
         self.wgt = None
         self.minimise_ambiguity(self.gf, self.lf)
@@ -47,13 +48,16 @@ class AmbiMin:
         # number of rules, symbols, sentence length    
         cfg = CFG.parse(self.lex, open(gp, "r").read())
         no_rules = len(cfg.rules)
+        no_seqs = 0
         no_symbols = 0 
         for rule in cfg.rules:
+            no_seqs += len(rule.seqs)
             for seq in rule.seqs:
                 no_symbols += len(seq)
                  
         print "ambiguous sentence: %s" % (sen)
-        print "\nstats:: %s, len: %s, no rules: %s, no symbols: %s" % (os.path.split(gp)[1],len(sen), str(no_rules), str(no_symbols))
+        out =  "\nstats:%s, %s, %s, %s, %s" % (os.path.split(gp)[1],len(sen),str(no_rules),str(no_seqs),str(no_symbols))
+        print out 
 
 
     def minimise_ambiguity(self, gp, lp):
@@ -62,19 +66,17 @@ class AmbiMin:
             if l.startswith('%token'):
                 tokenline = l
                 
-        is_amb, sen, acc_out = self.find_ambiguity(gp, lp)
-        curramblen = len(sen)
-        self.print_stats(gp, sen)
-
-        mincfg = AmbiParse.parse(self.cfg, acc_out) 
-        # write the cfg and run ACCENT
+        currgp = gp
         n = 1
-        while n < 5: 
-            new_gp = "%s.%s.acc" % (gp.split('.')[0],str(n))
-            print "\n=> " , os.path.split(new_gp)[1]
+        while n <= self.mincnt: 
+            print "[%s]currgp: %s" % (str(n),currgp)
+            is_amb, sen, acc_out = self.find_ambiguity(currgp, lp)
+            assert is_amb
+            mincfg = AmbiParse.parse(acc_out) 
+            new_gp = "%s.%s.acc" % (currgp.split('.')[0],str(n))
             self.write_cfg(mincfg, new_gp, tokenline)
-            is_amb, sen, acc_out = self.find_ambiguity(new_gp, lp)
-            self.print_stats(new_gp, sen)
+            self.print_stats(currgp, sen)
+            currgp = new_gp
             n += 1
 
 

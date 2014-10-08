@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import re
+import sys, re
 from sets import Set
 
 
@@ -43,6 +43,7 @@ class AmbiParse:
                 minamb.append(ltokens[0])
                 
         ambstr = " ".join(x for x in minamb)
+        #print "ambstr: " , ambstr
         return minamb
 
 
@@ -106,38 +107,42 @@ class AmbiParse:
 
     def root_rule(self, amb):
         root_amb = list(amb)
+        if root_amb[0] == 'root':
+            # parse already contain root rule
+            lhs,rhs = self.rule(root_amb, 1)
+            return lhs,rhs,2
+
         root_amb.insert(0,'{')
         root_amb.insert(0,'root')
         root_amb.append('}')
-        return self.rule(root_amb, 1)
+        lhs,rhs = self.rule(root_amb, 1)
+        return lhs,rhs,0
 
 
-    def min_cfg(self, amblist):
+    def min_cfg(self, amb1, amb2):
         cfg = {}
-        for amb in amblist:
-            lhs,rhs = self.root_rule(amb)
+        for amb in amb1,amb2:
+            # parse root rule 
+            lhs,rhs,i = self.root_rule(amb)
             if lhs not in cfg.keys():
                 cfg[lhs] = Set() 
-
+    
             cfg[lhs].add(rhs)
-            i = 0
-            while i < len(amb):
-                tok = amb[i]
-            
-                #print "tok[%s]: %s" % (str(i),tok)
-                if tok == "{":
-                    # i -1 is a rule
-                    lhs,rhs = self.rule(amb, i)
+            j = i
+            while j < len(amb):
+                if amb[j] == "{":
+                    # j -1 is a rule
+                    lhs,rhs = self.rule(amb, j)
                     if lhs not in cfg.keys():
                         cfg[lhs] = Set()
 
                     cfg[lhs].add(rhs)
-                i = i + 1
+                j += 1
             
         return cfg
 
 
-def parse(cfg, out):
+def parse(out):
     ambiparse = AmbiParse(out)
     vamb_pat = "Two different ``[a-zA-Z0-9_-]*'' derivation trees for the same phrase."
     vamb = False
@@ -148,15 +153,15 @@ def parse(cfg, out):
 
     amb1,amb2 = None, None
     if vamb:
-        print "Amb type: vertical"
+        print "\ntype: vertical"
         amb1,amb2 = ambiparse.parse_vamb()
     else:
-        print "Amb type: horizontal"
+        print "\ntype: horizontal"
         amb1,amb2 = ambiparse.parse_hamb()
 
-    return ambiparse.min_cfg([amb1,amb2])
+    return ambiparse.min_cfg(amb1,amb2)
 
 
 if __name__ == "__main__":
-    parse(sys.argv[1])
+    parse(open(sys.argv[1], 'r').read())
 

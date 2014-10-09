@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import sys, random
+import sys, random, re
 import CFG
 
 
@@ -137,3 +137,38 @@ def find_terminating_indices2(cfg_rules):
                 terminating_indices[rule.name] = indices
 
     return terminating_indices
+
+
+def lines_between_patterns(out, startp, endp):
+    match = False
+    lines = []
+    for l in iter(out.splitlines()):
+        if re.match(startp, l):
+            match = True
+            continue
+        elif re.match(endp, l):
+            match = False
+            continue
+        elif match:
+            if l != "":
+                lines.append(l)
+
+    return lines
+
+
+def match_bkt(l, i):
+    bkcnt = 1
+    k = i
+    while k < len(l):
+        if l[k] == '{':
+            bkcnt += 1
+        elif l[k] == '}':
+            bkcnt -= 1
+            
+        if bkcnt == 0:
+            return k + 1
+            
+        k += 1
+        
+    return None            
+

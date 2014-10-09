@@ -2,6 +2,7 @@
 
 import sys, re
 from sets import Set
+import Utils
 
 
 class AmbiParse:
@@ -9,23 +10,6 @@ class AmbiParse:
     def __init__(self, out):
         self.parseout = out
         self.parse_tree = []
-
-
-    def lines_between_patterns(self, out, startp, endp):
-        match = False
-        lines = []
-        for l in iter(out.splitlines()):
-            if re.match(startp, l):
-                match = True
-                continue
-            elif re.match(endp, l):
-                match = False
-                continue
-            elif match:
-                if l != "":
-                    lines.append(l)
-    
-        return lines
 
 
     def min_amb_tokens(self, lines):
@@ -48,46 +32,29 @@ class AmbiParse:
 
 
     def parse_vamb(self):
-        tree1 = self.lines_between_patterns(self.parseout, "TREE 1", "TREE 2")
-        tree2 = self.lines_between_patterns(self.parseout, "TREE 2", "------")
+        tree1 = Utils.lines_between_patterns(self.parseout, "TREE 1", "TREE 2")
+        tree2 = Utils.lines_between_patterns(self.parseout, "TREE 2", "------")
 
         return self.min_amb_tokens(tree1),self.min_amb_tokens(tree2)
-            
-            
+
+
     def parse_hamb(self):
-        tree1 = self.lines_between_patterns(self.parseout, "PARSE 1", "PARSE 2")
-        tree2 = self.lines_between_patterns(self.parseout, "PARSE 2", "------")
+        tree1 = Utils.lines_between_patterns(self.parseout, "PARSE 1", "PARSE 2")
+        tree2 = Utils.lines_between_patterns(self.parseout, "PARSE 2", "------")
 
         return self.min_amb_tokens(tree1),self.min_amb_tokens(tree2)
 
 
-    def match_bkt(self, s, i):
-        bkcnt = 1
-        k = i + 1
-        while k < len(s):
-            if s[k] == '{':
-                bkcnt += 1
-            elif s[k] == '}':
-                bkcnt -= 1
-                
-            if bkcnt == 0:
-                return k + 1
-                
-            k += 1
-            
-        return None            
-
-
-    def parse_rhs(self, s):
+    def parse_rhs(self, l):
         i = 0
         rhs = []
-        while i < len(s):
-            if s[i] == "{":
-                j = self.match_bkt(s, i)
+        while i < len(l):
+            if l[i] == "{":
+                j = Utils.match_bkt(l, i+1)
                 i = j
                 continue
             else:
-                rhs.append(s[i])
+                rhs.append(l[i])
                 
             i += 1
             
@@ -97,7 +64,7 @@ class AmbiParse:
     def rule(self, amb, i):
         rule_name = amb[i-1]
         # find the corresponding '}'
-        j = self.match_bkt(amb, i)
+        j = Utils.match_bkt(amb, i+1)
         assert j is not None
         _rhs = amb[i+1:j-1]
         rhs = self.parse_rhs(_rhs)

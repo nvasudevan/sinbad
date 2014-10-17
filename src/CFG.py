@@ -97,11 +97,22 @@ class Term:
 
 
 
+class Sym_Term:
+    def __init__(self, tok):
+        self.tok = tok
+
+
+    def __repr__(self):
+        return "%s" % self.tok
+
+
+
 class _Parser:
     def parse(self, lex, cfg):
         self._cfg = cfg
         rules = []
         self._toks = lex
+        self._sym_toks = []
         i = 0
         while i < len(self._cfg):
             i = self._ws(i)
@@ -144,6 +155,9 @@ class _Parser:
         i += 6
         while self._cfg[i] != ";":
             i += 1
+
+        _sym_tok_s = self._cfg[7:i]
+        self._sym_toks = _sym_tok_s.replace(' ','').split(',')
         return i + 1
 
 
@@ -207,7 +221,10 @@ class _Parser:
             j, name = self._id(i)
             if j > i:
                 if name in self._toks:
-                    elems.append(Term(name))
+                    if name in self._sym_toks:
+                        elems.append(Sym_Term(name))
+                    else:
+                        elems.append(Term(name))
                 else:
                     elems.append(Non_Term_Ref(name))
                 i = j
@@ -240,5 +257,6 @@ def parse(lex, cfg):
 
 if __name__ == "__main__":
     import sys
-    for p in sys.argv[1:]:
-        print parse({}, open(p, "r").read())
+    import Lexer
+    lex = Lexer.parse(open(sys.argv[2],"r").read())
+    print parse(lex, open(sys.argv[1], "r").read())

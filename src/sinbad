@@ -69,7 +69,8 @@ class Sinbad:
             self.check_file(args[i])
             self.check_file(args[i + 1])
             for backend in backends:
-                if self.find_ambiguity(args[i], args[i + 1], backend):
+                is_amb,_,_ =  self.find_ambiguity(args[i], args[i + 1], backend)
+                if is_amb:
                     break
             i += 2
 

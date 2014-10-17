@@ -20,8 +20,8 @@
 # IN THE SOFTWARE.
 
 
-import sys, random, re
-import CFG
+import os, sys, random, re, time
+import CFG, Lexer
 
 
 def error(msg, c):
@@ -171,4 +171,30 @@ def match_bkt(l, i):
         k += 1
         
     return None            
+
+
+def time_elapsed(start, duration):
+   now = time.time()
+   #print "now: %s, start: %s, duration: %s, diff: %s" % (now, start, duration, (now - start))
+   if (now - start) > duration: 
+       return True
+   
+   return False
+
+
+def print_stats(gp, lp, sen):
+    # number of rules, symbols, sentence length    
+    lex = Lexer.parse(open(lp, "r").read())
+    cfg = CFG.parse(lex, open(gp, "r").read())
+    no_rules = len(cfg.rules)
+    no_seqs = 0
+    no_symbols = 0 
+    for rule in cfg.rules:
+        no_seqs += len(rule.seqs)
+        for seq in rule.seqs:
+            no_symbols += len(seq)
+             
+    print "ambiguous sentence: %s" % (sen)
+    out =  "\nstats:%s, %s, %s, %s, %s" % (os.path.split(gp)[1],len(sen),str(no_rules),str(no_seqs),str(no_symbols))
+    print out 
 

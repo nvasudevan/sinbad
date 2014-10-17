@@ -66,10 +66,9 @@ class AmbiParse:
         # find the corresponding '}'
         j = Utils.match_bkt(amb, i+1)
         assert j is not None
-        _rhs = amb[i+1:j-1]
-        rhs = self.parse_rhs(_rhs)
-        rhs_str = " ".join(x for x in rhs)
-        return rule_name,rhs_str  
+        rhs = self.parse_rhs(amb[i+1:j-1])
+
+        return rule_name,rhs  
 
 
     def root_rule(self, amb):
@@ -92,18 +91,18 @@ class AmbiParse:
             # parse root rule 
             lhs,rhs,i = self.root_rule(amb)
             if lhs not in cfg.keys():
-                cfg[lhs] = Set() 
+                cfg[lhs] = [] 
     
-            cfg[lhs].add(rhs)
+            cfg[lhs].append(rhs)
             j = i
             while j < len(amb):
                 if amb[j] == "{":
                     # j -1 is a rule
                     lhs,rhs = self.rule(amb, j)
                     if lhs not in cfg.keys():
-                        cfg[lhs] = Set()
+                        cfg[lhs] = []
 
-                    cfg[lhs].add(rhs)
+                    cfg[lhs].append(rhs)
                 j += 1
             
         return cfg

@@ -38,7 +38,6 @@ class AmbiMin:
             self.usage()
 
         self.gf,self.lf = args[0],args[1]
-        self.lex = Lexer.parse(open(self.lf, "r").read())
 
         if self.backend is None:
             self.usage("backend is not set")
@@ -60,14 +59,6 @@ class AmbiMin:
                 "-w <wgt to apply on reaching threshold depth>" \
                 "<grammar> <lex>")
             sys.exit(1)
-
-
-    def find_ambiguity(self, gp, lp):
-        print "\n===> %s : %s" % (gp, self.backend)
-        self.cfg = CFG.parse(self.lex, open(gp, "r").read())
-        self.parser = Accent.compile(gp, lp)
-        bend = Backends.BACKENDS[self.backend](self)
-        return bend.run(self.t_depth, self.wgt, self.duration)
 
 
     def minimise_ambiguity(self):

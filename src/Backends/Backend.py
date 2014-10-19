@@ -20,8 +20,9 @@
 # IN THE SOFTWARE.
 
 
-import sys
+import sys, time
 import Accent
+import Utils
 
 
 class Simple:
@@ -30,23 +31,33 @@ class Simple:
         self._cfg = sin.cfg.clone()
 
 
-    def run(self, depth, wgt):
+    def run(self, depth, wgt, duration=None):
         recursion = 0
-        while True:
+        timer = False
+        if duration is not None:
+            timer = True
+
+        start = time.time()
+        while ((not timer) or (not Utils.time_elapsed(start, duration))):
             sys.stdout.write(".")
             sys.stdout.flush()
             try:
                 s = self.next(depth, wgt)
+                sys.stdout.write("sentence: %s\n" % s)
+                sys.stdout.flush()
                 out = Accent.run(self._sin.parser, s)
                 if Accent.was_ambiguous(out):
                     print "\nambiguity[%s]" %  str(recursion)
                     print s
                     print
                     print "".join(out)
-                    return True
+                    return True, s, out
             except KeyError as k_error:
                 pass
             except RuntimeError:
                 recursion += 1 
                 pass
+
+        return False, "", ""
+
 

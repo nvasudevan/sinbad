@@ -182,7 +182,7 @@ def time_elapsed(start, duration):
    return False
 
 
-def print_stats(gp, lp, sen):
+def print_stats(gp, lp, sen, is_amb):
     # number of rules, symbols, sentence length    
     lex = Lexer.parse(open(lp, "r").read())
     cfg = CFG.parse(lex, open(gp, "r").read())
@@ -194,7 +194,11 @@ def print_stats(gp, lp, sen):
         for seq in rule.seqs:
             no_symbols += len(seq)
              
-    print "ambiguous sentence: %s" % (sen)
-    out =  "\nstats:%s, %s, %s, %s, %s" % (os.path.split(gp)[1],len(sen),str(no_rules),str(no_seqs),str(no_symbols))
+
+    #print "\nsentence: %s" % (sen)
+    amb = ""
+    if is_amb:
+        amb = "yes" 
+    out = "\nstats:%s, %s, %s, %s, %s, %s" % (gp,amb,len(sen),str(no_rules),str(no_seqs),str(no_symbols))
     print out 
 

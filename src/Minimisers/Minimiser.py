@@ -2,6 +2,7 @@ import os
 from sets import Set
 import Lexer, CFG, Backends, Accent
 
+
 class Minimiser:
 
     def __init__(self, ambimin):
@@ -47,3 +48,25 @@ class Minimiser:
         gf.close() 
 
 
+    def print_stats(self, gp, sen, is_amb, amb_subset):
+        # number of rules, symbols, sentence length    
+        cfg = CFG.parse(self.lex, open(gp, "r").read())
+        no_rules = len(cfg.rules)
+        no_seqs = 0
+        no_symbols = 0 
+        for rule in cfg.rules:
+            no_seqs += len(rule.seqs)
+            for seq in rule.seqs:
+                no_symbols += len(seq)
+
+        amb = ""
+        len_amb_subset = ""
+        if is_amb:
+            amb = "yes" 
+            assert amb_subset is not None
+            len_amb_subset = len(amb_subset.split())
+
+        out = "\nstats:%s, %s, %s, %s, %s, %s, %s" %  \
+               (gp,amb,len(sen.split()),len_amb_subset,str(no_rules),str(no_seqs),str(no_symbols))
+        print out 
+    

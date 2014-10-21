@@ -139,39 +139,6 @@ def find_terminating_indices2(cfg_rules):
     return terminating_indices
 
 
-def lines_between_patterns(out, startp, endp):
-    match = False
-    lines = []
-    for l in iter(out.splitlines()):
-        if re.match(startp, l):
-            match = True
-            continue
-        elif re.match(endp, l):
-            match = False
-            continue
-        elif match:
-            if l != "":
-                lines.append(l)
-
-    return lines
-
-
-def match_bkt(l, i):
-    bkcnt = 1
-    k = i
-    while k < len(l):
-        if l[k] == '{':
-            bkcnt += 1
-        elif l[k] == '}':
-            bkcnt -= 1
-            
-        if bkcnt == 0:
-            return k + 1
-            
-        k += 1
-        
-    return None            
-
 
 def time_elapsed(start, duration):
    now = time.time()
@@ -181,24 +148,4 @@ def time_elapsed(start, duration):
    
    return False
 
-
-def print_stats(gp, lp, sen, is_amb):
-    # number of rules, symbols, sentence length    
-    lex = Lexer.parse(open(lp, "r").read())
-    cfg = CFG.parse(lex, open(gp, "r").read())
-    no_rules = len(cfg.rules)
-    no_seqs = 0
-    no_symbols = 0 
-    for rule in cfg.rules:
-        no_seqs += len(rule.seqs)
-        for seq in rule.seqs:
-            no_symbols += len(seq)
-             
-
-    #print "\nsentence: %s" % (sen)
-    amb = ""
-    if is_amb:
-        amb = "yes" 
-    out = "\nstats:%s, %s, %s, %s, %s, %s" % (gp,amb,len(sen),str(no_rules),str(no_seqs),str(no_symbols))
-    print out 
 

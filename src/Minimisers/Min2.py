@@ -28,13 +28,15 @@ class Min2(Minimiser.Minimiser):
 
 
     def minimise(self):
+        td = tempfile.mkdtemp()
         is_amb, sen, acc_out = self.find_ambiguity(self.ambimin.gf, self.ambimin.lf, None)
         assert is_amb
-        mincfg = AmbiParse.parse(acc_out) 
-        td = tempfile.mkdtemp()
+        ambi_parse = AmbiParse.parse(self, acc_out) 
+        mincfg = ambi_parse.min_cfg()
+        amb_subset = ambi_parse.ambiguous_subset()
         new_gp = os.path.join(td,"0.acc")
         self.write_cfg(mincfg, new_gp)
-        Utils.print_stats(new_gp, self.ambimin.lf, sen, is_amb)
+        self.print_stats(new_gp, sen, is_amb, amb_subset)
         currgp = new_gp
         n = 1
         found = True
@@ -49,12 +51,17 @@ class Min2(Minimiser.Minimiser):
                         new_gp = os.path.join(td, "%s.acc" % str(n))
                         n += 1
                         self.write_cfg(new_cfg, new_gp)
-                        is_amb,sen,acc_out = self.find_ambiguity(new_gp, self.ambimin.lf, self.ambimin.duration)
-                        Utils.print_stats(new_gp, self.ambimin.lf, sen, is_amb)
+                        is_amb, sen, acc_out = self.find_ambiguity(new_gp, self.ambimin.lf, self.ambimin.duration)
                         if is_amb:
                             currgp = new_gp
                             found = True
+                            ambi_parse = AmbiParse.parse(self, acc_out) 
+                            amb_subset = ambi_parse.ambiguous_subset()
+                            self.print_stats(new_gp, sen, is_amb, amb_subset)
                             break
+                        else:
+                            self.print_stats(new_gp, sen, is_amb, None)
+
 
                 if found:
                     break

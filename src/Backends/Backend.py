@@ -43,7 +43,6 @@ class Simple:
             sys.stdout.flush()
             try:
                 s = self.next(depth, wgt)
-                sys.stdout.write("sentence: %s\n" % s)
                 sys.stdout.flush()
                 out = Accent.run(self._sin.parser, s)
                 if Accent.was_ambiguous(out):
@@ -58,6 +57,6 @@ class Simple:
                 recursion += 1 
                 pass
 
-        return False, "", ""
+        return False, "", None
 
 

@@ -26,6 +26,6 @@ class Min1(Minimiser.Minimiser):
             currgp = new_gp
             n += 1
 
-#        if os.path.exists(td):
-#            shutil.rmtree(td)
+        if os.path.exists(td):
+            shutil.rmtree(td)
 

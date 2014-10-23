@@ -57,6 +57,6 @@ class Simple:
                 recursion += 1 
                 pass
 
-        return False, "", None
+        return False, None, None
 
 

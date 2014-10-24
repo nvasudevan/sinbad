@@ -94,13 +94,17 @@ class Minimiser:
                 no_symbols += len(seq)
 
         amb = ""
+        len_sen = ""
         len_amb_subset = ""
         if is_amb:
             amb = "yes" 
             assert amb_subset is not None
+            assert sen is not None
+            len_sen = len(sen.split())
             len_amb_subset = len(amb_subset.split())
 
         out = "\nstats:%s, %s, %s, %s, %s, %s, %s" %  \
-               (gp,amb,len(sen.split()),len_amb_subset,str(no_rules),str(no_seqs),str(no_symbols))
+              (gp,amb, len_sen, len_amb_subset, str(no_rules), \
+              str(no_seqs), str(no_symbols))
         print out 
     

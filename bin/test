@@ -1,0 +1,3 @@
+#!/bin/bash
+
+# A simple test script that can be invoked on it own or from CI

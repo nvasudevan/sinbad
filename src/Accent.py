@@ -22,7 +22,7 @@
 
 import os, subprocess, tempfile
 import Utils
-
+import sys
 
 
 def compile(old_gp, old_lp):
@@ -74,6 +74,12 @@ def run(parser, s):
 
     p = subprocess.Popen(parser, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     out = p.communicate(s)
+    if p.returncode != 0:
+        print "sentence: " , s
+        print "returncode: " , str(p.returncode)
+        print "error: " , out
+        sys.exit(1)
+
     return "".join(out[0])
 
 

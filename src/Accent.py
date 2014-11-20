@@ -74,11 +74,10 @@ def run(parser, s):
 
     p = subprocess.Popen(parser, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     out = p.communicate(s)
-    if p.returncode != 0:
-        print "sentence: " , s
-        print "returncode: " , str(p.returncode)
-        print "error: " , out
-        sys.exit(1)
+    r = p.returncode
+    # 0 - normal exit; 2 - ambiguous case
+    if r not in [0,2]:
+        Utils.error("accent failed for sentence:\n%s\n\nwith error: %s" % (s,out),r)
 
     return "".join(out[0])
 

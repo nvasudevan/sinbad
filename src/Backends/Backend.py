@@ -23,7 +23,7 @@
 import sys, time
 import Accent
 import Utils
-
+import traceback
 
 class Simple:
     def __init__(self, sin):
@@ -51,11 +51,16 @@ class Simple:
                     print
                     print "".join(out)
                     return True, s, out
-            except KeyError as k_error:
-                pass
-            except RuntimeError:
-                recursion += 1 
-                pass
+            except RuntimeError as err:
+                if "maximum recursion depth exceeded" in err.message:
+                    recursion += 1 
+                    sys.stdout.write("r:%s" % str(recursion))
+                    sys.stdout.flush()
+                    pass
+                else:
+                    print "error: \n"
+                    print traceback.format_exc()
+                    sys.exit(1)
 
         return False, None, None
 

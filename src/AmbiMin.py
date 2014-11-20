@@ -38,6 +38,9 @@ class AmbiMin:
         self.duration = None
         self.save_min_cfg = False
 
+        if len(args) != 2:
+            self.usage("grammar and lex is not set")
+
         for opt in opts:
             if opt[0] == "-b":
                 self.backend = opt[1]
@@ -58,9 +61,6 @@ class AmbiMin:
             else:
                 self.usage("Unknown argument '%s'" % opt[0])
 
-        if len(args) != 2:
-            self.usage()
-
         self.gf,self.lf = args[0],args[1]
 
         if self.backend is None:
@@ -79,9 +79,9 @@ class AmbiMin:
         if msg is not None:
             sys.stderr.write("\n%s\n" % msg)        
             sys.stderr.write("python AmbiMin.py -b <backend> -d <depth" \
-                "-n <max minimisation count>" \
-                "-w <wgt to apply on reaching threshold depth>" \
-                "<grammar> <lex>")
+                " -n <max minimisation count>" \
+                " -w <wgt to apply on reaching threshold depth>" \
+                " <grammar> <lex>\n")
             sys.exit(1)
 
 
@@ -91,3 +91,4 @@ class AmbiMin:
 
 
 AmbiMin()
+

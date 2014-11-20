@@ -35,7 +35,13 @@ class Calc(Backend.Simple):
         self._depth = 0
         self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)
 
-        return " ".join(self._s)
+        # if whitespace exists, then join the token as is, otherwise join 
+        # with a space
+        if "WS" in self._sin.lex.keys():
+            return "".join(self._s)
+        else:
+            return " ".join(self._s)
+
 
 
     def _dive(self, rule, depth):

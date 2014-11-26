@@ -55,13 +55,12 @@ class Min1a(Minimiser.Minimiser):
 	n = 1
         currgp = new_gp
         while i <= 50: 
-            print "[%s]currgp: %s" % (str(n),currgp)
             is_amb, sen, acc_out = self.find_ambiguity(currgp, self.ambimin.lf, None)
             assert is_amb
             ambi_parse = AmbiParse.parse(self, acc_out)
             min_cfg = ambi_parse.ambiguous_cfg_subset()
             size = self.cfg_size(min_cfg)
-            print "size[%s] <-> prev_size[%s]" % (size, prev_size)
+	    print "stats:[%s]:%s" % (str(n),size)
             if size < prev_size:
                 # reset the counter
                 i = 1

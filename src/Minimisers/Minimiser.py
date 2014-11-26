@@ -76,9 +76,9 @@ class Minimiser:
             print "gp: %s, min_gp: %s" % (gp, min_gp)
             r = subprocess.call(["cp", gp, min_gp])
             if r != 0:
-                Utils.error("Copy of %s -> %s failed!" % (gp, min_gp))
+                Utils.error("Copy of %s -> %s failed!\n" % (gp, min_gp))
 
-            sys.stderr.write("Copied: %s -> %s" % (gp, min_gp))
+            print "Copied: %s -> %s\n" % (gp, min_gp)
 
 
 

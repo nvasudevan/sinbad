@@ -72,7 +72,7 @@ class Minimiser:
         if self.ambimin.save_min_cfg:
             #gp_d = os.path.split(self.ambimin.gf)[0]
             #gp_f = os.path.split(self.ambimin.gf)[1].split('.')[0]
-            min_gp = "%s.m" % self.ambimin.gf
+            min_gp = "%s.%s.m" % (self.ambimin.gf,self.ambimin.minimiser)
             print "gp: %s, min_gp: %s" % (gp, min_gp)
             r = subprocess.call(["cp", gp, min_gp])
             if r != 0:

@@ -60,16 +60,16 @@ class Min1a(Minimiser.Minimiser):
             assert is_amb
             ambi_parse = AmbiParse.parse(self, acc_out)
             min_cfg = ambi_parse.ambiguous_cfg_subset()
-	    size = self.cfg_size(min_cfg)
-	    print "size[%s] <-> prev_size[%s]" % (size, prev_size)
-	    if size < prev_size:
+            size = self.cfg_size(min_cfg)
+            print "size[%s] <-> prev_size[%s]" % (size, prev_size)
+            if size < prev_size:
                 # reset the counter
                 i = 1
                 amb_subset = ambi_parse.ambiguous_subset()
                 new_gp = os.path.join(td,"%s.acc" % str(n))
                 self.write_cfg(min_cfg, new_gp)
                 currgp = new_gp
-		prev_size = size
+                prev_size = size
             else:
                 i += 1
 

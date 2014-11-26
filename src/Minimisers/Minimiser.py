@@ -60,10 +60,10 @@ class Minimiser:
         nt_list = [nt for nt in cfg.keys() if nt != 'root']
         nt_list.sort()
         for k in nt_list:
-            pp_seqs = Set()
+            pp_seqs = [] # Set()
             for seq in cfg[k]:
                 seq_s = " ".join(str(e) for e in seq)
-                pp_seqs.add(seq_s)
+                pp_seqs.append(seq_s)
 
             gf.write("%s : %s\n;\n" % (k," | ".join(pp_seqs)))
                
@@ -103,7 +103,7 @@ class Minimiser:
             len_sen = len(sen.split())
             len_amb_subset = len(amb_subset.split())
 
-        out = "\nstats:%s, %s, %s, %s, %s, %s, %s" %  \
+        out = "\nstats: %s, %s, %s, %s, %s, %s, %s" %  \
               (gp,amb, len_sen, len_amb_subset, str(no_rules), \
               str(no_seqs), str(no_symbols))
         print out 

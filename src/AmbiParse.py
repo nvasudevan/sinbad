@@ -143,7 +143,7 @@ class AmbiParse:
         return lhs,rhs,0
 
 
-    def min_cfg(self):
+    def ambiguous_cfg_subset(self):
         cfg = {}
         for amb in self.amb1,self.amb2:
             # parse root rule 
@@ -151,7 +151,9 @@ class AmbiParse:
             if lhs not in cfg.keys():
                 cfg[lhs] = [] 
     
-            cfg[lhs].append(rhs)
+	    if rhs not in cfg[lhs]:
+                cfg[lhs].append(rhs)
+
             j = i
             while j < len(amb):
                 if amb[j] == "{":
@@ -160,7 +162,9 @@ class AmbiParse:
                     if lhs not in cfg.keys():
                         cfg[lhs] = []
 
-                    cfg[lhs].append(rhs)
+		    if rhs not in cfg[lhs]:
+                        cfg[lhs].append(rhs)
+
                 j += 1
             
         return cfg

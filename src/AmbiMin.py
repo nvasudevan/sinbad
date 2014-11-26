@@ -69,9 +69,6 @@ class AmbiMin:
         if self.t_depth is None:
             self.usage("depth is not set")
 
-        if self.minimiser not in ['min1','min2']:
-            self.usage("Don't understand minimisation method %s. Try min1 or min2" % self.minimiser)
-
         self.minimise_ambiguity()
 
 

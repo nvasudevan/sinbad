@@ -36,15 +36,15 @@ class Min1(Minimiser.Minimiser):
         currgp = self.ambimin.gf
         while n <= self.ambimin.mincnt: 
             print "[%s]currgp: %s" % (str(n),currgp)
-            is_amb, sen, acc_out = self.find_ambiguity(currgp, self.ambimin.lf, None)
+            is_amb,sen,acc_out = self.find_ambiguity(currgp, self.ambimin.lf, None)
             assert is_amb
             ambi_parse = AmbiParse.parse(self, acc_out)
-            mincfg = ambi_parse.ambiguous_cfg_subset()
+            min_cfg = ambi_parse.ambiguous_cfg_subset()
             amb_subset = ambi_parse.ambiguous_subset()
-            new_gp = os.path.join(td,"%s.acc" % str(n))
-            self.write_cfg(mincfg, new_gp)
-            self.print_stats(currgp, sen, is_amb, amb_subset)
-            currgp = new_gp
+            min_gp = os.path.join(td,"%s.acc" % str(n))
+            self.write_cfg(min_cfg, min_gp)
+            print "stats:[%s]:%s" % (str(n),self.cfg_size(min_cfg))
+            currgp = min_gp
             n += 1
 
         if os.path.exists(td):

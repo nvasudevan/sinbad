@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import os, sys, tempfile, shutil
+import os, tempfile, shutil
 import Minimiser, AmbiParse
 
 
@@ -30,45 +30,38 @@ class Min1a(Minimiser.Minimiser):
         Minimiser.Minimiser.__init__(self, ambimin)
 
 
-    def cfg_size(self, cfg):
-        size = 0
-	for k in cfg.keys():
-            seqs = cfg[k]
-	    for seq in seqs:
-                size += len(seq)
-
-	return size
-
-
     def minimise(self):
         td = tempfile.mkdtemp()
-        is_amb, sen, acc_out = self.find_ambiguity(self.ambimin.gf, self.ambimin.lf, None)
+        is_amb, sen, acc_out = self.find_ambiguity(self.ambimin.gf,
+                                                   self.ambimin.lf,
+                                                   None)
 	assert is_amb
         ambi_parse = AmbiParse.parse(self, acc_out)
         min_cfg = ambi_parse.ambiguous_cfg_subset()
         amb_subset = ambi_parse.ambiguous_subset()
-        new_gp = os.path.join(td,"0.acc")
-        self.write_cfg(min_cfg, new_gp)
+        min_gp = os.path.join(td,"0.acc")
+        self.write_cfg(min_cfg, min_gp)
 
-	prev_size = self.cfg_size(min_cfg)
+        cfg_size = self.cfg_size(min_cfg)
+        print "stats:[0]:%s" % (cfg_size)
         i = 1
 	n = 1
-        currgp = new_gp
+        currgp = min_gp
         while i <= 50: 
             is_amb, sen, acc_out = self.find_ambiguity(currgp, self.ambimin.lf, None)
             assert is_amb
             ambi_parse = AmbiParse.parse(self, acc_out)
             min_cfg = ambi_parse.ambiguous_cfg_subset()
-            size = self.cfg_size(min_cfg)
-	    print "stats:[%s]:%s" % (str(n),size)
-            if size < prev_size:
+            _cfg_size = self.cfg_size(min_cfg)
+            print "stats:[%s]:%s" % (str(n),_cfg_size)
+            if _cfg_size < cfg_size:
                 # reset the counter
                 i = 1
                 amb_subset = ambi_parse.ambiguous_subset()
-                new_gp = os.path.join(td,"%s.acc" % str(n))
-                self.write_cfg(min_cfg, new_gp)
-                currgp = new_gp
-                prev_size = size
+                min_gp = os.path.join(td,"%s.acc" % str(n))
+                self.write_cfg(min_cfg, min_gp)
+                currgp = min_gp
+                cfg_size = _cfg_size
             else:
                 i += 1
 

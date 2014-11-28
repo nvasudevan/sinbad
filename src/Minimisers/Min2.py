@@ -60,7 +60,7 @@ class Min2(Minimiser.Minimiser):
         amb_subset = ambi_parse.ambiguous_subset()
         min_gp = os.path.join(td,"0.acc")
         self.write_cfg(min_cfg, min_gp)
-	print "stats:[0]:%s" % (self.cfg_size(min_cfg))
+        print "stats:[0]:%s" % (self.cfg_size(min_cfg))
 
         currgp = min_gp
         n = 1

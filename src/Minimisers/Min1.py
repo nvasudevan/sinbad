@@ -39,7 +39,7 @@ class Min1(Minimiser.Minimiser):
             is_amb, sen, acc_out = self.find_ambiguity(currgp, self.ambimin.lf, None)
             assert is_amb
             ambi_parse = AmbiParse.parse(self, acc_out)
-            mincfg = ambi_parse.min_cfg()
+            mincfg = ambi_parse.ambiguous_cfg_subset()
             amb_subset = ambi_parse.ambiguous_subset()
             new_gp = os.path.join(td,"%s.acc" % str(n))
             self.write_cfg(mincfg, new_gp)

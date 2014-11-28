@@ -82,6 +82,16 @@ class Minimiser:
 
 
 
+    def cfg_size(self, cfg):
+        size = 0
+	for k in cfg.keys():
+            seqs = cfg[k]
+	    for seq in seqs:
+                size += len(seq)
+
+	return size
+
+
     def print_stats(self, gp, sen, is_amb, amb_subset):
         # number of rules, symbols, sentence length    
         cfg = CFG.parse(self.lex, open(gp, "r").read())

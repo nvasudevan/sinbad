@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import os, sys, tempfile, shutil
+import os, tempfile, shutil
 import Minimiser, AmbiParse
 import CFG
 
@@ -51,15 +51,18 @@ class Min2(Minimiser.Minimiser):
 
     def minimise(self):
         td = tempfile.mkdtemp()
-        is_amb, sen, acc_out = self.find_ambiguity(self.ambimin.gf, self.ambimin.lf, None)
+        is_amb,sen,acc_out = self.find_ambiguity(self.ambimin.gf,
+                                                 self.ambimin.lf, 
+                                                 None)
         assert is_amb
         ambi_parse = AmbiParse.parse(self, acc_out) 
-        mincfg = ambi_parse.ambiguous_cfg_subset()
+        min_cfg = ambi_parse.ambiguous_cfg_subset()
         amb_subset = ambi_parse.ambiguous_subset()
-        new_gp = os.path.join(td,"0.acc")
-        self.write_cfg(mincfg, new_gp)
-        self.print_stats(new_gp, sen, is_amb, amb_subset)
-        currgp = new_gp
+        min_gp = os.path.join(td,"0.acc")
+        self.write_cfg(min_cfg, min_gp)
+	print "stats:[0]:%s" % (self.cfg_size(min_cfg))
+
+        currgp = min_gp
         n = 1
         found = True
         while found:
@@ -69,20 +72,20 @@ class Min2(Minimiser.Minimiser):
                 if len(rule.seqs) > 1:
                     for i in range(len(rule.seqs)):
                         print "\n=> %s: %s" % (rule.name, rule.seqs[i])
-                        new_cfg = self.cfg_minus_alt(cfg, rule.name, i)
-                        new_gp = os.path.join(td, "%s.acc" % str(n))
+                        min_cfg = self.cfg_minus_alt(cfg, rule.name, i)
+                        min_gp = os.path.join(td, "%s.acc" % str(n))
                         n += 1
-                        self.write_cfg(new_cfg, new_gp)
-                        is_amb, sen, acc_out = self.find_ambiguity(new_gp, self.ambimin.lf, self.ambimin.duration)
+                        self.write_cfg(min_cfg, min_gp)
+                        is_amb,sen,acc_out = self.find_ambiguity(min_gp, 
+                                                        self.ambimin.lf, 
+                                                        self.ambimin.duration)
                         if is_amb:
-                            currgp = new_gp
+                            currgp = min_gp
                             found = True
                             ambi_parse = AmbiParse.parse(self, acc_out) 
                             amb_subset = ambi_parse.ambiguous_subset()
-                            self.print_stats(new_gp, sen, is_amb, amb_subset)
+                            print "stats:[%s]:%s" % (str(n),self.cfg_size(min_cfg))
                             break
-                        else:
-                            self.print_stats(new_gp, sen, is_amb, None)
 
 
                 if found:

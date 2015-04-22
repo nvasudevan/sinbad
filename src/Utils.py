@@ -48,12 +48,13 @@ def min_max(l):
 
     return min, minc, max, maxc
 
+
 # http://eli.thegreenplace.net/2010/01/22/weighted-random-generation-in-python
 def rws(scores):
     """select a score based on roulette wheel selection"""
     rndscore = random.random() * sum(scores)
 
-    for i,sc in enumerate(scores):
+    for i, sc in enumerate(scores):
         rndscore -= sc
         if rndscore < 0:
             return i
@@ -61,6 +62,7 @@ def rws(scores):
 
 def rank_simple(vector):
     return sorted(range(len(vector)), key=vector.__getitem__)
+
 
 def rankdata(a):
     n = len(a)
@@ -79,7 +81,8 @@ def rankdata(a):
             sumranks = 0
             dupcount = 0
     return newarray
-    
+
+
 def rbrws(scores):
     """ Rank based roulette wheel selection 
         e.g: scores of [0.1,0.3,0.2] will result in a rank of [1,3,2]"""
@@ -110,6 +113,7 @@ def find_terminating_indices(cfg_rules):
                         terminating_indices[rule.name] = i
 
     return terminating_indices
+
 
 def find_terminating_indices2(cfg_rules):
     """ Essentially same ideas as above but with small variation: for each rule,
@@ -146,5 +150,4 @@ def time_elapsed(start, duration):
        return True
    
    return False
-
 

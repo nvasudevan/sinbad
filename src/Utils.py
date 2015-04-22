@@ -48,15 +48,14 @@ def min_max(l):
 
     return min, minc, max, maxc
 
-
+# http://eli.thegreenplace.net/2010/01/22/weighted-random-generation-in-python
 def rws(scores):
     """select a score based on roulette wheel selection"""
-    total = sum(scores)
-    rndscore = random.random() * total
+    rndscore = random.random() * sum(scores)
 
     for i,sc in enumerate(scores):
         rndscore -= sc
-        if rndscore <= 0:
+        if rndscore < 0:
             return i
 
 

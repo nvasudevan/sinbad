@@ -42,12 +42,15 @@ class Simple:
             sys.stdout.write(".")
             sys.stdout.flush()
             try:
+                t2 = time.time()
                 s = self.next(depth, wgt)
-                sys.stdout.flush()
+                t3 = time.time()
                 out = Accent.run(self._sin.parser, s)
+                t4 = time.time()
                 if Accent.was_ambiguous(out):
                     print "\nambiguity[%s]" %  str(recursion)
-                    print s
+                    print "sentence[gen=%.6f parse=%.6f (secs)]: %s" % \
+                                    ((t3-t2), (t4-t3), s)
                     print
                     print "".join(out)
                     return True, s, out
@@ -55,8 +58,10 @@ class Simple:
                 if "maximum recursion depth exceeded" in err.message:
                     recursion += 1 
                     sys.stdout.write("r:%s" % str(recursion))
+                    sys.stdout.write("recursion limit: %s" % \
+                                    str(sys.getrecursionlimit()))
                     sys.stdout.flush()
-                    pass
+                    sys.exit(1)
                 else:
                     print "error: \n"
                     print traceback.format_exc()

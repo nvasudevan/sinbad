@@ -22,7 +22,7 @@
 # IN THE SOFTWARE.
 
 
-import datetime, getopt, os, sys
+import time, getopt, os, sys
 import Accent, Backends, CFG, Lexer
 
 
@@ -59,11 +59,12 @@ class Sinbad:
         if len(args) % 2 != 0:
             self.usage("Some grammars are missing lexers.")
 
-    	if self.t_depth == None:
-    		# for any backends other than purerandom, we need threshold depth
-			if ([b for b in backends if b != 'purerandom'].__len__() > 0):
-				self.usage("Specify the threshold depth (-d N) to favour an alternative.")
-    			
+        # dynamic backends require threshold depth
+        dyn_bends = [b for b in backends if b != 'purerandom']
+        if len(dyn_bends) > 0:
+            if self.t_depth is None:
+                self.usage("Specify the threshold depth (-d N) to favour an alternative.")
+
         i = 0
         while i < len(args):
             self.check_file(args[i])
@@ -82,7 +83,8 @@ class Sinbad:
             sys.stderr.write("sinbad -d <threshold depth> -w <weight> -b <backend 1>" \
             "[-r <recursion limit>] [... -b  <backend n>] <grammar 1> <lexer 1> " \
             "[... <grammar n> <lexer n>]\n")
-	    sys.exit(1)
+
+            sys.exit(1)
 
 
     def check_file(self, p):
@@ -95,7 +97,10 @@ class Sinbad:
         print "===> %s : %s" % (gp, bend_name)
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
+        t0 = time.time()
         self.parser = Accent.compile(gp, lp)
+        t1 = time.time()
+        print "accent compile time (secs): %.6f" % (t1-t0) 
         bend = Backends.BACKENDS[bend_name](self)
         return bend.run(self.t_depth, self.wgt)
 

@@ -29,7 +29,7 @@ class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
         for rule in self._cfg.rules:
-           rule.seqs_finite_depth = []
+            rule.seqs_finite_depth = []
 
         while 1:
             changed = False

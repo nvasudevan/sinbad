@@ -2,7 +2,7 @@
  Brief backends description
 ================================================================================
 
-Random1
+Purerandom
   Builds up a string by randomly walking the input CFG and taking random
   choices at all opportunities.
     + Simple

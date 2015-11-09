@@ -51,7 +51,7 @@ class Calc(Backend.Simple):
 
                     if len(_seq) == 0:
                         changed = True
-                        rule.seqs_finite_depth.append(i) 
+                        rule.seqs_finite_depth.append(i)
                         break
 
 
@@ -62,7 +62,7 @@ class Calc(Backend.Simple):
     def next(self, depth, wgt = None):
         self._s = []
         self._depth = 0
-                    
+
         self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth, wgt)
 
         # if whitespace exists, then join the token as is, otherwise join 
@@ -107,11 +107,11 @@ class Calc(Backend.Simple):
                 for i in range(len(rule.seqs)):
                     if scores[i] == minsc:
                         min_seqs.append(rule.seqs[i])
-                
+
                 seq = random.choice(min_seqs)
         else:
             seq = random.choice(rule.seqs)
-                
+
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
                 self._dive(self._cfg.get_rule(e.name), depth, wgt)
@@ -119,5 +119,5 @@ class Calc(Backend.Simple):
                 self._s.append(self._cfg.gen_token(e.tok))
 
         rule.exited += 1
-        
+
         self._depth -= 1

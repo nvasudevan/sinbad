@@ -142,6 +142,34 @@ def find_terminating_indices2(cfg_rules):
     return terminating_indices
 
 
+def calc_seqs_finite_depth(cfg):
+    for rule in cfg.rules:
+        rule.seqs_finite_depth = []
+
+    while 1:
+        changed = False
+        for rule in cfg.rules:
+            if len(rule.seqs_finite_depth) > 0:
+                continue
+
+            for i,seq in enumerate(rule.seqs):
+                _seq = []
+                for e in seq:
+                    if isinstance(e, CFG.Non_Term_Ref):
+                        ref_rule = cfg.get_rule(e.name)
+                        if len(ref_rule.seqs_finite_depth) == 0:
+                            _seq.append(e.name)
+                            break
+
+                if len(_seq) == 0:
+                    changed = True
+                    rule.seqs_finite_depth.append(i)
+                    break
+
+
+        if not changed:
+            break
+
 
 def time_elapsed(start, duration):
    now = time.time()

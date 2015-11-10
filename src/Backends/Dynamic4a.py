@@ -31,32 +31,8 @@ class Calc(Backend.Simple):
 
         for rule in self._cfg.rules:
             rule.entered = rule.exited = 0
-            rule.seqs_finite_depth = []
 
-
-        while 1:
-            changed = False
-            for rule in self._cfg.rules:
-                if len(rule.seqs_finite_depth) > 0:
-                    continue
-
-                for i,seq in enumerate(rule.seqs):
-                    _seq = []
-                    for e in seq:
-                        if isinstance(e, CFG.Non_Term_Ref):
-                            ref_rule = self._cfg.get_rule(e.name)
-                            if len(ref_rule.seqs_finite_depth) == 0:
-                                _seq.append(e.name)
-                                break
-
-                    if len(_seq) == 0:
-                        changed = True
-                        rule.seqs_finite_depth.append(i)
-                        break
-
-
-            if not changed:
-                break
+        Utils.calc_seqs_finite_depth(self._cfg)
 
 
     def next(self, depth, wgt = None):

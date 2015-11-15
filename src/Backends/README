@@ -94,3 +94,7 @@ Dynamic10 [builds on Dynamic9]
   If < wgt, calculate inverse scores (1/seq.entered), and then use 
   roulette wheel selection on the inverse scores
   For > wgt, use Dynamic3
+
+Dynamic11 [builds on Dynamic4]
+  Calculate which sequences are of finite depth
+  When probabilistic weight is applied, use seqs with finite depth

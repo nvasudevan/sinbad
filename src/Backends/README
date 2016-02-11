@@ -96,5 +96,10 @@ Dynamic10 [builds on Dynamic9]
   For > wgt, use Dynamic3
 
 Dynamic11 [builds on Dynamic4]
-  Calculate which sequences are of finite depth
+  Use scoring mechanism, to favour alternatives
+  Calculate which sequences are of finite depth during sentence generation
   When probabilistic weight is applied, use seqs with finite depth
+
+Dynamic12 [builds on Dynamic11]
+  One difference to Dynamic11: the part which calculates alternatives
+  with finite depth is reset for every sentence.

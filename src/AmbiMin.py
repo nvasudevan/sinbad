@@ -75,8 +75,11 @@ class AmbiMin:
     def usage(self, msg=None):
         if msg is not None:
             sys.stderr.write("\n%s\n" % msg)        
-            sys.stderr.write("python AmbiMin.py -b <backend> -d <depth" \
+            sys.stderr.write("python AmbiMin.py " \
+                " -m <minimiser (min1|min2|..)>" \
                 " -n <max minimisation count>" \
+                " -b <backend>" \
+                " -d <depth" \
                 " -w <wgt to apply on reaching threshold depth>" \
                 " <grammar> <lex>\n")
             sys.exit(1)

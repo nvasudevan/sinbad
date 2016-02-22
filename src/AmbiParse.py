@@ -151,7 +151,7 @@ class AmbiParse:
             if lhs not in cfg.keys():
                 cfg[lhs] = [] 
     
-	    if rhs not in cfg[lhs]:
+            if rhs not in cfg[lhs]:
                 cfg[lhs].append(rhs)
 
             j = i
@@ -162,7 +162,7 @@ class AmbiParse:
                     if lhs not in cfg.keys():
                         cfg[lhs] = []
 
-		    if rhs not in cfg[lhs]:
+                    if rhs not in cfg[lhs]:
                         cfg[lhs].append(rhs)
 
                 j += 1

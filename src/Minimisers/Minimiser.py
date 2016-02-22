@@ -84,12 +84,12 @@ class Minimiser:
 
     def cfg_size(self, cfg):
         size = 0
-	for k in cfg.keys():
+        for k in cfg.keys():
             seqs = cfg[k]
-	    for seq in seqs:
+            for seq in seqs:
                 size += len(seq)
 
-	return size
+        return size
 
 
     def print_stats(self, gp, sen, is_amb, amb_subset):

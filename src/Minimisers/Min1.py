@@ -20,7 +20,8 @@
 # IN THE SOFTWARE.
 
 
-import os, tempfile, shutil
+import os, tempfile
+import CFG
 import Minimiser, AmbiParse
 
 
@@ -30,23 +31,35 @@ class Min1(Minimiser.Minimiser):
         Minimiser.Minimiser.__init__(self, ambimin)
 
 
-    def minimise(self):
-        td = tempfile.mkdtemp()
+    def minimise(self, td):
+        """ Minimises a given CFG and return the final version """
         n = 1
-        currgp = self.ambimin.gf
+        currgp = self.ambimin.gp
+
         while n <= self.ambimin.mincnt: 
-            print "[%s]currgp: %s" % (str(n),currgp)
-            is_amb,sen,acc_out = self.find_ambiguity(currgp, self.ambimin.lf, None)
+            #print "[%s]currgp: %s" % (n, currgp)
+            is_amb, sen, parse_trees = self.find_ambiguity(currgp, self.ambimin.lp, None)
             assert is_amb
-            ambi_parse = AmbiParse.parse(self, acc_out)
+            ambi_parse = AmbiParse.parse(self, parse_trees)
+            # extract the minimised cfg
             min_cfg = ambi_parse.ambiguous_cfg_subset()
-            amb_subset = ambi_parse.ambiguous_subset()
-            min_gp = os.path.join(td,"%s.acc" % str(n))
+            # extract the ambiguous string from sentence
+            amb_str = ambi_parse.ambiguous_subset()
+
+            # cfg size, sentence size, ambiguous string size, amb type
+            ambi_type = "h"
+            if ambi_parse.vamb:
+                ambi_type = "v"
+
+            stats = (self.cfg_size(currgp), len(sen.split()),
+                     len(amb_str.split()), ambi_type)
+            self.cfg_min_stats.append(stats)
+
+            # write the min cfg to a temp file, reset currgp
+            min_gp = os.path.join(td, "%s.acc" % n)
             self.write_cfg(min_cfg, min_gp)
-            print "stats:[%s]:%s" % (str(n),self.cfg_size(min_cfg))
             currgp = min_gp
             n += 1
 
-        if os.path.exists(td):
-            shutil.rmtree(td)
+        return currgp
 

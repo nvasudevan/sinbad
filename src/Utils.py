@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import os, sys, random, re, time
+import os, subprocess, sys, random, re, time
 import CFG, Lexer
 
 
@@ -169,6 +169,15 @@ def calc_seqs_finite_depth(cfg):
 
         if not changed:
             break
+
+
+def file_copy(source, target):
+    r = subprocess.call(["cp", source, target])
+    if r != 0:
+        Utils.error("Copy of %s -> %s failed!\n" % (source, target), r)
+
+    print "Copied: %s -> %s\n" % (source, target)
+
 
 
 def time_elapsed(start, duration):

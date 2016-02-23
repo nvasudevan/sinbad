@@ -20,21 +20,24 @@ class AmbiParse:
     
         self.amb1, self.amb2 = None, None
         if self.vamb:
-            print "\ntype: vertical"
+            #print "\ntype: vertical"
             self.amb1, self.amb2 = self.parse_vamb()
         else:
-            print "\ntype: horizontal"
+            #print "\ntype: horizontal"
             self.amb1, self.amb2 = self.parse_hamb()
     
 
 
     def ambiguous_subset(self):
+        """ returns the 'actual' ambiguous string from the parse tree """
         _terms = []
         for tok in self.amb1:
-            if (tok in self.min.lex) or (re.match(TERM_TOK,tok)):
+            if (tok in self.min.lex) or (re.match(TERM_TOK, tok)):
                 _terms.append(tok)
 
-        return  " ".join(t for t in _terms)
+        amb_str = " ".join(t for t in _terms)
+
+        return  amb_str.replace("'","")
 
 
     def min_amb_tokens(self, lines):
@@ -144,8 +147,9 @@ class AmbiParse:
 
 
     def ambiguous_cfg_subset(self):
+        """ From amb1 and amb2, extract the (minimised) CFG """
         cfg = {}
-        for amb in self.amb1,self.amb2:
+        for amb in self.amb1, self.amb2:
             # parse root rule 
             lhs,rhs,i = self.root_rule(amb)
             if lhs not in cfg.keys():
@@ -172,10 +176,7 @@ class AmbiParse:
 
 def parse(min, out):
     ambiparse = AmbiParse(min, out)
+
     return ambiparse
 
-
-if __name__ == "__main__":
-    p = parse(open(sys.argv[1], 'r').read())
-    print p.min_cfg()
 

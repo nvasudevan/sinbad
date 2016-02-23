@@ -22,14 +22,15 @@
 # IN THE SOFTWARE.
 
 
-import os, sys, getopt
+import os, sys, tempfile, getopt, shutil
 import Minimisers
+import Utils
 
 class AmbiMin:
 
     def __init__(self):
         opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:n:m:t:s")
-        self.gf,self.lf = None, None
+        self.gp,self.lp = None, None
         self.t_depth = None
         self.backend = None
         self.wgt = None
@@ -61,7 +62,7 @@ class AmbiMin:
             else:
                 self.usage("Unknown argument '%s'" % opt[0])
 
-        self.gf,self.lf = args[0],args[1]
+        self.gp,self.lp = args[0],args[1]
 
         if self.backend is None:
             self.usage("backend is not set")
@@ -87,7 +88,18 @@ class AmbiMin:
 
     def minimise_ambiguity(self):
         min = Minimisers.MINIMISERS[self.minimiser](self)
-        min.minimise()
+        td = tempfile.mkdtemp()
+        final_min_gp = min.minimise(td)
+        min.write_stats()
+
+        # save the final minimised cfg
+        min_gp = "%s.%s" % (self.gp, self.minimiser)
+        if self.save_min_cfg:
+           Utils.file_copy(final_min_gp, min_gp)
+
+        # clean up
+        if os.path.exists(td):
+            shutil.rmtree(td)
 
 
 AmbiMin()

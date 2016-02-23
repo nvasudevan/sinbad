@@ -26,11 +26,12 @@ import os, sys, tempfile, getopt, shutil
 import Minimisers
 import Utils
 
+
 class AmbiMin:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:n:m:t:s")
-        self.gp,self.lp = None, None
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:s")
+        self.gp, self.lp = None, None
         self.t_depth = None
         self.backend = None
         self.wgt = None
@@ -46,9 +47,9 @@ class AmbiMin:
             if opt[0] == "-b":
                 self.backend = opt[1]
             elif opt[0] == "-d":
-                self.t_depth = int(opt[1])  
+                self.t_depth = int(opt[1])
             elif opt[0] == "-w":
-                self.wgt = float(opt[1])             
+                self.wgt = float(opt[1])
             elif opt[0] == "-n":
                 self.mincnt = int(opt[1])
             elif opt[0] == "-m":
@@ -62,7 +63,7 @@ class AmbiMin:
             else:
                 self.usage("Unknown argument '%s'" % opt[0])
 
-        self.gp,self.lp = args[0],args[1]
+        self.gp, self.lp = args[0], args[1]
 
         if self.backend is None:
             self.usage("backend is not set")
@@ -72,10 +73,9 @@ class AmbiMin:
 
         self.minimise_ambiguity()
 
-
     def usage(self, msg=None):
         if msg is not None:
-            sys.stderr.write("\n%s\n" % msg)        
+            sys.stderr.write("\n%s\n" % msg)
             sys.stderr.write("python AmbiMin.py " \
                 " -m <minimiser (min1|min2|..)>" \
                 " -n <max minimisation count>" \
@@ -84,7 +84,6 @@ class AmbiMin:
                 " -w <wgt to apply on reaching threshold depth>" \
                 " <grammar> <lex>\n")
             sys.exit(1)
-
 
     def minimise_ambiguity(self):
         min = Minimisers.MINIMISERS[self.minimiser](self)
@@ -95,7 +94,7 @@ class AmbiMin:
         # save the final minimised cfg
         min_gp = "%s.%s" % (self.gp, self.minimiser)
         if self.save_min_cfg:
-           Utils.file_copy(final_min_gp, min_gp)
+            Utils.file_copy(final_min_gp, min_gp)
 
         # clean up
         if os.path.exists(td):
@@ -103,4 +102,3 @@ class AmbiMin:
 
 
 AmbiMin()
-

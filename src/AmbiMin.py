@@ -91,10 +91,9 @@ class AmbiMin:
         final_min_gp = min.minimise(td)
         min.write_stats()
 
-        # save the final minimised cfg
-        min_gp = "%s.%s" % (self.gp, self.minimiser)
+        # save the final minimised cfg with .minX appended
         if self.save_min_cfg:
-            Utils.file_copy(final_min_gp, min_gp)
+            Utils.file_copy(final_min_gp, "%s.%s" % (self.gp, self.minimiser))
 
         # clean up
         if os.path.exists(td):

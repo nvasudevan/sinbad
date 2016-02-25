@@ -37,27 +37,15 @@ class Min1(Minimiser.Minimiser):
         currgp = self.ambimin.gp
 
         while n <= self.ambimin.mincnt: 
-            #print "[%s]currgp: %s" % (n, currgp)
-            is_amb, sen, parse_trees = self.find_ambiguity(currgp, self.ambimin.lp, None)
-            assert is_amb
-            ambi_parse = AmbiParse.parse(self, parse_trees)
-            # extract the minimised cfg
-            min_cfg = ambi_parse.ambiguous_cfg_subset()
-            # extract the ambiguous string from sentence
-            amb_str = ambi_parse.ambiguous_subset()
+            amb, sen, trees = self.find_ambiguity(currgp, self.ambimin.lp, None)
+            assert amb
+            ambi_parse = AmbiParse.parse(self, trees)
+            self.add_stats(currgp, ambi_parse, sen)
 
-            # cfg size, sentence size, ambiguous string size, amb type
-            ambi_type = "h"
-            if ambi_parse.vamb:
-                ambi_type = "v"
-
-            stats = (self.cfg_size(currgp), len(sen.split()),
-                     len(amb_str.split()), ambi_type)
-            self.cfg_min_stats.append(stats)
-
-            # write the min cfg to a temp file, reset currgp
+            # save the minimised cfg to target file
             min_gp = os.path.join(td, "%s.acc" % n)
-            self.write_cfg(min_cfg, min_gp)
+            self.write_cfg(ambi_parse.min_cfg, min_gp)
+
             currgp = min_gp
             n += 1
 

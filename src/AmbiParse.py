@@ -12,23 +12,25 @@ class AmbiParse:
     def __init__(self, min, out):
         self.min = min
         self.parse_out = out
-        self.vamb = False
+        self.amb_type = 'horizontal'
         for l in iter(out.splitlines()):
             if re.match(VERTICAL_AMBIGUITY, l):
-                self.vamb = True
+                self.amb_type = 'vertical'
                 break
     
         self.amb1, self.amb2 = None, None
-        if self.vamb:
-            #print "\ntype: vertical"
+        if self.amb_type == 'vertical':
             self.amb1, self.amb2 = self.parse_vamb()
         else:
-            #print "\ntype: horizontal"
             self.amb1, self.amb2 = self.parse_hamb()
     
+        # extract the ambiguous grammar rules from parse trees
+        self.min_cfg = self.ambiguous_cfg_subset()
+        # extract the ambiguous string from sentence
+        self.amb_str = self.ambiguous_string()
 
 
-    def ambiguous_subset(self):
+    def ambiguous_string(self):
         """ returns the 'actual' ambiguous string from the parse tree """
         _terms = []
         for tok in self.amb1:
@@ -96,14 +98,14 @@ class AmbiParse:
         tree1 = self.lines_between_patterns(self.parse_out, "TREE 1", "TREE 2")
         tree2 = self.lines_between_patterns(self.parse_out, "TREE 2", "------")
 
-        return self.min_amb_tokens(tree1),self.min_amb_tokens(tree2)
+        return self.min_amb_tokens(tree1), self.min_amb_tokens(tree2)
 
 
     def parse_hamb(self):
         tree1 = self.lines_between_patterns(self.parse_out, "PARSE 1", "PARSE 2")
         tree2 = self.lines_between_patterns(self.parse_out, "PARSE 2", "------")
 
-        return self.min_amb_tokens(tree1),self.min_amb_tokens(tree2)
+        return self.min_amb_tokens(tree1), self.min_amb_tokens(tree2)
 
 
     def parse_rhs(self, l):

@@ -23,6 +23,8 @@
 import os, sys
 from sets import Set
 import Lexer, CFG, Backends, Accent
+import AmbiParse
+
 
 class Minimiser:
 
@@ -80,41 +82,11 @@ class Minimiser:
         return size
 
 
-#    def CFG_size(self, cfg):
-#        size = 0
-#        for k in cfg.keys():
-#            seqs = cfg[k]
-#            for seq in seqs:
-#                size += len(seq)
-#
-#        return size
+    def add_stats(self, gp, ambi_parse, sen):
 
-
-    def print_stats(self, gp, sen, is_amb, amb_subset):
-        # number of rules, symbols, sentence length    
-        cfg = CFG.parse(self.lex, open(gp, "r").read())
-        no_rules = len(cfg.rules)
-        no_seqs = 0
-        no_symbols = 0 
-        for rule in cfg.rules:
-            no_seqs += len(rule.seqs)
-            for seq in rule.seqs:
-                no_symbols += len(seq)
-
-        amb = ""
-        len_sen = ""
-        len_amb_subset = ""
-        if is_amb:
-            amb = "yes" 
-            assert amb_subset is not None
-            assert sen is not None
-            len_sen = len(sen.split())
-            len_amb_subset = len(amb_subset.split())
-
-        out = "\nstats: %s, %s, %s, %s, %s, %s, %s" %  \
-              (gp,amb, len_sen, len_amb_subset, str(no_rules), \
-              str(no_seqs), str(no_symbols))
-        print out 
+        stats = (self.cfg_size(gp), len(sen.split()),
+                 len(ambi_parse.amb_str.split()), ambi_parse.amb_type)
+        self.cfg_min_stats.append(stats)
 
 
     def write_stats(self):

@@ -35,30 +35,32 @@ class Min1a(Minimiser.Minimiser):
         is_amb, sen, acc_out = self.find_ambiguity(self.ambimin.gf,
                                                    self.ambimin.lf,
                                                    None)
-	assert is_amb
+        assert is_amb
         ambi_parse = AmbiParse.parse(self, acc_out)
         min_cfg = ambi_parse.ambiguous_cfg_subset()
         amb_subset = ambi_parse.ambiguous_subset()
-        min_gp = os.path.join(td,"0.acc")
+        min_gp = os.path.join(td, "0.acc")
         self.write_cfg(min_cfg, min_gp)
 
         cfg_size = self.cfg_size(min_cfg)
         print "stats:[0]:%s" % (cfg_size)
         i = 1
-	n = 1
+        n = 1
         currgp = min_gp
-        while i <= 50: 
-            is_amb, sen, acc_out = self.find_ambiguity(currgp, self.ambimin.lf, None)
+        while i <= 50:
+            is_amb, sen, acc_out = self.find_ambiguity(currgp,
+                                                       self.ambimin.lf,
+                                                       None)
             assert is_amb
             ambi_parse = AmbiParse.parse(self, acc_out)
             min_cfg = ambi_parse.ambiguous_cfg_subset()
             _cfg_size = self.cfg_size(min_cfg)
-            print "stats:[%s]:%s" % (str(n),_cfg_size)
+            print "stats:[%s]:%s" % (str(n), _cfg_size)
             if _cfg_size < cfg_size:
                 # reset the counter
                 i = 1
                 amb_subset = ambi_parse.ambiguous_subset()
-                min_gp = os.path.join(td,"%s.acc" % str(n))
+                min_gp = os.path.join(td, "%s.acc" % str(n))
                 self.write_cfg(min_cfg, min_gp)
                 currgp = min_gp
                 cfg_size = _cfg_size
@@ -69,4 +71,3 @@ class Min1a(Minimiser.Minimiser):
 
         if os.path.exists(td):
             shutil.rmtree(td)
-

@@ -22,7 +22,7 @@
 # IN THE SOFTWARE.
 
 
-import os, sys, tempfile, getopt, shutil
+import os, sys, getopt, tempfile, shutil
 import Minimisers
 import Utils
 
@@ -39,6 +39,7 @@ class AmbiMin:
         self.minimiser = None
         self.duration = None
         self.save_min_cfg = False
+        self.td = tempfile.mkdtemp()
 
         if len(args) != 2:
             self.usage("grammar and lex is not set")
@@ -76,28 +77,28 @@ class AmbiMin:
     def usage(self, msg=None):
         if msg is not None:
             sys.stderr.write("\n%s\n" % msg)
-            sys.stderr.write("python AmbiMin.py " \
-                " -m <minimiser (min1|min2|..)>" \
-                " -n <max minimisation count>" \
-                " -b <backend>" \
-                " -d <depth" \
-                " -w <wgt to apply on reaching threshold depth>" \
-                " <grammar> <lex>\n")
+            sys.stderr.write("python AmbiMin.py "
+                             " -m <minimiser (min1|min2|..)>"
+                             " -n <max minimisation count>"
+                             " -b <backend>"
+                             " -d <depth"
+                             " -w <wgt to apply on reaching threshold depth>"
+                             " <grammar> <lex>\n")
             sys.exit(1)
 
     def minimise_ambiguity(self):
         min = Minimisers.MINIMISERS[self.minimiser](self)
-        td = tempfile.mkdtemp()
-        final_min_gp = min.minimise(td)
+        min_gp, min_lp = min.minimise()
         min.write_stats()
 
         # save the final minimised cfg with .minX appended
         if self.save_min_cfg:
-            Utils.file_copy(final_min_gp, "%s.%s" % (self.gp, self.minimiser))
+            Utils.file_copy(min_gp, "%s.%s" % (self.gp, self.minimiser))
+            Utils.file_copy(min_lp, "%s.%s" % (self.lp, self.minimiser))
 
         # clean up
-        if os.path.exists(td):
-            shutil.rmtree(td)
+        if os.path.exists(self.td):
+            shutil.rmtree(self.td)
 
 
 AmbiMin()

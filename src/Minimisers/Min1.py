@@ -20,9 +20,9 @@
 # IN THE SOFTWARE.
 
 
-import os, tempfile
+import os
 import CFG
-import Minimiser, AmbiParse
+import Minimiser, AmbiParse, MiniUtils
 
 
 class Min1(Minimiser.Minimiser):
@@ -31,23 +31,29 @@ class Min1(Minimiser.Minimiser):
         Minimiser.Minimiser.__init__(self, ambimin)
 
 
-    def minimise(self, td):
-        """ Minimises a given CFG and return the final version """
-        n = 1
+    def minimise(self):
+        """ Minimises a given CFG and return the final version
+            of target cfg and lex
+        """
         currgp = self.ambimin.gp
+        currlp = self.ambimin.lp
+        td = self.ambimin.td
+        n = 1
 
-        while n <= self.ambimin.mincnt: 
-            amb, sen, trees = self.find_ambiguity(currgp, self.ambimin.lp, None)
+        while n <= self.ambimin.mincnt:
+            amb, sen, trees = self.find_ambiguity(currgp, currlp, None)
             assert amb
             ambi_parse = AmbiParse.parse(self, trees)
-            self.add_stats(currgp, ambi_parse, sen)
+            # save the minimised cfg, lex to target files
+            _gp = os.path.join(td, "%s.acc" % n)
+            _lp = os.path.join(td, "%s.lex" % n)
+            print "currgp: %s, _gp: %s " % (currgp, _gp)
+            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
+            # add stats
+            self.add_stats(currgp, _gp, ambi_parse, sen)
 
-            # save the minimised cfg to target file
-            min_gp = os.path.join(td, "%s.acc" % n)
-            self.write_cfg(ambi_parse.min_cfg, min_gp)
-
-            currgp = min_gp
+            currgp = _gp
+            currlp = _lp
             n += 1
 
-        return currgp
-
+        return currgp, currlp

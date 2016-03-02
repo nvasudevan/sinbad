@@ -20,82 +20,69 @@
 # IN THE SOFTWARE.
 
 
-import os, tempfile 
+import os
 import Minimiser, AmbiParse
-import CFG
-import Min2Utils
+import CFG, Lexer
+import MiniUtils
+
 
 class Min2(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
-        self.symtokens = []
-        if self.tokenline != "":
-            tok_str = self.tokenline[7:len(self.tokenline)-1]
-            self.sym_tokens = tok_str.replace(' ','').split(',')
 
 
-    def pruned_cfg(self, gp):
-        """ Given a grammar (gp), prune the unreachable rules."""
-
-        cfg = CFG.parse(self.lex, open(gp, "r").read())
-        unreachable = Min2Utils.unreachable_rules(cfg)
-        if len(unreachable) > 0:
-            print "=> unreachable: " , unreachable
-            _cfg = {}
-            for rule in cfg.rules:
-                if rule.name not in unreachable:
-                    _cfg[rule.name] = rule.seqs
-
-            _dir, _gf = os.path.split(gp)
-            _gp = os.path.join(_dir, "%s.%s" % ("pruned", _gf))
-            self.write_cfg(_cfg, _gp)
-
-            return _gp
-
-        return gp
-
-
-    def minimise(self, td):
-        amb, sen, trees = self.find_ambiguity(self.ambimin.gp,
-                                              self.ambimin.lp,
-                                              None)
+    def minimise(self):
+        td = self.ambimin.td
+        currgp, currlp = self.ambimin.gp, self.ambimin.lp
+        amb, sen, trees = self.find_ambiguity(currgp, currlp, None)
         assert amb
         ambi_parse = AmbiParse.parse(self, trees)
-        self.add_stats(self.ambimin.gp, ambi_parse, sen)
+        _gp, _lp = os.path.join(td, "0.acc"), os.path.join(td, "0.lex")
+        MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
+        self.add_stats(currgp, _gp, ambi_parse, sen)
 
-        _gp = os.path.join(td, "0.acc")
-        self.write_cfg(ambi_parse.min_cfg, _gp)
-
-        currgp = _gp
+        currgp, currlp = _gp, _lp
+        currcfg = ambi_parse.min_cfg
         n = 1
         found = True
+
         while found:
             found = False
-            cfg = CFG.parse(self.lex, open(currgp, "r").read())
-            for rule in cfg.rules:
-                if len(rule.seqs) > 1:
-                    for i in range(len(rule.seqs)):
-                        print "\n=> (%s) - %s" % (rule, rule.seqs[i])
-                        min_cfg = Min2Utils.cfg_minus_alt(cfg, rule.name, i)
-                        min_gp = os.path.join(td, "%s.acc" % n)
-                        print "currgp: %s, min_gp: %s " % (currgp, min_gp)
-                        self.write_cfg(min_cfg, min_gp)
+            for key in currcfg.keys():
+                seqs = currcfg[key]
+                # Purging alt which are the only alt for a rule,
+                # means we need to throw away the rule, and the rules
+                # that refer to it - this will lead to mutating of
+                # alternatives, and the modified grammar will become
+                # unrecognisable from the original one.
+                if len(seqs) > 1:
+                    for i in range(len(seqs)):
+                        _cfg = MiniUtils.cfg_minus_alt(currcfg, key, i)
+                        _gf, _lf = "%s.acc" % n, "%s.lex" % n
+                        _gp, _lp = os.path.join(td, _gf), os.path.join(td, _lf)
+                        print "==> _gp: %s " % _gp
+                        MiniUtils.write_cfg_lex(_cfg, _gp, currlp, _lp)
                         n += 1
 
-                        if Min2Utils.valid_cfg(min_gp, self.lex):
-                            _gp = self.pruned_cfg(min_gp)
-                            amb, sen, trees = self.find_ambiguity(_gp,
-                                                         self.ambimin.lp,
-                                                         self.ambimin.duration)
+                        if MiniUtils.valid_cfg(_gp, _lp):
+                            __gp, __lp = MiniUtils.pruned_cfg(_cfg, _gp, _lp)
+                            amb, sen, trees = self.find_ambiguity(__gp, __lp,
+                                                       self.ambimin.duration)
                             if amb:
                                 ambi_parse = AmbiParse.parse(self, trees)
-                                self.add_stats(_gp, ambi_parse, sen)
+                                # minimised gp usefule for stats
+                                _min_gp = os.path.join(td, "min.%s" % _gf)
+                                MiniUtils.write_cfg_lex(ambi_parse.min_cfg,
+                                                        _min_gp, __lp)
+                                self.add_stats(__gp, _min_gp, ambi_parse, sen)
                                 found = True
-                                currgp = _gp
+                                currcfg = _cfg
+                                currgp = __gp
+                                currlp = __lp
                                 break
 
                 if found:
                     break
 
-        return currgp
+        return currgp, currlp

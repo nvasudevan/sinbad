@@ -1,11 +1,33 @@
 #! /usr/bin/env python
+#
+# Copyright (c) 2012 King's College London
+# created by Laurence Tratt and Naveneetha Vasudevan
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
 
 import sys, re
 from sets import Set
-import Utils
 
 VERTICAL_AMBIGUITY = "Two different ``[a-zA-Z0-9_-]*'' derivation trees for the same phrase."
 TERM_TOK = "'(.)'"
+
 
 class AmbiParse:
 
@@ -17,13 +39,13 @@ class AmbiParse:
             if re.match(VERTICAL_AMBIGUITY, l):
                 self.amb_type = 'vertical'
                 break
-    
+
         self.amb1, self.amb2 = None, None
         if self.amb_type == 'vertical':
             self.amb1, self.amb2 = self.parse_vamb()
         else:
             self.amb1, self.amb2 = self.parse_hamb()
-    
+
         # extract the ambiguous grammar rules from parse trees
         self.min_cfg = self.ambiguous_cfg_subset()
         # extract the ambiguous string from sentence
@@ -38,8 +60,7 @@ class AmbiParse:
                 _terms.append(tok)
 
         amb_str = " ".join(t for t in _terms)
-
-        return  amb_str.replace("'","")
+        return amb_str.replace("'", "")
 
 
     def min_amb_tokens(self, lines):
@@ -55,11 +76,11 @@ class AmbiParse:
                 ltokens = l.split()
                 # contains terminal (only one token)
                 minamb.append(ltokens[0])
-                
+
         return minamb
 
 
-    def lines_between_patterns(self, out, startp, endp):
+    def parse_output(self, out, startp, endp):
         match = False
         lines = []
         for l in iter(out.splitlines()):
@@ -72,11 +93,10 @@ class AmbiParse:
             elif match:
                 if l != "":
                     lines.append(l)
-    
-        return lines
-    
 
-    
+        return lines
+
+
     def match_bkt(self, l, i):
         bkcnt = 1
         k = i
@@ -85,25 +105,25 @@ class AmbiParse:
                 bkcnt += 1
             elif l[k] == '}':
                 bkcnt -= 1
-                
+
             if bkcnt == 0:
                 return k + 1
-                
+
             k += 1
-            
-        return None            
+
+        return None
 
 
     def parse_vamb(self):
-        tree1 = self.lines_between_patterns(self.parse_out, "TREE 1", "TREE 2")
-        tree2 = self.lines_between_patterns(self.parse_out, "TREE 2", "------")
+        tree1 = self.parse_output(self.parse_out, "TREE 1", "TREE 2")
+        tree2 = self.parse_output(self.parse_out, "TREE 2", "------")
 
         return self.min_amb_tokens(tree1), self.min_amb_tokens(tree2)
 
 
     def parse_hamb(self):
-        tree1 = self.lines_between_patterns(self.parse_out, "PARSE 1", "PARSE 2")
-        tree2 = self.lines_between_patterns(self.parse_out, "PARSE 2", "------")
+        tree1 = self.parse_output(self.parse_out, "PARSE 1", "PARSE 2")
+        tree2 = self.parse_output(self.parse_out, "PARSE 2", "------")
 
         return self.min_amb_tokens(tree1), self.min_amb_tokens(tree2)
 
@@ -118,9 +138,9 @@ class AmbiParse:
                 continue
             else:
                 rhs.append(l[i])
-                
+
             i += 1
-            
+
         return rhs
 
 
@@ -131,32 +151,32 @@ class AmbiParse:
         assert j is not None
         rhs = self.parse_rhs(amb[i+1:j-1])
 
-        return rule_name,rhs  
+        return rule_name, rhs
 
 
     def root_rule(self, amb):
         root_amb = list(amb)
         if root_amb[0] == 'root':
             # parse already contain root rule
-            lhs,rhs = self.rule(root_amb, 1)
-            return lhs,rhs,2
+            lhs, rhs = self.rule(root_amb, 1)
+            return lhs, rhs, 2
 
-        root_amb.insert(0,'{')
-        root_amb.insert(0,'root')
+        root_amb.insert(0, '{')
+        root_amb.insert(0, 'root')
         root_amb.append('}')
-        lhs,rhs = self.rule(root_amb, 1)
-        return lhs,rhs,0
+        lhs, rhs = self.rule(root_amb, 1)
+        return lhs, rhs, 0
 
 
     def ambiguous_cfg_subset(self):
         """ From amb1 and amb2, extract the (minimised) CFG """
         cfg = {}
         for amb in self.amb1, self.amb2:
-            # parse root rule 
-            lhs,rhs,i = self.root_rule(amb)
+            # parse root rule
+            lhs, rhs, i = self.root_rule(amb)
             if lhs not in cfg.keys():
-                cfg[lhs] = [] 
-    
+                cfg[lhs] = []
+
             if rhs not in cfg[lhs]:
                 cfg[lhs].append(rhs)
 
@@ -164,7 +184,7 @@ class AmbiParse:
             while j < len(amb):
                 if amb[j] == "{":
                     # j -1 is a rule
-                    lhs,rhs = self.rule(amb, j)
+                    lhs, rhs = self.rule(amb, j)
                     if lhs not in cfg.keys():
                         cfg[lhs] = []
 
@@ -172,7 +192,7 @@ class AmbiParse:
                         cfg[lhs].append(rhs)
 
                 j += 1
-            
+
         return cfg
 
 
@@ -180,5 +200,3 @@ def parse(min, out):
     ambiparse = AmbiParse(min, out)
 
     return ambiparse
-
-

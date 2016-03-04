@@ -35,7 +35,7 @@ class Min2(Minimiser.Minimiser):
     def minimise(self):
         td = tempfile.mkdtemp()
         gp, lp = self.run(td)
-        self.write_stats()
+        # self.write_stats()
         self.save_min_cfg(gp, lp)
         # clean up
         shutil.rmtree(td, True)
@@ -43,12 +43,14 @@ class Min2(Minimiser.Minimiser):
 
     def run(self, td):
         currgp, currlp = self.ambimin.gp, self.ambimin.lp
+        self.write_stat(currgp)
         amb, sen, trees = self.find_ambiguity(currgp, currlp, None)
         assert amb
         ambi_parse = AmbiParse.parse(self, trees)
         _gp, _lp = os.path.join(td, "0.acc"), os.path.join(td, "0.lex")
         MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
-        self.add_stats(currgp, _gp, ambi_parse, sen)
+        #self.add_stats(currgp, _gp, ambi_parse, sen)
+        self.write_stat(_gp)
 
         currgp, currlp = _gp, _lp
         currcfg = ambi_parse.min_cfg
@@ -83,7 +85,8 @@ class Min2(Minimiser.Minimiser):
                                 _min_gp = os.path.join(td, "min.%s" % _gf)
                                 MiniUtils.write_cfg_lex(ambi_parse.min_cfg,
                                                         _min_gp, __lp)
-                                self.add_stats(__gp, _min_gp, ambi_parse, sen)
+                                # self.add_stats(__gp, _min_gp, ambi_parse, sen)
+                                self.write_stat(_min_gp)
                                 found = True
                                 currcfg = _cfg
                                 currgp = __gp

@@ -30,7 +30,7 @@ import Utils
 class AmbiMin:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:s")
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:s")
         self.gp, self.lp = None, None
         self.t_depth = None
         self.backend = None
@@ -39,6 +39,7 @@ class AmbiMin:
         self.minimiser = None
         self.duration = None
         self.save_min_cfg = False
+        self.statslog = None
 
         if len(args) != 2:
             self.usage("grammar and lex is not set")
@@ -58,6 +59,8 @@ class AmbiMin:
                 self.duration = int(opt[1])
             elif opt[0] == "-s":
                 self.save_min_cfg = True
+            elif opt[0] == "-l":
+                self.statslog = opt[1]
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -66,12 +69,16 @@ class AmbiMin:
         self.gp, self.lp = args[0], args[1]
 
         if self.backend is None:
-            self.usage("backend is not set")
+            self.usage("** backend (-b <>) is not set **\n")
 
         if self.t_depth is None:
-            self.usage("depth is not set")
+            self.usage("** depth (-d <>) is not set **\n")
+
+        if self.statslog is None:
+            self.usage("** stats log (-l <>) is not set **\n")
 
         self.minimise_ambiguity()
+
 
     def usage(self, msg=None):
         if msg is not None:
@@ -82,8 +89,10 @@ class AmbiMin:
                              " -b <backend>"
                              " -d <depth"
                              " -w <wgt to apply on reaching threshold depth>"
+                             " -l <log to write stats to>"
                              " <grammar> <lex>\n")
             sys.exit(1)
+
 
     def minimise_ambiguity(self):
         min = Minimisers.MINIMISERS[self.minimiser](self)

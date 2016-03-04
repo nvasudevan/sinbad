@@ -41,6 +41,7 @@ class Minimiser:
 
         self.lex = Lexer.parse(open(self.ambimin.lp, "r").read())
         self.cfg_min_stats = []
+        open(self.ambimin.statslog, "w").close()
 
 
     def find_ambiguity(self, gp, lp, duration=None):
@@ -76,7 +77,12 @@ class Minimiser:
         self.cfg_min_stats.append(stats)
 
 
-    def write_stats(self):
+    def write_stat(self, gp):
+        with open(self.ambimin.statslog, "a") as logp:
+            logp.write("%s," % self.cfg_size(gp))
+
+
+    def _write_stats(self):
         print "\nstats: "
         for (gsize, tgsize, senl, ambl, ambtype) in self.cfg_min_stats:
             print "%s -> %s, %s, %s, %s" % (gsize, tgsize, senl, ambl, ambtype)
@@ -87,4 +93,5 @@ class Minimiser:
                                                       i_senl, f_senl,
                                                       i_ambl, f_ambl,
                                                       i_type, f_type)
+
 

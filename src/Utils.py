@@ -24,7 +24,7 @@ import os, subprocess, sys, random, re, time
 import CFG, Lexer
 
 
-def error(msg, c):
+def error(msg, c=1):
     sys.stderr.write(msg)
     sys.exit(c)
 

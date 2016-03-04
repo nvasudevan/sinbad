@@ -14,3 +14,10 @@ Min2
     - Iteratively, remove an alternative from the minimised grammar,
       and keep checking for ambiguity. 
       
+Min3
+  Minimise a given grammar in two phases:
+    - Check for ambiguity, and from the ambiguous output,
+      build a minimised grammar. 
+    - Run AmbiDexter on the minimised grammar; if ambiguity found,
+      the pass the ambiguous string to ACCENT, to create the final
+      minimised grammar

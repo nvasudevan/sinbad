@@ -23,6 +23,7 @@
 import os, sys
 import Lexer, CFG, Backends, Accent
 import AmbiParse
+import Utils
 
 
 class Minimiser:
@@ -42,7 +43,7 @@ class Minimiser:
         self.cfg_min_stats = []
 
 
-    def find_ambiguity(self, gp, lp, duration):
+    def find_ambiguity(self, gp, lp, duration=None):
         print "\n===> %s : %s" % (gp, self.ambimin.backend)
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
         self.parser = Accent.compile(gp, lp)
@@ -60,8 +61,16 @@ class Minimiser:
         return size
 
 
-    def add_stats(self, src_gp, min_gp, ambi_parse, sen):
-        stats = (self.cfg_size(src_gp), self.cfg_size(min_gp),
+    def save_min_cfg(self, gp, lp):
+        if self.ambimin.save_min_cfg:
+            min_gp = "%s.%s" % (self.ambimin.gp, self.ambimin.minimiser)
+            min_lp = "%s.%s" % (self.ambimin.lp, self.ambimin.minimiser)
+            Utils.file_copy(gp, min_gp)
+            Utils.file_copy(lp, min_lp)
+
+
+    def add_stats(self, initg, finalg, ambi_parse, sen):
+        stats = (self.cfg_size(initg), self.cfg_size(finalg),
                  len(sen.split()), len(ambi_parse.amb_str.split()),
                  ambi_parse.amb_type)
         self.cfg_min_stats.append(stats)
@@ -72,9 +81,10 @@ class Minimiser:
         for (gsize, tgsize, senl, ambl, ambtype) in self.cfg_min_stats:
             print "%s -> %s, %s, %s, %s" % (gsize, tgsize, senl, ambl, ambtype)
 
-        o_gsize, o_tgsize, o_senl, o_ambl, o_type = self.cfg_min_stats[0]
+        i_gsize, i_tgsize, i_senl, i_ambl, i_type = self.cfg_min_stats[0]
         f_gsize, f_tgsize, f_senl, f_ambl, f_type = self.cfg_min_stats[-1]
-        print "summary:%s,%s,,%s,%s,,%s,%s,,%s,%s" % (o_gsize, f_tgsize,
-                                                      o_senl, f_senl,
-                                                      o_ambl, f_ambl,
-                                                      o_type, f_type)
+        print "summary:%s,%s,,%s,%s,,%s,%s,,%s,%s" % (i_gsize, f_tgsize,
+                                                      i_senl, f_senl,
+                                                      i_ambl, f_ambl,
+                                                      i_type, f_type)
+

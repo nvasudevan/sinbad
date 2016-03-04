@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 
-import os
+import os, tempfile, shutil
 import Minimiser, AmbiParse
 import CFG, Lexer
 import MiniUtils
@@ -33,7 +33,15 @@ class Min2(Minimiser.Minimiser):
 
 
     def minimise(self):
-        td = self.ambimin.td
+        td = tempfile.mkdtemp()
+        gp, lp = self.run(td)
+        self.write_stats()
+        self.save_min_cfg(gp, lp)
+        # clean up
+        shutil.rmtree(td, True)
+
+
+    def run(self, td):
         currgp, currlp = self.ambimin.gp, self.ambimin.lp
         amb, sen, trees = self.find_ambiguity(currgp, currlp, None)
         assert amb

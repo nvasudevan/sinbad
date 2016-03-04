@@ -20,48 +20,58 @@
 # IN THE SOFTWARE.
 
 
-import os, tempfile, shutil
-import CFG
-import Minimiser, AmbiParse, MiniUtils
+import os, subprocess, tempfile, shutil, sys
+import Minimiser, AmbiParse
+import CFG, Lexer
+import Utils, MiniUtils
 
 
-class Min1(Minimiser.Minimiser):
+class MinAD(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
 
 
+    def ambidexter(self, gp):
+        cmd = ['./ambidexter.sh', gp, str(self.ambimin.duration)]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        out, _  = p.communicate()
+        r = p.returncode
+        # 0 - normal exit; 2 - ambiguous case
+        if r != 0:
+            msg = "AmbiDexter failed for %s (err: %s)\n" % (gp, r)
+            return msg, r
+
+        sen = out.split(':')[1]
+        return sen, 0
+
+
     def minimise(self):
         td = tempfile.mkdtemp()
-        gp, lp = self.run(td)
-        self.write_stats()
+        gp, lp, sen = self.run(td)
+        s = "summary: %s, %s, %s" % (self.cfg_size(self.ambimin.gp),
+                                     self.cfg_size(gp), sen)
+
+        print s
         self.save_min_cfg(gp, lp)
         # clean up
         shutil.rmtree(td, True)
 
 
     def run(self, td):
-        """ Minimises a given CFG and return the final version
-            of target cfg and lex
-        """
-        currgp = self.ambimin.gp
-        currlp = self.ambimin.lp
-        n = 1
+        gp, lp = self.ambimin.gp, self.ambimin.lp
+        amb, sen, trees = self.find_ambiguity(gp, lp)
+        assert amb
+        ambi_parse = AmbiParse.parse(self, trees)
+        # save the minimised cfg, lex to target files
+        _gp = os.path.join(td, "%s.acc" % 0)
+        _lp = os.path.join(td, "%s.lex" % 0)
+        print "gp: %s, _gp: %s " % (gp, _gp)
+        MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, lp, _lp)
 
-        while n <= self.ambimin.mincnt:
-            amb, sen, trees = self.find_ambiguity(currgp, currlp, None)
-            assert amb
-            ambi_parse = AmbiParse.parse(self, trees)
-            # save the minimised cfg, lex to target files
-            _gp = os.path.join(td, "%s.acc" % n)
-            _lp = os.path.join(td, "%s.lex" % n)
-            print "currgp: %s, _gp: %s " % (currgp, _gp)
-            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
-            # add stats
-            self.add_stats(currgp, _gp, ambi_parse, sen)
+        # run ambidexter on the minimised grammar
+        sen, r = self.ambidexter(_gp)
+        if r != 0:
+            return _gp, _lp, None
 
-            currgp = _gp
-            currlp = _lp
-            n += 1
-
-        return currgp, currlp
+        return _gp, _gp, sen

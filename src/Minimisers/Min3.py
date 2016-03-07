@@ -34,6 +34,7 @@ class Min3(Minimiser.Minimiser):
 
     def ambidexter(self, gp):
         cmd = ['./ambidexter.sh', gp, str(self.ambimin.duration)]
+        print "ambidexter: ", cmd
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         sen, _  = p.communicate()
         r = p.returncode
@@ -63,7 +64,6 @@ class Min3(Minimiser.Minimiser):
 
         lex = Lexer.parse(open(lp, "r").read())
         _sen = self.convert_sen(sen, lex)
-        # run accent on _sen 
         parser = Accent.compile(gp, lp)
         out = Accent.run(parser, _sen)
         ambiparse = AmbiParse.parse(self, out)
@@ -86,33 +86,39 @@ class Min3(Minimiser.Minimiser):
 
     def minimise(self):
         td = tempfile.mkdtemp()
-        gp0, gp1, lp1 = self.run(td)
+        gp, lp = self.run(td)
         # self.write_stats(self.ambimin.gp, gp0, gp1)
-        self.save_min_cfg(gp1, lp1)
+        self.save_min_cfg(gp, lp)
         # clean up
-        #shutil.rmtree(td, True)
+        shutil.rmtree(td, True)
 
 
     def run(self, td):
-        gp, lp = self.ambimin.gp, self.ambimin.lp
-        self.write_stat(gp)
-        amb, sen, trees = self.find_ambiguity(gp, lp)
-        assert amb
-        ambi_parse = AmbiParse.parse(self, trees)
-        # save the minimised cfg, lex to target files
-        _gp = os.path.join(td, "%s.acc" % 0)
-        _lp = os.path.join(td, "%s.lex" % 0)
-        print "gp: %s, _gp: %s " % (gp, _gp)
-        MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, lp, _lp)
-        self.write_stat(_gp)
+        currgp, currlp = self.ambimin.gp, self.ambimin.lp
+        n = 1
+
+        self.write_stat(currgp)
+        while n <= self.ambimin.mincnt:
+            amb, sen, trees = self.find_ambiguity(currgp, currlp)
+            assert amb
+            ambi_parse = AmbiParse.parse(self, trees)
+            _gp = os.path.join(td, "%s.acc" % n)
+            _lp = os.path.join(td, "%s.lex" % n)
+            print "currgp: %s, _gp: %s " % (currgp, _gp)
+            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
+            self.write_stat(_gp)
+
+            currgp = _gp
+            currlp = _lp
+            n += 1
 
         # run ambidexter on the minimised grammar
-        sen, r = self.ambidexter(_gp)
+        sen, r = self.ambidexter(currgp)
         if r == 0:
             # pass the string from ambidexter to accent,
             # to minimisei the grammar even further
-            __gp, __lp = self.accent(sen, _gp, _lp, td)
-            self.write_stat(__gp)
-            return _gp, __gp, __lp 
+            _gp, _lp = self.accent(sen, currgp, currlp, td)
+            self.write_stat(_gp)
+            return _gp, _lp
 
-        return _gp, None, None
+        return currgp, currlp

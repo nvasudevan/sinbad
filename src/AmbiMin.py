@@ -30,7 +30,7 @@ import Utils
 class AmbiMin:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:s")
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:f:o:s")
         self.gp, self.lp = None, None
         self.t_depth = None
         self.backend = None
@@ -40,6 +40,8 @@ class AmbiMin:
         self.duration = None
         self.save_min_cfg = False
         self.statslog = None
+        self.fltr = None
+        self.outf = None
 
         if len(args) != 2:
             self.usage("grammar and lex is not set")
@@ -61,6 +63,10 @@ class AmbiMin:
                 self.save_min_cfg = True
             elif opt[0] == "-l":
                 self.statslog = opt[1]
+            elif opt[0] == "-f":
+                self.fltr = opt[1]
+            elif opt[0] == "-o":
+                self.outf = opt[1]
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -90,6 +96,8 @@ class AmbiMin:
                              " -d <depth"
                              " -w <wgt to apply on reaching threshold depth>"
                              " -l <log to write stats to>"
+                             " -f <filter (ambidexter) to apply>"
+                             " -o <output format for filterd grammars>"
                              " <grammar> <lex>\n")
             sys.exit(1)
 

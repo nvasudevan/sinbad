@@ -4,20 +4,26 @@
 
 Min1
   Minimise a given grammar iteratively.
-    - Check for ambiguity, and using the ambiguous output,
-      build a minimised grammar. Apply this routine iteratively.
+    - Check for ambiguity, and from the ambiguous output,
+      build a minimised grammar. Keep doing so N times.
 
 Min2
   Minimise a given grammar iteratively by remove one alternative at a time.
     - Check for ambiguity, and from the ambiguous output,
-      build a minimised grammar. 
-    - Iteratively, remove an alternative from the minimised grammar,
-      and keep checking for ambiguity. 
+      build a minimised grammar. Keep doing this until all
+      the alternatives have been tried.
       
 Min3
-  Minimise a given grammar in two phases:
+  Builds on Min1. Minimise a given grammar in two phases:
     - Check for ambiguity, and from the ambiguous output,
       build a minimised grammar. 
     - Run AmbiDexter on the minimised grammar; if ambiguity found,
-      the pass the ambiguous string to ACCENT, to create the final
+      then pass the ambiguous string to ACCENT, to create the final
       minimised grammar
+
+Min4 
+  Builds on Min1. Minimise a grammar in two phases:
+    - Keep minimising using the parse tree output from ACCENT.
+    - On the final minimised grammar from phase 1, apply AmbiDexter with filter
+      to minimise the grammar even further. Filters remove unambiguous portions
+      of the grammar.

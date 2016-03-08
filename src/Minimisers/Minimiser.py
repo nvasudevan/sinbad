@@ -68,8 +68,14 @@ class Minimiser:
 
     def save_min_cfg(self, gp, lp):
         if self.ambimin.save_min_cfg:
-            min_gp = "%s.%s" % (self.ambimin.gp, self.ambimin.minimiser)
-            min_lp = "%s.%s" % (self.ambimin.lp, self.ambimin.minimiser)
+            gd, gf = os.path.split(self.ambimin.gp)
+            gname, gext = os.path.splitext(gf)
+            _gf = "%s.%s%s" % (gname, self.ambimin.minimiser, gext)
+            min_gp = os.path.join(gd, _gf)
+            ld, lf = os.path.split(self.ambimin.lp)
+            lname, lext = os.path.splitext(lf)
+            _lf = "%s.%s%s" % (lname, self.ambimin.minimiser, lext)
+            min_lp = os.path.join(ld,  _lf)
             Utils.file_copy(gp, min_gp)
             Utils.file_copy(lp, min_lp)
 

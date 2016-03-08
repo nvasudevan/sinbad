@@ -40,6 +40,10 @@ class Minimiser:
                 self.sym_tokens = tok_str.replace(' ', '').split(',')
 
         self.lex = Lexer.parse(open(self.ambimin.lp, "r").read())
+        self.lex_ws = False
+        if "WS" in self.lex.keys():
+            self.lex_ws = True
+
         self.cfg_min_stats = []
         open(self.ambimin.statslog, "w").close()
 

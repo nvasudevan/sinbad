@@ -56,7 +56,14 @@ class Min3(Minimiser.Minimiser):
                 # single char quoted tokens
                 _sen.append(tok.replace("'", ""))
 
-        return " ".join(_sen)
+        if "WS" in lex.keys():
+            return "".join(_sen)
+        else:
+            # the origingal grammar had WS rule but not anymore.
+            if self.lex_ws:
+                return "".join(_sen)
+
+            return " ".join(_sen)
 
 
     def accent(self, sen, gp, lp, td):
@@ -65,6 +72,8 @@ class Min3(Minimiser.Minimiser):
         lex = Lexer.parse(open(lp, "r").read())
         _sen = self.convert_sen(sen, lex)
         parser = Accent.compile(gp, lp)
+        print "sen (from ambi): " , sen
+        print "sen (tokenised): **%s**" % _sen
         out = Accent.run(parser, _sen)
         ambiparse = AmbiParse.parse(self, out)
         _gp = os.path.join(td, "%s.acc" % 1)

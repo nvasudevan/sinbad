@@ -289,7 +289,7 @@ def write_lex(sym_tokens, tokens, lex, lp):
 
             # CSS lex has a WS for single whitespace, so no need for another
             # blank rule. Add " " only where lex does't already have one
-            if " " not in lex.values():
+            if "WS" not in lex.keys():
                 lf.write(footer1)
 
             lf.write(footer2)

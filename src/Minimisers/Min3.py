@@ -24,26 +24,15 @@ import os, subprocess, tempfile, shutil, sys
 import Minimiser, AmbiParse
 import CFG, Lexer, Accent
 import Utils, MiniUtils
+import AmbiDexter
 
 
 class Min3(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
-
-
-    def ambidexter(self, gp):
-        cmd = ['./ambidexter.sh', gp, str(self.ambimin.duration)]
-        print "ambidexter: ", cmd
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        sen, _  = p.communicate()
-        r = p.returncode
-        # 0 - normal exit; 2 - ambiguous case
-        if r != 0:
-            msg = "AmbiDexter failed for %s (err: %s)\n" % (gp, r)
-            return msg, r
-
-        return sen, 0
+        if ambimin.ambijarp is None:
+            ambimin.usage("** Need path to AmbiDexter jar file **\n")
 
 
     def convert_sen(self, sen, lex):
@@ -122,7 +111,9 @@ class Min3(Minimiser.Minimiser):
             n += 1
 
         # run ambidexter on the minimised grammar
-        sen, r = self.ambidexter(currgp)
+        opts = ['-q', '-pg', '-ik', '0']
+        sen, r = AmbiDexter.ambiguous(currgp, self.ambimin.ambijarp,
+                                      opts, str(self.ambimin.duration))
         if r == 0:
             # pass the string from ambidexter to accent,
             # to minimisei the grammar even further

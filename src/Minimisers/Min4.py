@@ -24,25 +24,21 @@ import os, subprocess, tempfile, shutil, sys
 import Minimiser, AmbiParse
 import CFG, Lexer, Accent
 import Utils, MiniUtils
+import AmbiDexter
 
 
 class Min4(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
+        if ambimin.ambijarp is None:
+            ambimin.usage("** Need path to AmbiDexter jar file **\n")
 
+        if ambimin.fltr is None:
+            ambimin.usage('** Which filter to apply for AmbiDexter? **\n')
 
-    def ambidexter(self, gp, fltr, outf):
-        cmd = ['./filter.sh', gp, str(self.ambimin.duration), fltr, outf]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        outg, _  = p.communicate()
-        r = p.returncode
-        # 0 - normal exit; 2 - ambiguous case
-        if r != 0:
-            msg = "AmbiDexter failed for %s (err: %s)\n" % (gp, r)
-            return msg, r
-
-        return outg.rstrip(), 0
+        if ambimin.fltr_cfg_outfmt is None:
+            ambimin.usage('** What should be output format for filtered grammars? **\n')
 
 
     def minimise(self):
@@ -73,7 +69,10 @@ class Min4(Minimiser.Minimiser):
             n += 1
 
         # run ambidexter on the minimised grammar
-        _gp, r = self.ambidexter(currgp, self.ambimin.fltr, self.ambimin.outf)
+        opts = ['-q', '-pg', '-h', '-%s' % self.ambimin.fltr,
+                '-%s' % self.ambimin.fltr_cfg_outfmt]
+        _gp, r = AmbiDexter.filter(currgp, self.ambimin.ambijarp,
+                                   opts, str(self.ambimin.duration))
         if r == 0:
             self.write_stat(_gp)
             return _gp, currlp

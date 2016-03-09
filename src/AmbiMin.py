@@ -30,7 +30,7 @@ import Utils
 class AmbiMin:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:f:o:s")
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:j:f:o:s")
         self.gp, self.lp = None, None
         self.t_depth = None
         self.backend = None
@@ -40,8 +40,9 @@ class AmbiMin:
         self.duration = None
         self.save_min_cfg = False
         self.statslog = None
+        self.ambijarp = None
         self.fltr = None
-        self.outf = None
+        self.fltr_cfg_outfmt = None
 
         if len(args) != 2:
             self.usage("grammar and lex is not set")
@@ -63,10 +64,12 @@ class AmbiMin:
                 self.save_min_cfg = True
             elif opt[0] == "-l":
                 self.statslog = opt[1]
+            elif opt[0] == "-j":
+                self.ambijarp = opt[1]
             elif opt[0] == "-f":
                 self.fltr = opt[1]
             elif opt[0] == "-o":
-                self.outf = opt[1]
+                self.fltr_cfg_outfmt = opt[1]
             elif opt[0] == "-h":
                 self.usage()
             else:
@@ -89,16 +92,17 @@ class AmbiMin:
     def usage(self, msg=None):
         if msg is not None:
             sys.stderr.write("\n%s\n" % msg)
-            sys.stderr.write("python AmbiMin.py "
-                             " -m <minimiser (min1|min2|..)>"
-                             " -n <max minimisation count>"
-                             " -b <backend>"
-                             " -d <depth"
-                             " -w <wgt to apply on reaching threshold depth>"
-                             " -l <log to write stats to>"
-                             " -f <filter (ambidexter) to apply>"
-                             " -o <output format for filterd grammars>"
-                             " <grammar> <lex>\n")
+            sys.stderr.write("python AmbiMin.py [options] <grammar> <lex>\n\n")
+            sys.stderr.write("Options include:\n"
+                "   -m <minimiser (min1|min2|..)>\n"
+                "   -n <max minimisation count>\n"
+                "   -b <backend>\n"
+                "   -d <depth\n"
+                "   -w <wgt to apply on reaching threshold depth>\n"
+                "   -l <log to write stats to>\n"
+                "   -j <path to AmbiDexter jar file>\n"
+                "   -f <for ambidexter: filter (lr0|slr1|lalr1|lr1) to apply>\n"
+                "   -o <output format for filtered grammars>\n")
             sys.exit(1)
 
 

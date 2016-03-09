@@ -94,15 +94,15 @@ class AmbiMin:
             sys.stderr.write("\n%s\n" % msg)
             sys.stderr.write("python AmbiMin.py [options] <grammar> <lex>\n\n")
             sys.stderr.write("Options include:\n"
-                "   -m <minimiser (min1|min2|..)>\n"
-                "   -n <max minimisation count>\n"
+                "   -m <minimiser type (min1|min2|..)>\n"
+                "   -n <no of iterations for minimisation>\n"
                 "   -b <backend>\n"
                 "   -d <depth\n"
                 "   -w <wgt to apply on reaching threshold depth>\n"
                 "   -l <log to write stats to>\n"
                 "   -j <path to AmbiDexter jar file>\n"
                 "   -f <for ambidexter: filter (lr0|slr1|lalr1|lr1) to apply>\n"
-                "   -o <output format for filtered grammars>\n")
+                "   -o <output format for the filtered grammar>\n")
             sys.exit(1)
 
 

@@ -30,6 +30,8 @@ class Min2(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
+        if ambimin.duration is None:
+            ambimin.usage("** Duration for each minimisation is not set **\n")
 
 
     def minimise(self):

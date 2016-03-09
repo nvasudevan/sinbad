@@ -29,6 +29,8 @@ class Min1(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
+        if ambimin.mincnt is None:
+            ambimin.usage("** Need no of iterations for minimisation **\n")
 
 
     def minimise(self):

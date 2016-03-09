@@ -72,22 +72,10 @@ class Min3(Minimiser.Minimiser):
         return _gp, _lp
 
 
-    def write_stats(self, initg, min1g, ambidxg):
-        _initg = self.cfg_size(self.ambimin.gp)
-        _min1g = self.cfg_size(min1g)
-        _ambidxg = '-'
-        if ambidxg is not None:
-            _ambidxg = self.cfg_size(ambidxg)
-
-        print "summary: %s,%s,%s" % (_initg, _min1g, _ambidxg)
-
-
     def minimise(self):
         td = tempfile.mkdtemp()
         gp, lp = self.run(td)
-        # self.write_stats(self.ambimin.gp, gp0, gp1)
         self.save_min_cfg(gp, lp)
-        # clean up
         shutil.rmtree(td, True)
 
 

@@ -36,9 +36,7 @@ class Min1(Minimiser.Minimiser):
     def minimise(self):
         td = tempfile.mkdtemp()
         gp, lp = self.run(td)
-        #self.write_stats()
         self.save_min_cfg(gp, lp)
-        # clean up
         shutil.rmtree(td, True)
 
 
@@ -60,8 +58,6 @@ class Min1(Minimiser.Minimiser):
             _lp = os.path.join(td, "%s.lex" % n)
             print "currgp: %s, _gp: %s " % (currgp, _gp)
             MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
-            # add stats
-            # self.add_stats(currgp, _gp, ambi_parse, sen)
             self.write_stat(_gp)
 
             currgp = _gp

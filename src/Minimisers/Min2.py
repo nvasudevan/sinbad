@@ -37,9 +37,7 @@ class Min2(Minimiser.Minimiser):
     def minimise(self):
         td = tempfile.mkdtemp()
         gp, lp = self.run(td)
-        # self.write_stats()
         self.save_min_cfg(gp, lp)
-        # clean up
         shutil.rmtree(td, True)
 
 

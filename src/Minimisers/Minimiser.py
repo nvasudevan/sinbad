@@ -58,12 +58,14 @@ class Minimiser:
 
     def cfg_size(self, gp):
         _cfg = CFG.parse(self.lex, open(gp, "r").read())
-        size = 0
+        nrules = len(_cfg.rules)
+        nalts, nsyms = 0, 0
         for r in _cfg.rules:
+            nalts += len(r.seqs)
             for seq in r.seqs:
-                size += len(seq)
+                nsyms += len(seq)
 
-        return size
+        return nrules, nalts, nsyms
 
 
     def save_min_cfg(self, gp, lp):
@@ -89,7 +91,8 @@ class Minimiser:
 
     def write_stat(self, gp):
         with open(self.ambimin.statslog, "a") as logp:
-            logp.write("%s," % self.cfg_size(gp))
+            rules, alts, syms = self.cfg_size(gp)
+            logp.write("%s,%s,%s\n" % (rules, alts, syms))
 
 
     def _write_stats(self):

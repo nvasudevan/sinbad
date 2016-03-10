@@ -14,6 +14,11 @@ Min2
       the alternatives have been tried.
       
 Min3
+  Builds on Min2.
+    - Whereas in Min2, alternatives were removed sequentially,
+      in Min3, alternatives are removed randomly.
+
+Min4
   Builds on Min1. Minimise a given grammar in two phases:
     - Check for ambiguity, and from the ambiguous output,
       build a minimised grammar. 
@@ -21,7 +26,7 @@ Min3
       then pass the ambiguous string to ACCENT, to create the final
       minimised grammar
 
-Min4 
+Min5
   Builds on Min1. Minimise a grammar in two phases:
     - Keep minimising using the parse tree output from ACCENT.
     - On the final minimised grammar from phase 1, apply AmbiDexter with filter

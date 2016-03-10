@@ -20,13 +20,15 @@
 # IN THE SOFTWARE.
 
 import Min1, Min1a, Min2
-import MinAD, Min3, Min4
+import Min3, Min4, Min5
+import MinAD
 
 MINIMISERS = {
     'min1': Min1.Min1,
     'min2': Min2.Min2,
     'min3': Min3.Min3,
     'min4': Min4.Min4,
+    'min5': Min5.Min5,
     'minad': MinAD.MinAD,
     'min1a': Min1a.Min1a,
 }

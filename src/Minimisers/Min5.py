@@ -20,17 +20,25 @@
 # IN THE SOFTWARE.
 
 
-import os, tempfile, shutil
-import CFG
-import Minimiser, AmbiParse, MiniUtils
+import os, subprocess, tempfile, shutil, sys
+import Minimiser, AmbiParse
+import CFG, Lexer, Accent
+import Utils, MiniUtils
+import AmbiDexter
 
 
-class Min1(Minimiser.Minimiser):
+class Min5(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
-        if ambimin.mincnt is None:
-            ambimin.usage("** Need no of iterations for minimisation **\n")
+        if ambimin.ambijarp is None:
+            ambimin.usage("** Need path to AmbiDexter jar file **\n")
+
+        if ambimin.fltr is None:
+            ambimin.usage('** Which filter to apply for AmbiDexter? **\n')
+
+        if ambimin.fltr_cfg_outfmt is None:
+            ambimin.usage('** What should be output format for filtered grammars? **\n')
 
 
     def minimise(self):
@@ -41,26 +49,31 @@ class Min1(Minimiser.Minimiser):
 
 
     def run(self, td):
-        """ Minimises a given CFG and return the final version
-            of target cfg and lex
-        """
-        currgp = self.ambimin.gp
-        currlp = self.ambimin.lp
+        currgp, currlp = self.ambimin.gp, self.ambimin.lp
         n = 1
 
+        self.write_stat(currgp)
         while n <= self.ambimin.mincnt:
-            amb, sen, trees = self.find_ambiguity(currgp, currlp, None)
+            amb, sen, trees = self.find_ambiguity(currgp, currlp)
             assert amb
             ambi_parse = AmbiParse.parse(self, trees)
-            # save the minimised cfg, lex to target files
-            _gp = os.path.join(td, "%s.acc" % n)
-            _lp = os.path.join(td, "%s.lex" % n)
-            print "currgp: %s, _gp: %s " % (currgp, _gp)
-            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
-            self.write_stat(_gp)
+            gp = os.path.join(td, "%s.acc" % n)
+            lp = os.path.join(td, "%s.lex" % n)
+            print "currgp: %s, gp: %s " % (currgp, gp)
+            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, gp, currlp, lp)
+            self.write_stat(gp)
 
-            currgp = _gp
-            currlp = _lp
+            currgp = gp
+            currlp = lp
             n += 1
+
+        # run ambidexter on the minimised grammar
+        opts = ['-q', '-pg', '-h', '-%s' % self.ambimin.fltr,
+                '-%s' % self.ambimin.fltr_cfg_outfmt]
+        _gp = AmbiDexter.filter(currgp, self.ambimin.ambijarp,
+                                opts, str(self.ambimin.duration))
+        self.write_stat(_gp)
+        if _gp is not None:
+            return _gp, currlp
 
         return currgp, currlp

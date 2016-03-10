@@ -20,93 +20,79 @@
 # IN THE SOFTWARE.
 
 
-import os, subprocess, tempfile, shutil, sys
+import os, tempfile, shutil
+import random
 import Minimiser, AmbiParse
-import CFG, Lexer, Accent
-import Utils, MiniUtils
-import AmbiDexter
+import CFG, Lexer
+import MiniUtils
 
 
 class Min3(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
-        if ambimin.ambijarp is None:
-            ambimin.usage("** Need path to AmbiDexter jar file **\n")
+        if ambimin.duration is None:
+            ambimin.usage("** Duration for each minimisation is not set **\n")
 
 
-    def convert_sen(self, sen, lex):
-        """ sen contains symbolic tokens, convert to 'actual' tokens."""
-        _sen = []
-        for tok in sen.split():
-            if tok in lex.keys():
-                _sen.append(lex[tok])
-            else:
-                # single char quoted tokens
-                _sen.append(tok.replace("'", ""))
+    def rule_alts_combs(self, cfgmap):
+        combs = []
+        for k in cfgmap.keys():
+            if len(cfgmap[k]) > 1:
+                for i in range(len(cfgmap[k])):
+                    combs.append((k, i))
 
-        if "WS" in lex.keys():
-            return "".join(_sen)
-        else:
-            # the origingal grammar had WS rule but not anymore.
-            if self.lex_ws:
-                return "".join(_sen)
-
-            return " ".join(_sen)
-
-
-    def accent(self, sen, gp, lp, td):
-        """ build parser in td using gp+lp, and parse sentence sen."""
-
-        lex = Lexer.parse(open(lp, "r").read())
-        _sen = self.convert_sen(sen, lex)
-        parser = Accent.compile(gp, lp)
-        print "sen (from ambi): " , sen
-        print "sen (tokenised): **%s**" % _sen
-        out = Accent.run(parser, _sen)
-        ambiparse = AmbiParse.parse(self, out)
-        _gp = os.path.join(td, "%s.acc" % 1)
-        _lp = os.path.join(td, "%s.lex" % 1)
-        MiniUtils.write_cfg_lex(ambiparse.min_cfg, _gp, lp, _lp)
-
-        return _gp, _lp
+        return combs
 
 
     def minimise(self):
         td = tempfile.mkdtemp()
-        gp, lp = self.run(td)
-        self.save_min_cfg(gp, lp)
+        amb, sen, trees = self.find_ambiguity(self.ambimin.gp, self.ambimin.lp)
+        assert amb
+        ambi_parse = AmbiParse.parse(self, trees)
+        gp, lp = os.path.join(td, "0.acc"), os.path.join(td, "0.lex")
+        MiniUtils.write_cfg_lex(ambi_parse.min_cfg, gp, self.ambimin.lp, lp)
+        self.write_stat(gp)
+
+        _gp, _lp = self.run(td, ambi_parse.min_cfg, gp, lp)
+        self.save_min_cfg(_gp, _lp)
         shutil.rmtree(td, True)
 
 
-    def run(self, td):
-        currgp, currlp = self.ambimin.gp, self.ambimin.lp
+    def run(self, td, cfg, gp, lp):
+        currgp, currlp = gp, lp
+        currcfg = cfg
         n = 1
+        found = True
 
-        self.write_stat(currgp)
-        while n <= self.ambimin.mincnt:
-            amb, sen, trees = self.find_ambiguity(currgp, currlp)
-            assert amb
-            ambi_parse = AmbiParse.parse(self, trees)
-            _gp = os.path.join(td, "%s.acc" % n)
-            _lp = os.path.join(td, "%s.lex" % n)
-            print "currgp: %s, _gp: %s " % (currgp, _gp)
-            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
-            self.write_stat(_gp)
+        while found:
+            found = False
+            combs = self.rule_alts_combs(currcfg)
+            random.shuffle(combs)
+            while combs:
+                key, i = combs.pop()
+                _cfg = MiniUtils.cfg_minus_alt(currcfg, key, i)
+                _gf, _lf = "%s.acc" % n, "%s.lex" % n
+                _gp, _lp = os.path.join(td, _gf), os.path.join(td, _lf)
+                MiniUtils.write_cfg_lex(_cfg, _gp, currlp, _lp)
+                n += 1
 
-            currgp = _gp
-            currlp = _lp
-            n += 1
-
-        # run ambidexter on the minimised grammar
-        opts = ['-q', '-pg', '-ik', '0']
-        sen, r = AmbiDexter.ambiguous(currgp, self.ambimin.ambijarp,
-                                      opts, str(self.ambimin.duration))
-        if r == 0:
-            # pass the string from ambidexter to accent,
-            # to minimisei the grammar even further
-            _gp, _lp = self.accent(sen, currgp, currlp, td)
-            self.write_stat(_gp)
-            return _gp, _lp
+                if MiniUtils.valid_cfg(_gp, _lp):
+                    __gp, __lp = MiniUtils.pruned_cfg(_cfg, _gp, _lp)
+                    amb, sen, trees = self.find_ambiguity(__gp, __lp,
+                                               self.ambimin.duration)
+                    if amb:
+                        ambi_parse = AmbiParse.parse(self, trees)
+                        _min_gp = os.path.join(td, "min.%s" % _gf)
+                        _min_lp = os.path.join(td, "min.%s" % _lf)
+                        MiniUtils.write_cfg_lex(ambi_parse.min_cfg,
+                                                _min_gp, __lp, _min_lp)
+                        self.write_stat(_min_gp)
+                        found = True
+                        currcfg = ambi_parse.min_cfg
+                        currgp = _min_gp
+                        currlp = _min_lp
+                        print "==> currp: %s " % currgp
+                        break
 
         return currgp, currlp

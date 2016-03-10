@@ -46,6 +46,8 @@ class Minimiser:
 
         self.cfg_min_stats = []
         open(self.ambimin.statslog, "w").close()
+        # write the initial cfg size
+        self.write_stat(self.ambimin.gp)
 
 
     def find_ambiguity(self, gp, lp, duration=None):
@@ -82,29 +84,12 @@ class Minimiser:
             Utils.file_copy(lp, min_lp)
 
 
-    def add_stats(self, initg, finalg, ambi_parse, sen):
-        stats = (self.cfg_size(initg), self.cfg_size(finalg),
-                 len(sen.split()), len(ambi_parse.amb_str.split()),
-                 ambi_parse.amb_type)
-        self.cfg_min_stats.append(stats)
-
-
     def write_stat(self, gp):
-        with open(self.ambimin.statslog, "a") as logp:
+        """ write no of rules, alts, symbols """
+        s = "-,-,-" 
+        if gp is not None:
             rules, alts, syms = self.cfg_size(gp)
-            logp.write("%s,%s,%s\n" % (rules, alts, syms))
+            s = "%s,%s,%s" % (rules, alts, syms)
 
-
-    def _write_stats(self):
-        print "\nstats: "
-        for (gsize, tgsize, senl, ambl, ambtype) in self.cfg_min_stats:
-            print "%s -> %s, %s, %s, %s" % (gsize, tgsize, senl, ambl, ambtype)
-
-        i_gsize, i_tgsize, i_senl, i_ambl, i_type = self.cfg_min_stats[0]
-        f_gsize, f_tgsize, f_senl, f_ambl, f_type = self.cfg_min_stats[-1]
-        print "summary:%s,%s,,%s,%s,,%s,%s,,%s,%s" % (i_gsize, f_tgsize,
-                                                      i_senl, f_senl,
-                                                      i_ambl, f_ambl,
-                                                      i_type, f_type)
-
-
+        with open(self.ambimin.statslog, "a") as logp:
+            logp.write("%s\n" % s)

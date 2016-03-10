@@ -21,7 +21,7 @@
 
 
 import os, subprocess
-import tempfile
+import tempfile, sys
 
 
 def to_yacc(gp):
@@ -55,31 +55,34 @@ def run(gp, jarp, opts, duration, heap):
 
 def ambiguous(gp, jarp, opts, duration='30', heap='1g'):
     out, err, r = run(gp, jarp, opts, duration, heap)
-    if r != 0:
+    if r == 0:
+        for l in out.split('\n'):
+            if l.startswith('ambiguous sentence:'):
+                return l.replace('ambiguous sentence: ', '')
+
+    # timeout throws return code 124
+    if ((r != 0) and (r != 124)):
         msg = "AmbiDexter failed for grammar: %s " % gp
-        print "%s\n---\n%s" % (msg, err)
-        None, r
+        print "%s\n---\nout:%s\n err:%s" % (msg, out, err)
+        sys.exit(1)
 
-    for l in out.split('\n'):
-        if l.startswith('ambiguous sentence:'):
-            return l.replace('ambiguous sentence: ', ''), 0
-
-    return None, 0
+    return None
 
 
 def filter(gp, jarp, opts, duration='30', heap='1g'):
     out, err, r = run(gp, jarp, opts, duration, heap)
-    if r != 0:
+    if r == 0:
+        for l in out.split('\n'):
+            if l.startswith('Exporting grammar to'):
+                fltrp = l.replace('Exporting grammar to ', '')
+                return fltrp
+
+    if ((r != 0) and (r != 124)):
         msg = "AmbiDexter failed for grammar: %s " % gp
-        print "%s\n---\n%s" % (msg, err)
-        return None, r
+        print "%s\n---\nout:%s\n err:%s" % (msg, out, err)
+        sys.exit(1)
 
-    for l in out.split('\n'):
-        if l.startswith('Exporting grammar to'):
-            fltrp = l.replace('Exporting grammar to ', '')
-            return fltrp, 0
-
-    return None, 0
+    return None
 
 
 if __name__ == "__main__":

@@ -26,7 +26,8 @@ import tempfile, sys
 
 def to_yacc(gp):
     """ convert the grammar format from ACCENT to YACC """
-    tp = tempfile.mktemp('.y') 
+    d, _ = os.path.split(gp)
+    tp = tempfile.mktemp('.y', dir=d)
     with open(tp, 'w') as tf:
         with open(gp) as gf:
             for l in gf:
@@ -54,6 +55,7 @@ def run(gp, jarp, opts, duration, heap):
 
 
 def ambiguous(gp, jarp, opts, duration='30', heap='1g'):
+    print "\n=> check ambiguity on " , gp
     out, err, r = run(gp, jarp, opts, duration, heap)
     if r == 0:
         for l in out.split('\n'):
@@ -70,6 +72,7 @@ def ambiguous(gp, jarp, opts, duration='30', heap='1g'):
 
 
 def filter(gp, jarp, opts, duration='30', heap='1g'):
+    print "\n=> apply filter %s on %s" % (opts, gp)
     out, err, r = run(gp, jarp, opts, duration, heap)
     if r == 0:
         for l in out.split('\n'):

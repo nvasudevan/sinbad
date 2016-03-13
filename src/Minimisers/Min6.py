@@ -20,14 +20,16 @@
 # IN THE SOFTWARE.
 
 
-import os, subprocess, tempfile, shutil, sys
+import os, subprocess, tempfile, shutil
+import time, sys, tempfile
 import Minimiser, AmbiParse
 import CFG, Lexer, Accent
 import Utils, MiniUtils
 import AmbiDexter
+import Accent
 
 
-class Min5(Minimiser.Minimiser):
+class Min6(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
@@ -41,11 +43,47 @@ class Min5(Minimiser.Minimiser):
             ambimin.usage('** What should be output format for filtered grammars? **\n')
 
 
+    def run_accent(self, sen, gp, lp, td):
+        """ build parser in td using gp+lp, and parse sentence sen."""
+
+        parser = Accent.compile(gp, lp)
+        out = Accent.run(parser, sen)
+        ambiparse = AmbiParse.parse(self, out)
+        _gp = tempfile.mktemp('.acc', dir=td)
+        _lp = tempfile.mktemp('.lex', dir=td)
+        MiniUtils.write_cfg_lex(ambiparse.min_cfg, _gp, lp, _lp)
+
+        return _gp, _lp
+
+
+    def fix_sym_tokens_bug(self, tokengp, rulesgp, td):
+        # AmbiDexter has a bug that it doesn't list all the 
+        # symbolic tokens at the top of the filtered grammar
+        # so I re-create the grammar file with the right set of
+        # symbolic tokens
+        tokenl = ""
+        with open(tokengp, 'r') as _gf:
+            for l in _gf:
+                if l.startswith('%token'):
+                    tokenl = l
+                    break
+
+        ambigf = open(rulesgp, 'r').read().split('\n')
+        tp = tempfile.mktemp('.acc', dir=td)
+        with open(tp, 'w') as tf:
+            tf.write(tokenl)
+            for l in ambigf:
+                if not l.startswith('%token'):
+                    tf.write("%s\n" % l)
+
+        return tp
+
+
     def minimise(self):
         td = tempfile.mkdtemp()
         gp, lp = self.run(td)
         self.save_min_cfg(gp, lp)
-        shutil.rmtree(td, True)
+        #shutil.rmtree(td, True)
 
 
     def run(self, td):
@@ -70,10 +108,29 @@ class Min5(Minimiser.Minimiser):
         # run ambidexter on the minimised grammar
         opts = ['-q', '-pg', '-h', '-%s' % self.ambimin.fltr,
                 '-%s' % self.ambimin.fltr_cfg_outfmt]
+        t1 = time.time()
         _gp = AmbiDexter.filter(currgp, self.ambimin.ambijarp,
                                 opts, str(self.ambimin.duration))
+        t2 = time.time()
         self.write_stat(_gp)
-        if _gp is not None:
-            return _gp, currlp
+        if _gp is None:
+            return currgp, currlp 
 
-        return currgp, currlp
+        print "=> filtered grammar : " , _gp
+        tp = self.fix_sym_tokens_bug(currgp, _gp, td)
+
+        # run ambidexter on the minimised grammar
+        opts = ['-q', '-pg', '-ik', '0']
+        t = self.ambimin.duration - (t2 - t1)
+        sen = AmbiDexter.ambiguous(tp, self.ambimin.ambijarp, opts, str(t))
+        if sen is not None:
+            # the sentence from ambidexter contains symbolic tokens,
+            # so first convert them
+            _sen = MiniUtils.convert_sen(sen, currlp, self.lex_ws)
+            __gp, __lp = self.run_accent(_sen, tp, currlp, td)
+            self.write_stat(__gp)
+            return __gp, __lp
+
+        # AmbiDexter didn't find anything
+        self.write_stat(None)
+        return tp, currlp

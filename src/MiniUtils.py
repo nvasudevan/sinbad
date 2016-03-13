@@ -21,6 +21,7 @@
 
 from sets import Set
 import os, sys, copy
+import tempfile
 import CFG, Lexer
 
 
@@ -295,3 +296,27 @@ def write_lex(sym_tokens, tokens, lex, lp):
             lf.write(footer2)
             lf.write(footer3)
             lf.write(footer4)
+
+
+def convert_sen(sen, lp, ws):
+    """ sen contains symbolic tokens, convert to 'actual' tokens using
+        the lex
+    """
+    lex = Lexer.parse(open(lp, "r").read())
+    _sen = []
+    for tok in sen.split():
+        if tok in lex.keys():
+            _sen.append(lex[tok])
+        else:
+            # single char quoted tokens
+            _sen.append(tok.replace("'", ""))
+
+    if "WS" in lex.keys():
+        return "".join(_sen)
+    else:
+        # the origingal grammar had WS rule but not anymore.
+        if ws:
+            return "".join(_sen)
+
+        return " ".join(_sen)
+

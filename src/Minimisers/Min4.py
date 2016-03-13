@@ -21,6 +21,7 @@
 
 
 import os, subprocess, tempfile, shutil, sys
+import tempfile
 import Minimiser, AmbiParse
 import CFG, Lexer, Accent
 import Utils, MiniUtils
@@ -35,38 +36,14 @@ class Min4(Minimiser.Minimiser):
             ambimin.usage("** Need path to AmbiDexter jar file **\n")
 
 
-    def convert_sen(self, sen, lex):
-        """ sen contains symbolic tokens, convert to 'actual' tokens."""
-        _sen = []
-        for tok in sen.split():
-            if tok in lex.keys():
-                _sen.append(lex[tok])
-            else:
-                # single char quoted tokens
-                _sen.append(tok.replace("'", ""))
-
-        if "WS" in lex.keys():
-            return "".join(_sen)
-        else:
-            # the origingal grammar had WS rule but not anymore.
-            if self.lex_ws:
-                return "".join(_sen)
-
-            return " ".join(_sen)
-
-
-    def accent(self, sen, gp, lp, td):
+    def run_accent(self, sen, gp, lp, td):
         """ build parser in td using gp+lp, and parse sentence sen."""
 
-        lex = Lexer.parse(open(lp, "r").read())
-        _sen = self.convert_sen(sen, lex)
         parser = Accent.compile(gp, lp)
-        print "sen (from ambi): " , sen
-        print "sen (tokenised): **%s**" % _sen
-        out = Accent.run(parser, _sen)
+        out = Accent.run(parser, sen)
         ambiparse = AmbiParse.parse(self, out)
-        _gp = os.path.join(td, "%s.acc" % 1)
-        _lp = os.path.join(td, "%s.lex" % 1)
+        _gp = tempfile.mktemp('.acc', dir=td)
+        _lp = tempfile.mktemp('.lex', dir=td)
         MiniUtils.write_cfg_lex(ambiparse.min_cfg, _gp, lp, _lp)
 
         return _gp, _lp
@@ -104,7 +81,8 @@ class Min4(Minimiser.Minimiser):
         if sen is not None:
             # pass the string from ambidexter to accent,
             # to minimisei the grammar even further
-            _gp, _lp = self.accent(sen, currgp, currlp, td)
+            _sen = MiniUtils.convert_sen(sen, currlp, self.lex_ws)
+            _gp, _lp = self.run_accent(_sen, currgp, currlp, td)
             self.write_stat(_gp)
             return _gp, _lp
 

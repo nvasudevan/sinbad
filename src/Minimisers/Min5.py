@@ -40,6 +40,11 @@ class Min5(Minimiser.Minimiser):
         if ambimin.fltr_cfg_outfmt is None:
             ambimin.usage('** What should be output format for filtered grammars? **\n')
 
+        fltr = '-%s' % self.ambimin.fltr
+        fltr_out = '-%s' % self.ambimin.fltr_cfg_outfmt
+        opts = ['-q', '-h', fltr, fltr_out]
+        self.ambidxt = AmbiDexter.AmbiDexter(self.ambimin.ambijarp, opts, self.lex_ws)
+
 
     def minimise(self):
         td = tempfile.mkdtemp()
@@ -50,7 +55,6 @@ class Min5(Minimiser.Minimiser):
 
     def run(self, td):
         currgp, currlp = self.ambimin.gp, self.ambimin.lp
-        self.write_stat(currgp)
         n = 1
 
         while n <= self.ambimin.mincnt:
@@ -68,11 +72,9 @@ class Min5(Minimiser.Minimiser):
             n += 1
 
         # run ambidexter on the minimised grammar
-        opts = ['-q', '-pg', '-h', '-%s' % self.ambimin.fltr,
-                '-%s' % self.ambimin.fltr_cfg_outfmt]
-        _gp = AmbiDexter.filter(currgp, self.ambimin.ambijarp,
-                                opts, str(self.ambimin.duration))
+        _gp = self.ambidxt.filter(currgp, str(self.ambimin.duration))
         self.write_stat(_gp)
+
         if _gp is not None:
             return _gp, currlp
 

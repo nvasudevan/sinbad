@@ -42,6 +42,9 @@ class Min6(Minimiser.Minimiser):
         if ambimin.fltr_cfg_outfmt is None:
             ambimin.usage('** What should be output format for filtered grammars? **\n')
 
+        opts = ['-q']
+        self.ambidxt = AmbiDexter.AmbiDexter(self.ambimin.ambijarp, opts, self.lex_ws)
+
 
     def run_accent(self, sen, gp, lp, td):
         """ build parser in td using gp+lp, and parse sentence sen."""
@@ -88,7 +91,6 @@ class Min6(Minimiser.Minimiser):
 
     def run(self, td):
         currgp, currlp = self.ambimin.gp, self.ambimin.lp
-        self.write_stat(currgp)
         n = 1
 
         while n <= self.ambimin.mincnt:
@@ -106,13 +108,14 @@ class Min6(Minimiser.Minimiser):
             n += 1
 
         # run ambidexter on the minimised grammar
-        opts = ['-q', '-pg', '-h', '-%s' % self.ambimin.fltr,
-                '-%s' % self.ambimin.fltr_cfg_outfmt]
+        fltr = '-%s' % self.ambimin.fltr
+        fltr_outg = '-%s' % self.ambimin.fltr_cfg_outfmt
+        opts = ['-h', fltr, fltr_outg]
         t1 = time.time()
-        _gp = AmbiDexter.filter(currgp, self.ambimin.ambijarp,
-                                opts, str(self.ambimin.duration))
+        _gp = self.ambidxt.filter(currgp, str(self.ambimin.duration), opts)
         t2 = time.time()
         self.write_stat(_gp)
+
         if _gp is None:
             return currgp, currlp 
 
@@ -120,14 +123,13 @@ class Min6(Minimiser.Minimiser):
         tp = self.fix_sym_tokens_bug(currgp, _gp, td)
 
         # run ambidexter on the minimised grammar
-        opts = ['-q', '-pg', '-ik', '0']
+        opts = ['-pg', '-ik', '0']
         t = self.ambimin.duration - (t2 - t1)
-        sen = AmbiDexter.ambiguous(tp, self.ambimin.ambijarp, opts, str(t))
-        if sen is not None:
-            # the sentence from ambidexter contains symbolic tokens,
-            # so first convert them
-            _sen = MiniUtils.convert_sen(sen, currlp, self.lex_ws)
-            __gp, __lp = self.run_accent(_sen, tp, currlp, td)
+        print "time remaining: " , t
+        ambisen, accsen = self.ambidxt.ambiguous(tp, currlp, str(t), opts)
+        print "accsen: " , accsen
+        if accsen is not None:
+            __gp, __lp = self.run_accent(accsen, tp, currlp, td)
             self.write_stat(__gp)
             return __gp, __lp
 

@@ -35,6 +35,10 @@ class Min4(Minimiser.Minimiser):
         if ambimin.ambijarp is None:
             ambimin.usage("** Need path to AmbiDexter jar file **\n")
 
+        opts = ['-q', '-pg', '-ik', '0']
+        self.ambidxt = AmbiDexter.AmbiDexter(self.ambimin.ambijarp,
+                                             opts, self.lex_ws)
+
 
     def run_accent(self, sen, gp, lp, td):
         """ build parser in td using gp+lp, and parse sentence sen."""
@@ -75,14 +79,14 @@ class Min4(Minimiser.Minimiser):
             n += 1
 
         # run ambidexter on the minimised grammar
-        opts = ['-q', '-pg', '-ik', '0']
-        sen = AmbiDexter.ambiguous(currgp, self.ambimin.ambijarp,
-                                   opts, str(self.ambimin.duration))
-        if sen is not None:
+        ambisen, accsen = self.ambidxt.ambiguous(currgp, currlp,
+                                                 str(self.ambimin.duration))
+        print "ambisen: " , ambisen
+        print "accsen: " , accsen
+        if accsen is not None:
             # pass the string from ambidexter to accent,
             # to minimisei the grammar even further
-            _sen = MiniUtils.convert_sen(sen, currlp, self.lex_ws)
-            _gp, _lp = self.run_accent(_sen, currgp, currlp, td)
+            _gp, _lp = self.run_accent(accsen, currgp, currlp, td)
             self.write_stat(_gp)
             return _gp, _lp
 

@@ -32,12 +32,18 @@ class Min4(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
+        if ambimin.duration is None:
+            ambimin.usage("** Duration for each minimisation is not set **\n")
+
         if ambimin.ambijarp is None:
-            ambimin.usage("** Need path to AmbiDexter jar file **\n")
+            ambimin.usage("** Need path to ambidexter jar file **\n")
+
+        if ambimin.heap is None:
+            ambimin.usage("** heap size for ambidexter is not set **\n")
 
         opts = ['-q', '-pg', '-ik', '0']
-        self.ambidxt = AmbiDexter.AmbiDexter(self.ambimin.ambijarp,
-                                             opts, self.lex_ws)
+        self.ambidxt = AmbiDexter.AmbiDexter(self.ambimin.ambijarp, opts,
+                                             self.lex_ws, self.ambimin.heap)
 
 
     def run_accent(self, sen, gp, lp, td):

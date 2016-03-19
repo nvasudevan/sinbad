@@ -30,7 +30,7 @@ import Utils
 class AmbiMin:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:j:f:o:s")
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:j:f:o:x:s")
         self.gp, self.lp = None, None
         self.t_depth = None
         self.backend = None
@@ -41,6 +41,7 @@ class AmbiMin:
         self.save_min_cfg = False
         self.statslog = None
         self.ambijarp = None
+        self.heap = None
         self.fltr = None
         self.fltr_cfg_outfmt = None
 
@@ -66,6 +67,8 @@ class AmbiMin:
                 self.statslog = opt[1]
             elif opt[0] == "-j":
                 self.ambijarp = opt[1]
+            elif opt[0] == "-x":
+                self.heap = opt[1]
             elif opt[0] == "-f":
                 self.fltr = opt[1]
             elif opt[0] == "-o":
@@ -100,7 +103,8 @@ class AmbiMin:
                 "   -d <depth\n"
                 "   -w <wgt to apply on reaching threshold depth>\n"
                 "   -l <log to write stats to>\n"
-                "   -j <path to AmbiDexter jar file>\n"
+                "   -j <path to ambidexter jar file>\n"
+                "   -x <heap size (1g|512m) for ambidexter>\n"
                 "   -f <for ambidexter: filter (lr0|slr1|lalr1|lr1) to apply>\n"
                 "   -o <output format for the filtered grammar>\n")
             sys.exit(1)

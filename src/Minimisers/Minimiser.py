@@ -84,12 +84,15 @@ class Minimiser:
             Utils.file_copy(lp, min_lp)
 
 
-    def write_stat(self, gp):
-        """ write no of rules, alts, symbols """
+    def write_stat(self, gp, tag=''):
+        """ write no of rules, alts, symbols
+            Use the tag to mark the final line
+        """
         s = "-,-,-" 
+        print "tag: " , tag
         if gp is not None:
             rules, alts, syms = self.cfg_size(gp)
             s = "%s,%s,%s" % (rules, alts, syms)
 
         with open(self.ambimin.statslog, "a") as logp:
-            logp.write("%s\n" % s)
+            logp.write("%s%s\n" % (tag, s))

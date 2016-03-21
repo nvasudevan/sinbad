@@ -93,9 +93,9 @@ class Min4(Minimiser.Minimiser):
             # pass the string from ambidexter to accent,
             # to minimisei the grammar even further
             _gp, _lp = self.run_accent(accsen, currgp, currlp, td)
-            self.write_stat(_gp)
+            self.write_stat(_gp, '*')
             return _gp, _lp
 
         # AmbiDexter didn't find anything
-        self.write_stat(None)
+        self.write_stat(None, '*')
         return currgp, currlp

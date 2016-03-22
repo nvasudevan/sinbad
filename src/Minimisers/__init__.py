@@ -19,14 +19,18 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-import Min1, Min1a, Min2
-import Min3, Min4, Min5, Min6
+import Min1, Min1a
+import Min2, Min2a
+import Min3, Min3a
+import Min4, Min5, Min6
 import MinAD
 
 MINIMISERS = {
     'min1': Min1.Min1,
     'min2': Min2.Min2,
+    'min2a': Min2a.Min2a,
     'min3': Min3.Min3,
+    'min3a': Min3a.Min3a,
     'min4': Min4.Min4,
     'min5': Min5.Min5,
     'min6': Min6.Min6,

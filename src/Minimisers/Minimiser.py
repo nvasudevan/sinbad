@@ -89,7 +89,6 @@ class Minimiser:
             Use the tag to mark the final line
         """
         s = "-,-,-" 
-        print "tag: " , tag
         if gp is not None:
             rules, alts, syms = self.cfg_size(gp)
             s = "%s,%s,%s" % (rules, alts, syms)

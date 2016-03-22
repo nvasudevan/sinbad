@@ -32,8 +32,8 @@ class Min4(Minimiser.Minimiser):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)
-        if ambimin.duration is None:
-            ambimin.usage("** Duration for each minimisation is not set **\n")
+        if ambimin.ambi_duration is None:
+            ambimin.usage("** Duration to run ambidexter is not set **\n")
 
         if ambimin.ambijarp is None:
             ambimin.usage("** Need path to ambidexter jar file **\n")
@@ -86,7 +86,7 @@ class Min4(Minimiser.Minimiser):
 
         # run ambidexter on the minimised grammar
         ambisen, accsen = self.ambidxt.ambiguous(currgp, currlp,
-                                                 str(self.ambimin.duration))
+                                str(self.ambimin.ambi_duration))
         print "ambisen: " , ambisen
         print "accsen: " , accsen
         if accsen is not None:

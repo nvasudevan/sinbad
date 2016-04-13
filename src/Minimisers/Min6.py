@@ -112,7 +112,7 @@ class Min6(Minimiser.Minimiser):
         fltr_outg = '-%s' % self.ambimin.fltr_cfg_outfmt
         opts = ['-h', fltr, fltr_outg]
         t1 = time.time()
-        _gp = self.ambidxt.filter(currgp, str(self.ambimin.duration), opts)
+        _gp = self.ambidxt.filter(currgp, str(self.ambimin.ambi_duration), opts)
         t2 = time.time()
         self.write_stat(_gp)
 
@@ -124,7 +124,7 @@ class Min6(Minimiser.Minimiser):
 
         # run ambidexter on the minimised grammar
         opts = ['-pg', '-ik', '0']
-        t = self.ambimin.duration - (t2 - t1)
+        t = self.ambimin.ambi_duration - (t2 - t1)
         print "time remaining: " , t
         ambisen, accsen = self.ambidxt.ambiguous(tp, currlp, str(t), opts)
         print "accsen: " , accsen

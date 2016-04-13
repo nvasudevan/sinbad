@@ -106,11 +106,13 @@ class AmbiMin:
                 "   -d <depth\n"
                 "   -w <wgt to apply on reaching threshold depth>\n"
                 "   -l <log to write stats to>\n"
+                "   -s <save the minimised grammar with .<minimiser> extn>\n"
                 "   -j <path to ambidexter jar file>\n"
                 "   -T <duration to run ambidexter>\n"
                 "   -x <heap size (1g|512m) for ambidexter>\n"
                 "   -f <for ambidexter: filter (lr0|slr1|lalr1|lr1) to apply>\n"
                 "   -o <output format for the filtered grammar>\n")
+
             sys.exit(1)
 
 

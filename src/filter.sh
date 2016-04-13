@@ -17,7 +17,7 @@ acc_to_yacc(){
 }
 
 acc_to_yacc
-/usr/bin/timeout $duration $ambicmd -q -pg -h -${filter} -${outputf} $gy > $log 2>&1 || exit $?
+/usr/bin/timeout $duration $ambicmd -q -h -${filter} -${outputf} $gy > $log 2>&1 || exit $?
 
 outg=$(grep 'Exporting grammar to' $log | sed -e 's/Exporting grammar to //')
 echo "$outg"

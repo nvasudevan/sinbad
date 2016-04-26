@@ -58,6 +58,19 @@ class Minimiser:
         return bend.run(self.ambimin.t_depth, self.ambimin.wgt, duration)
 
 
+    def verify_ambiguity(self, mingp, minlp, minsen, duration=None):
+        gp = self.ambimin.gp
+        print "\n===> %s : %s" % (gp, self.ambimin.backend)
+        self.cfg = CFG.parse(self.lex, open(self.ambimin.gp, "r").read())
+        self.parser = Accent.compile(self.ambimin.gp, self.ambimin.lp)
+        # minimiser stuff
+        minlex = Lexer.parse(open(minlp, 'r').read())
+        mincfg = CFG.parse(minlex, open(mingp, 'r').read())
+        minbackend = "%sm" % self.ambimin.backend
+        bend = Backends.BACKENDS[minbackend](self, mincfg, minsen)
+        return bend.run(self.ambimin.t_depth, self.ambimin.wgt, duration)
+
+
     def cfg_size(self, gp):
         _cfg = CFG.parse(self.lex, open(gp, "r").read())
         nrules = len(_cfg.rules)
@@ -95,3 +108,4 @@ class Minimiser:
 
         with open(self.ambimin.statslog, "a") as logp:
             logp.write("%s%s\n" % (tag, s))
+

@@ -171,6 +171,19 @@ def calc_seqs_finite_depth(cfg):
             break
 
 
+def find_rule(cfg, subseq):
+    """Find the rule containing this sub-sequence"""
+    subseq_s = [str(x) for x in subseq]
+    for rule in cfg.rules:
+        for i, seq in enumerate(rule.seqs):
+            seq_s = [str(x) for x in seq]
+            found, _ = sublist_exists(seq_s, subseq_s)
+            if found:
+                return rule.name, i
+
+    return False, None
+
+
 def file_copy(source, target):
     r = subprocess.call(["cp", source, target])
     if r != 0:
@@ -187,4 +200,11 @@ def time_elapsed(start, duration):
        return True
    
    return False
+
+
+def sublist_exists(l, subl):
+    for i in range(len(l)-len(subl)+1):
+        if l[i:i+len(subl)] == subl:
+            return True, i
+    return False, None
 

@@ -35,8 +35,11 @@ class Min1(Minimiser.Minimiser):
 
     def minimise(self):
         td = tempfile.mkdtemp()
-        gp, lp = self.run(td)
+        gp, lp, sen = self.run(td)
         self.save_min_cfg(gp, lp)
+        if self.ambimin.verify:
+            self.verify_ambiguity(gp, lp, sen)
+
         shutil.rmtree(td, True)
 
 
@@ -63,4 +66,4 @@ class Min1(Minimiser.Minimiser):
             currlp = _lp
             n += 1
 
-        return currgp, currlp
+        return currgp, currlp, sen

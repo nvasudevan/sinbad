@@ -30,17 +30,18 @@ import Utils
 class AmbiMin:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:j:f:o:x:T:s")
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:n:m:t:l:j:f:o:x:T:sv")
         self.gp, self.lp = None, None
         self.t_depth = None
         self.backend = None
         self.wgt = None
-        self.mincnt = 0
+        self.mincnt = None
         self.minimiser = None
         self.duration = None
         self.ambi_duration = None
         self.save_min_cfg = False
         self.statslog = None
+        self.verify = False
         self.ambijarp = None
         self.heap = None
         self.fltr = None
@@ -68,6 +69,8 @@ class AmbiMin:
                 self.save_min_cfg = True
             elif opt[0] == "-l":
                 self.statslog = opt[1]
+            elif opt[0] == "-v":
+                self.verify = True
             elif opt[0] == "-j":
                 self.ambijarp = opt[1]
             elif opt[0] == "-x":
@@ -107,6 +110,7 @@ class AmbiMin:
                 "   -w <wgt to apply on reaching threshold depth>\n"
                 "   -l <log to write stats to>\n"
                 "   -s <save the minimised grammar with .<minimiser> extn>\n"
+                "   -v <verify the minimised grammar>\n"
                 "   -j <path to ambidexter jar file>\n"
                 "   -T <duration to run ambidexter>\n"
                 "   -x <heap size (1g|512m) for ambidexter>\n"

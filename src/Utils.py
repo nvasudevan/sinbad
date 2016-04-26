@@ -177,11 +177,11 @@ def find_rule(cfg, subseq):
     for rule in cfg.rules:
         for i, seq in enumerate(rule.seqs):
             seq_s = [str(x) for x in seq]
-            found, _ = sublist_exists(seq_s, subseq_s)
+            found, j = sublist_exists(seq_s, subseq_s)
             if found:
-                return rule.name, i
+                return rule.name, i, j
 
-    return False, None
+    return False, None, None
 
 
 def file_copy(source, target):

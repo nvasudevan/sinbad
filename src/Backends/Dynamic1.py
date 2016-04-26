@@ -20,8 +20,8 @@
 # IN THE SOFTWARE.
 
 
-import math, random, sys
-import Accent, Backend, CFG, Utils
+import random
+import Backend, CFG
 
 
 
@@ -46,7 +46,7 @@ class Calc(Backend.Simple):
             return " ".join(self._s)
 
 
-    def _dive(self, rule, depth):
+    def _dive(self, rule, depth, wgt=None):
         self._depth += 1
 
         rule.entered += 1
@@ -78,9 +78,10 @@ class Calc(Backend.Simple):
         else:
             seq = random.choice(rule.seqs)
 
+
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name), depth)
+                self._dive(self._cfg.get_rule(e.name), depth, wgt)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
 

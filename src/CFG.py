@@ -52,10 +52,20 @@ class CFG:
 
 
     def gen_token(self, name):
-        if name in self.tokens:
-            return self.tokens[name]
-        else:
-            return name.lower()
+        assert name in self.tokens
+        return self.tokens[name]
+
+
+    def size(self):
+        """ size of a cfg represented as no of rules, alts and symbols. """
+        nrules = len(self.rules)
+        nalts, nsyms = 0, 0
+        for r in self.rules:
+            nalts += len(r.seqs)
+            for seq in r.seqs:
+                nsyms += len(seq)
+
+        return nrules, nalts, nsyms
 
 
     def __repr__(self):

@@ -40,27 +40,33 @@ class AmbiParse:
                 self.amb_type = 'vertical'
                 break
 
-        self.amb1, self.amb2 = None, None
+        amb1, amb2 = None, None
         if self.amb_type == 'vertical':
-            self.amb1, self.amb2 = self.parse_vamb()
+            amb1, amb2 = self.parse_vamb()
         else:
-            self.amb1, self.amb2 = self.parse_hamb()
+            amb1, amb2 = self.parse_hamb()
 
+        amb1s = self.ambiguous_string(amb1)
+        amb2s = self.ambiguous_string(amb2)
+        assert amb1s == amb2s
         # extract the ambiguous grammar rules from parse trees
-        self.min_cfg = self.ambiguous_cfg_subset()
+        self.min_cfg = self.ambiguous_cfg_subset(amb1, amb2)
         # extract the ambiguous string from sentence
-        self.amb_str = self.ambiguous_string()
+        self.amb_str = amb1s
 
 
-    def ambiguous_string(self):
+    def ambiguous_string(self, ambtokl):
         """ returns the 'actual' ambiguous string from the parse tree """
         _terms = []
-        for tok in self.amb1:
-            if (tok in self.min.lex) or (re.match(TERM_TOK, tok)):
-                _terms.append(tok)
+        for tok in ambtokl:
+            if (tok in self.min.lex):
+                _terms.append(self.min.lex[tok])
 
-        amb_str = " ".join(t for t in _terms)
-        return amb_str.replace("'", "")
+            if (re.match(TERM_TOK, tok)):
+                _terms.append(tok.replace("'", ""))
+
+        # for CSS check for WS token
+        return " ".join(t for t in _terms)
 
 
     def min_amb_tokens(self, lines):
@@ -168,10 +174,10 @@ class AmbiParse:
         return lhs, rhs, 0
 
 
-    def ambiguous_cfg_subset(self):
+    def ambiguous_cfg_subset(self, amb1, amb2):
         """ From amb1 and amb2, extract the (minimised) CFG """
         cfg = {}
-        for amb in self.amb1, self.amb2:
+        for amb in amb1, amb2:
             # parse root rule
             lhs, rhs, i = self.root_rule(amb)
             if lhs not in cfg.keys():

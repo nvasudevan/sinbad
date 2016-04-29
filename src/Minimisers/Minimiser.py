@@ -69,7 +69,7 @@ class Simple:
 
 
     def verify_ambiguity(self, mingp, minlp, minsen, duration=None):
-        print "\n===> %s : %s" % (self._sin.gp, self._sin.backend)
+        print "\n===> [verify] %s : %s" % (self._sin.gp, self._sin.backend)
         self.lex = Lexer.parse(open(self._sin.lp, 'r').read())
         self.cfg = CFG.parse(self.lex, open(self._sin.gp, "r").read())
         self.parser = Accent.compile(self._sin.gp, self._sin.lp)

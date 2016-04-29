@@ -31,12 +31,13 @@ import Minimisers, AmbiParse, MiniUtils
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:r:m:x:n:vs")
+        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:r:m:x:n:t:vs")
         self.backend = None
         self.t_depth = None
         self.wgt = None
         self.minp = None
         self.mincnt = None
+        self.mint = None
         self.save_min_cfg = False
         self.td = None
         self.verify = False
@@ -57,6 +58,8 @@ class Sinbad:
                 self.td = opt[1]
             elif opt[0] == "-n":
                 self.mincnt = int(opt[1])
+            elif opt[0] == "-t":
+                self.mint = int(opt[1])
             elif opt[0] == "-v":
                 self.verify = True
             elif opt[0] == "-s":
@@ -76,6 +79,12 @@ class Sinbad:
         # dynamic backends require threshold depth
         if self.backend != 'purerandom' and self.t_depth is None:
             self.usage("Specify threshold depth (-d N) to favour alternatives.")
+
+        if self.minp == 'min1' and self.mincnt is None:
+            self.usage("** Min1 requires no of iterations (-n N) **\n")
+
+        if self.minp in ['min2', 'min3'] and self.mint is None:
+            self.usage("** Min2 requires a time duration (-t N seconds) **\n")
 
         self.gp, self.lp = args[0], args[1]
         self.check_file(self.gp)
@@ -104,7 +113,7 @@ class Sinbad:
             sys.exit(1)
 
 
-    def find_ambiguity(self, gp, lp, bend_name):
+    def find_ambiguity(self, gp, lp, bend_name, duration=None):
         print "===> %s : %s" % (gp, bend_name)
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
@@ -113,7 +122,7 @@ class Sinbad:
         t1 = time.time()
         print "accent compile time (secs): %.6f" % (t1-t0) 
         bend = Backends.BACKENDS[bend_name](self)
-        return bend.run(self.t_depth, self.wgt)
+        return bend.run(self.t_depth, self.wgt, duration)
 
 
     def run_minimiser(self, ptrees):
@@ -125,13 +134,14 @@ class Sinbad:
         if not os.path.exists(self.td):
             os.mkdir(self.td)
 
-        ambi_parse = AmbiParse.parse(self, ptrees)
         # save the minimised cfg, lex to target files
+        self.ambi_parse = AmbiParse.parse(self, ptrees)
         self.mingp = os.path.join(self.td, "%s.acc" % 0)
         self.minlp = os.path.join(self.td, "%s.lex" % 0)
         print "mingp: %s" % self.mingp
         print "minlp: %s" % self.minlp
-        MiniUtils.write_cfg_lex(ambi_parse.min_cfg, self.mingp, self.lp, self.minlp)
+        MiniUtils.write_cfg_lex(self.ambi_parse.min_cfg, self.mingp,
+                                self.lp, self.minlp)
 
         m = Minimisers.MINIMISERS[self.minp](self)
         m.minimise()

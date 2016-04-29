@@ -27,12 +27,10 @@ import CFG, Lexer
 import MiniUtils
 
 
-class Min3(Minimiser.Minimiser):
+class Min3(Minimiser.Simple):
 
     def __init__(self, ambimin):
-        Minimiser.Minimiser.__init__(self, ambimin)
-        if ambimin.duration is None:
-            ambimin.usage("** Duration for each minimisation is not set **\n")
+        Minimiser.Simple.__init__(self, ambimin)
 
 
     def rule_alts_combs(self, cfgmap):
@@ -45,54 +43,42 @@ class Min3(Minimiser.Minimiser):
         return combs
 
 
-    def minimise(self):
-        td = tempfile.mkdtemp()
-        amb, sen, trees = self.find_ambiguity(self.ambimin.gp, self.ambimin.lp)
-        assert amb
-        ambi_parse = AmbiParse.parse(self, trees)
-        gp, lp = os.path.join(td, "0.acc"), os.path.join(td, "0.lex")
-        MiniUtils.write_cfg_lex(ambi_parse.min_cfg, gp, self.ambimin.lp, lp)
-        self.write_stat(gp)
-
-        _gp, _lp = self.run(td, ambi_parse.min_cfg, gp, lp)
-        self.save_min_cfg(_gp, _lp)
-        shutil.rmtree(td, True)
-
-
-    def run(self, td, cfg, gp, lp):
-        currgp, currlp = gp, lp
-        currcfg = cfg
+    def run(self):
+        currgp = self._sin.mingp
+        currlp = self._sin.minlp
+        currparse = self._sin.ambi_parse
         n = 1
         found = True
 
         while found:
             found = False
-            combs = self.rule_alts_combs(currcfg)
+            combs = self.rule_alts_combs(currparse.min_cfg)
             random.shuffle(combs)
             while combs:
                 key, i = combs.pop()
-                _cfg = MiniUtils.cfg_minus_alt(currcfg, key, i)
+                _cfg = MiniUtils.cfg_minus_alt(currparse.min_cfg, key, i)
                 _gf, _lf = "%s.acc" % n, "%s.lex" % n
-                _gp, _lp = os.path.join(td, _gf), os.path.join(td, _lf)
+                _gp = os.path.join(self._sin.td, _gf)
+                _lp = os.path.join(self._sin.td, _lf)
                 MiniUtils.write_cfg_lex(_cfg, _gp, currlp, _lp)
                 n += 1
 
                 if MiniUtils.valid_cfg(_gp, _lp):
                     __gp, __lp = MiniUtils.pruned_cfg(_cfg, _gp, _lp)
-                    amb, sen, trees = self.find_ambiguity(__gp, __lp,
-                                               self.ambimin.duration)
+                    amb, _, ptrees = self._sin.find_ambiguity(__gp, __lp,
+                                       self._sin.backend, self._sin.mint)
                     if amb:
-                        ambi_parse = AmbiParse.parse(self, trees)
-                        _min_gp = os.path.join(td, "min.%s" % _gf)
-                        _min_lp = os.path.join(td, "min.%s" % _lf)
+                        ambi_parse = AmbiParse.parse(self, ptrees)
+                        _min_gp = os.path.join(self._sin.td, "min.%s" % _gf)
+                        _min_lp = os.path.join(self._sin.td, "min.%s" % _lf)
                         MiniUtils.write_cfg_lex(ambi_parse.min_cfg,
                                                 _min_gp, __lp, _min_lp)
-                        self.write_stat(_min_gp)
+                        self.write_stat(_min_gp, _min_lp)
                         found = True
-                        currcfg = ambi_parse.min_cfg
+                        currparse = ambi_parse
                         currgp = _min_gp
                         currlp = _min_lp
                         print "==> currp: %s " % currgp
                         break
 
-        return currgp, currlp
+        return currgp, currlp, currparse.amb_str

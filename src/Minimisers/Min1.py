@@ -29,13 +29,12 @@ class Min1(Minimiser.Simple):
 
     def __init__(self, sin):
         Minimiser.Simple.__init__(self, sin)
-        if self._sin.mincnt is None:
-            self._sin.usage("** Min1 requires no of iterations (-n N) **\n")
 
 
     def run(self):
         currgp = self._sin.mingp
         currlp = self._sin.minlp
+        currparse = self._sin.ambi_parse
         n = 1
 
         while n <= self._sin.mincnt:
@@ -52,6 +51,7 @@ class Min1(Minimiser.Simple):
 
             currgp = _gp
             currlp = _lp
+            currparse = ambi_parse
             n += 1
 
-        return currgp, currlp, ambi_parse.amb_str
+        return currgp, currlp, currparse.amb_str

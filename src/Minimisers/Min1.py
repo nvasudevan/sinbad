@@ -20,50 +20,38 @@
 # IN THE SOFTWARE.
 
 
-import os, tempfile, shutil
+import os
 import CFG
 import Minimiser, AmbiParse, MiniUtils
 
 
-class Min1(Minimiser.Minimiser):
+class Min1(Minimiser.Simple):
 
-    def __init__(self, ambimin):
-        Minimiser.Minimiser.__init__(self, ambimin)
-        if ambimin.mincnt is None:
-            ambimin.usage("** Need no of iterations for minimisation **\n")
-
-
-    def minimise(self):
-        td = tempfile.mkdtemp()
-        gp, lp, sen = self.run(td)
-        self.save_min_cfg(gp, lp)
-        if self.ambimin.verify:
-            self.verify_ambiguity(gp, lp, sen)
-
-        shutil.rmtree(td, True)
+    def __init__(self, sin):
+        Minimiser.Simple.__init__(self, sin)
+        if self._sin.mincnt is None:
+            self._sin.usage("** Min1 requires no of iterations (-n N) **\n")
 
 
-    def run(self, td):
-        """ Minimises a given CFG and return the final version
-            of target cfg and lex
-        """
-        currgp = self.ambimin.gp
-        currlp = self.ambimin.lp
+    def run(self):
+        currgp = self._sin.mingp
+        currlp = self._sin.minlp
         n = 1
 
-        while n <= self.ambimin.mincnt:
-            amb, sen, trees = self.find_ambiguity(currgp, currlp, None)
+        while n <= self._sin.mincnt:
+            amb, sen, ptrees = self._sin.find_ambiguity(currgp, currlp,
+                                                        self._sin.backend)
             assert amb
-            ambi_parse = AmbiParse.parse(self, trees)
+            ambi_parse = AmbiParse.parse(self, ptrees)
             # save the minimised cfg, lex to target files
-            _gp = os.path.join(td, "%s.acc" % n)
-            _lp = os.path.join(td, "%s.lex" % n)
+            _gp = os.path.join(self._sin.td, "%s.acc" % n)
+            _lp = os.path.join(self._sin.td, "%s.lex" % n)
             print "currgp: %s, _gp: %s " % (currgp, _gp)
             MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
-            self.write_stat(_gp)
+            self.write_stat(_gp, _lp)
 
             currgp = _gp
             currlp = _lp
             n += 1
 
-        return currgp, currlp, sen
+        return currgp, currlp, ambi_parse.amb_str

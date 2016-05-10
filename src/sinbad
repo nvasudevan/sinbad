@@ -31,7 +31,7 @@ import Minimisers, AmbiParse, MiniUtils
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1 : ], "hb:d:w:r:m:x:n:t:vs")
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:r:m:x:n:t:j:X:T:vs")
         self.backend = None
         self.t_depth = None
         self.wgt = None
@@ -41,6 +41,8 @@ class Sinbad:
         self.save_min_cfg = False
         self.td = None
         self.verify = False
+        self.ambijarp = None
+        self.jvmheap = None
         for opt in opts:
             if opt[0] == "-b":
                 if opt[1] not in Backends.BACKENDS:
@@ -64,17 +66,22 @@ class Sinbad:
                 self.verify = True
             elif opt[0] == "-s":
                 self.save_min_cfg = True
+            elif opt[0] == "-j":
+                self.ambijarp = opt[1]
+            elif opt[0] == "-X":
+                self.jvmheap = opt[1]
+            elif opt[0] == "-T":
+                self.ambit = int(opt[1])
             elif opt[0] == "-h":
                 self.usage()
             else:
                 self.usage("Unknown argument '%s'" % opt[0])
 
         if self.backend is None:
-            self.usage("No backend specified.")
+            self.usage("** No backend specified. **")
+
         if len(args) == 0:
-            self.usage("Not enough arguments.")
-        if len(args) % 2 != 0:
-            self.usage("Some grammars are missing lexers.")
+            self.usage("** Not enough arguments. **")
 
         # dynamic backends require threshold depth
         if self.backend != 'purerandom' and self.t_depth is None:
@@ -85,6 +92,16 @@ class Sinbad:
 
         if self.minp in ['min2', 'min3'] and self.mint is None:
             self.usage("** Min2 requires a time duration (-t N seconds) **\n")
+
+        if self.minp in ['min4']:
+            if self.ambijarp is None:
+                self.usage("** path to ambidexter jar? **\n")
+
+            if self.jvmheap is None:
+                self.usage("** heap size? for running ambidexter **\n")
+
+            if self.ambit is None:
+                self.usage("*** duration to run ambidexter for? **\n")
 
         self.gp, self.lp = args[0], args[1]
         self.check_file(self.gp)
@@ -100,9 +117,19 @@ class Sinbad:
         if msg is not None:
             sys.stderr.write(msg + "\n\n")
 
-            sys.stderr.write("sinbad -d <threshold depth> -w <weight> -b <backend 1>" \
-            "[-r <recursion limit>] [... -b  <backend n>] <grammar 1> <lexer 1> " \
-            "[... <grammar n> <lexer n>]\n")
+            sys.stderr.write("sinbad <backend options> <minimiser options> "
+            "<grammar> <lexer>" \
+            "\n\nOptions for backend: " \
+            "\n-b <backend> \n-d <threshold depth> "
+            "\n-w <weight to apply to unpick favoured alternatives> " \
+            "\n\nOptions for minimiser: " \
+            "\n-m <minimiser to run> " \
+            "\n-s (save minimised grammar) " \
+            "\n-t <minimisation duration in secs> " \
+            "\n-n <no of iterations for minimising> " \
+            "\n-j <absolute path to ambidexter jar> " \
+            "\n-X <JVM heap size for ambidexter>\n" \
+            "\n-T <duration to run ambidexter for>\n")
 
             sys.exit(1)
 

@@ -27,7 +27,7 @@ import Utils, MiniUtils
 import AmbiDexter
 
 
-class Min5(Minimiser.Minimiser):
+class Min5(Minimiser.Simple):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)

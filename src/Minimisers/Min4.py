@@ -28,74 +28,63 @@ import Utils, MiniUtils
 import AmbiDexter
 
 
-class Min4(Minimiser.Minimiser):
+class Min4(Minimiser.Simple):
 
-    def __init__(self, ambimin):
-        Minimiser.Minimiser.__init__(self, ambimin)
-        if ambimin.ambi_duration is None:
-            ambimin.usage("** Duration to run ambidexter is not set **\n")
-
-        if ambimin.ambijarp is None:
-            ambimin.usage("** Need path to ambidexter jar file **\n")
-
-        if ambimin.heap is None:
-            ambimin.usage("** heap size for ambidexter is not set **\n")
-
-        opts = ['-q', '-pg', '-ik', '0']
-        self.ambidxt = AmbiDexter.AmbiDexter(self.ambimin.ambijarp, opts,
-                                             self.lex_ws, self.ambimin.heap)
+    def __init__(self, sin):
+        Minimiser.Simple.__init__(self, sin)
+        self.ambidxt = AmbiDexter.AmbiDexter(self._sin.ambijarp,
+                                             ['-q', '-pg', '-ik', '0'],
+                                             self.lex_ws, self._sin.jvmheap)
 
 
-    def run_accent(self, sen, gp, lp, td):
+    def run_accent(self, sen, gp, lp):
         """ build parser in td using gp+lp, and parse sentence sen."""
 
         parser = Accent.compile(gp, lp)
         out = Accent.run(parser, sen)
-        ambiparse = AmbiParse.parse(self, out)
-        _gp = tempfile.mktemp('.acc', dir=td)
-        _lp = tempfile.mktemp('.lex', dir=td)
-        MiniUtils.write_cfg_lex(ambiparse.min_cfg, _gp, lp, _lp)
+        _ambip = AmbiParse.parse(self, out)
+        _gp = tempfile.mktemp('.acc', dir=self._sin.td)
+        _lp = tempfile.mktemp('.lex', dir=self._sin.td)
+        MiniUtils.write_cfg_lex(_ambip.min_cfg, _gp, lp, _lp)
 
-        return _gp, _lp
-
-
-    def minimise(self):
-        td = tempfile.mkdtemp()
-        gp, lp = self.run(td)
-        self.save_min_cfg(gp, lp)
-        shutil.rmtree(td, True)
+        return _gp, _lp, _ambip
 
 
-    def run(self, td):
-        currgp, currlp = self.ambimin.gp, self.ambimin.lp
+    def run(self):
+        currgp = self._sin.mingp
+        currlp = self._sin.minlp
+        currparse = self._sin.ambi_parse
         n = 1
 
-        while n <= self.ambimin.mincnt:
-            amb, sen, trees = self.find_ambiguity(currgp, currlp)
+        while n <= self._sin.mincnt:
+            amb, sen, ptrees = self._sin.find_ambiguity(currgp, currlp,
+                                                        self._sin.backend)
             assert amb
-            ambi_parse = AmbiParse.parse(self, trees)
-            gp = os.path.join(td, "%s.acc" % n)
-            lp = os.path.join(td, "%s.lex" % n)
-            print "currgp: %s, gp: %s " % (currgp, gp)
-            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, gp, currlp, lp)
-            self.write_stat(gp)
+            ambi_parse = AmbiParse.parse(self, ptrees)
+            # save the minimised cfg, lex to target files
+            _gp = os.path.join(self._sin.td, "%s.acc" % n)
+            _lp = os.path.join(self._sin.td, "%s.lex" % n)
+            print "currgp: %s, _gp: %s " % (currgp, _gp)
+            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
+            self.write_stat(_gp, _lp)
 
-            currgp = gp
-            currlp = lp
+            currgp = _gp
+            currlp = _lp
+            currparse = ambi_parse
             n += 1
 
         # run ambidexter on the minimised grammar
-        ambisen, accsen = self.ambidxt.ambiguous(currgp, currlp,
-                                str(self.ambimin.ambi_duration))
-        print "ambisen: " , ambisen
+        sen = self.ambidxt.ambiguous(currgp, str(self._sin.ambit))
+        accsen = self.ambidxt.sen_in_accent(sen, currlp)
+        print "ambisen: " , sen
         print "accsen: " , accsen
         if accsen is not None:
             # pass the string from ambidexter to accent,
-            # to minimisei the grammar even further
-            _gp, _lp = self.run_accent(accsen, currgp, currlp, td)
-            self.write_stat(_gp, '*')
-            return _gp, _lp
+            # to minimise the grammar even further
+            _gp, _lp, _ambip = self.run_accent(accsen, currgp, currlp)
+            self.write_stat(_gp, _lp, '*')
+            return _gp, _lp, _ambip.amb_str
 
         # AmbiDexter didn't find anything
-        self.write_stat(None, '*')
-        return currgp, currlp
+        self.write_stat(None, None, '*')
+        return currgp, currlp, ambi_parse.amb_str

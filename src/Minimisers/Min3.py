@@ -20,17 +20,15 @@
 # IN THE SOFTWARE.
 
 
-import os, tempfile, shutil
-import random
-import Minimiser, AmbiParse
-import CFG, Lexer
-import MiniUtils
+import os, random
+import Minimiser, AmbiParse, MiniUtils
+import CFG
 
 
 class Min3(Minimiser.Simple):
 
-    def __init__(self, ambimin):
-        Minimiser.Simple.__init__(self, ambimin)
+    def __init__(self, sin):
+        Minimiser.Simple.__init__(self, sin)
 
 
     def rule_alts_combs(self, cfgmap):

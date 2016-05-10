@@ -26,7 +26,7 @@ import CFG, Lexer
 import Utils, MiniUtils
 
 
-class MinAD(Minimiser.Minimiser):
+class MinAD(Minimiser.Simple):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)

@@ -29,7 +29,7 @@ import AmbiDexter
 import Accent
 
 
-class Min6(Minimiser.Minimiser):
+class Min6(Minimiser.Simple):
 
     def __init__(self, ambimin):
         Minimiser.Minimiser.__init__(self, ambimin)

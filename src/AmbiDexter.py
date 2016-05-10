@@ -64,7 +64,7 @@ class AmbiDexter:
         return out, err, r
 
 
-    def convert_sen(self, sen, lp):
+    def sen_in_accent(self, sen, lp):
         """ sen contains symbolic tokens, convert to 'actual' tokens using
             the lex
         """
@@ -87,7 +87,7 @@ class AmbiDexter:
             return " ".join(_sen)
 
 
-    def ambiguous(self, gp, lp, duration='30', xtra_opts=[]):
+    def ambiguous(self, gp, duration='30', xtra_opts=[]):
         _opts = self.opts + xtra_opts
         print "\n=> check ambiguity on %s with opts %s" % (gp, _opts)
         out, err, r = self.run(gp, _opts, duration)
@@ -95,7 +95,7 @@ class AmbiDexter:
             for l in out.split('\n'):
                 if l.startswith('ambiguous sentence:'):
                     sen = l.replace('ambiguous sentence: ', '')
-                    return sen, self.convert_sen(sen, lp)
+                    return sen
 
         # timeout throws return code 124
         if ((r != 0) and (r != 124)):
@@ -103,7 +103,7 @@ class AmbiDexter:
             print "%s\n---\nout:%s\n err:%s" % (msg, out, err)
             sys.exit(1)
 
-        return None, None
+        return None
 
 
     def filter(self, gp, duration='30', xtra_opts=[]):

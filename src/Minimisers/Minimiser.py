@@ -44,11 +44,6 @@ class Simple:
                 tok_str = token_line[7:len(token_line)-2]
                 self.sym_tokens = tok_str.replace(' ', '').split(',')
 
-        self.lex = Lexer.parse(open(self._sin.minlp, "r").read())
-        self.lex_ws = False
-        if "WS" in self.lex.keys():
-            self.lex_ws = True
-
         self.cfg_min_stats = []
 
 
@@ -65,24 +60,33 @@ class Simple:
 
         # verify the minimised sentence
         if self._sin.verify:
-            self.verify_ambiguity(gp, lp, ambstr)
+            r = self.verify_ambiguity(gp, lp, ambstr)
+            if r:
+                print "** minimisation with %s verified **" % self._sin.minp
 
 
     def verify_ambiguity(self, mingp, minlp, minsen, duration=None):
         print "\n===> [verify] %s : %s" % (self._sin.gp, self._sin.backend)
-        self.lex = Lexer.parse(open(self._sin.lp, 'r').read())
-        self.cfg = CFG.parse(self.lex, open(self._sin.gp, "r").read())
-        self.parser = Accent.compile(self._sin.gp, self._sin.lp)
-        # set up minimised cfg stuff
+        self._sin.lex = Lexer.parse(open(self._sin.lp, 'r').read())
+        self._sin.cfg = CFG.parse(self._sin.lex, open(self._sin.gp, "r").read())
+        self._sin.parser = Accent.compile(self._sin.gp, self._sin.lp)
+
         minlex = Lexer.parse(open(minlp, 'r').read())
         mincfg = CFG.parse(minlex, open(mingp, 'r').read())
+        seq = mincfg.get_rule('root').seqs[0]
+        # check if the root rule of minimised cfg == root of original cfg
+        if (len(seq) == 1) and (str(seq[0]) == self._sin.cfg.start_rulen):
+            out = Accent.run(self._sin.parser, minsen)
+            if Accent.was_ambiguous(out):
+                return True
+
         minbend = "%sm" % self._sin.backend
-        bend = Backends.BACKENDS[minbend](self, mincfg, minsen)
+        bend = Backends.BACKENDS[minbend](self._sin, mincfg, minsen)
+        # we keep trying until we hit the subseq
         while not bend.found:
-            print "bend.found: " , bend.found
             bend.run(self._sin.t_depth, self._sin.wgt, duration)
 
-        return bend.found
+        return True
 
 
     def save_min_cfg(self, gp, lp):

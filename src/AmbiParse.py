@@ -31,8 +31,9 @@ TERM_TOK = "'(.)'"
 
 class AmbiParse:
 
-    def __init__(self, min, out):
-        self.min = min
+    def __init__(self, lex, lex_ws, out):
+        self.lex = lex
+        self.lex_ws = lex_ws
         self.parse_out = out
         self.amb_type = 'horizontal'
         for l in iter(out.splitlines()):
@@ -59,13 +60,17 @@ class AmbiParse:
         """ returns the 'actual' ambiguous string from the parse tree """
         _terms = []
         for tok in ambtokl:
-            if (tok in self.min.lex):
-                _terms.append(self.min.lex[tok])
+            if tok not in ['{', '}']:
+                if (tok in self.lex):
+                    _terms.append(self.lex[tok])
+                elif (re.match(TERM_TOK, tok)):
+                    _terms.append(tok.replace("'", ""))
 
-            if (re.match(TERM_TOK, tok)):
-                _terms.append(tok.replace("'", ""))
+        if self.lex_ws:
+            # CSS has WS for a single space, so we build sentence
+            # without whitespaces
+            return "".join(t for t in _terms)
 
-        # for CSS check for WS token
         return " ".join(t for t in _terms)
 
 
@@ -202,7 +207,7 @@ class AmbiParse:
         return cfg
 
 
-def parse(min, out):
-    ambiparse = AmbiParse(min, out)
+def parse(lex, lex_ws, out):
+    ambiparse = AmbiParse(lex, lex_ws, out)
 
     return ambiparse

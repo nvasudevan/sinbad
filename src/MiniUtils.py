@@ -212,7 +212,7 @@ def pruned_cfg(cfg, gp, lp):
     return gp, lp
 
 
-def write_cfg_lex(cfg, tgp, lp, tlp=None):
+def write_cfg_lex(cfg, tgp, lp, tlp, lex_ws):
     """ Write the given cfg, along with the respective headers to
         the target file (tgp).
         Additionally, create the minmised lex file (tlp) too.
@@ -221,7 +221,7 @@ def write_cfg_lex(cfg, tgp, lp, tlp=None):
     print "\n=> writing to %s" % tgp
     lex = Lexer.parse(open(lp, "r").read())
     sym_tokens, tokens = minimise_lex(cfg, lex)
-    write_lex(sym_tokens, tokens, lex, tlp)
+    write_lex(sym_tokens, tokens, lex, tlp, lex_ws)
 
     token_line = ""
     if len(sym_tokens) > 0:
@@ -270,7 +270,7 @@ def minimise_lex(cfg, lex):
     return _sym_tokens, _tokens
 
 
-def write_lex(sym_tokens, tokens, lex, lp):
+def write_lex(sym_tokens, tokens, lex, lp, lex_ws):
     # minimised lex stiff
     if lp is not None:
         headers = '%{\n#include "yygrammar.h"\n%}\n%%\n'
@@ -291,7 +291,7 @@ def write_lex(sym_tokens, tokens, lex, lp):
 
             # CSS lex has a WS for single whitespace, so no need for another
             # blank rule. Add " " only where lex does't already have one
-            if "WS" not in lex.keys():
+            if not lex_ws:
                 lf.write(footer1)
 
             lf.write(footer2)

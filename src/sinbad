@@ -43,6 +43,7 @@ class Sinbad:
         self.verify = False
         self.ambijarp = None
         self.jvmheap = None
+        self.ambit = None
         for opt in opts:
             if opt[0] == "-b":
                 if opt[1] not in Backends.BACKENDS:
@@ -85,27 +86,33 @@ class Sinbad:
 
         # dynamic backends require threshold depth
         if self.backend != 'purerandom' and self.t_depth is None:
-            self.usage("Specify threshold depth (-d N) to favour alternatives.")
+            self.usage("*** threshold depth (-d N) to favour alts is not set.")
 
         if self.minp == 'min1' and self.mincnt is None:
             self.usage("** Min1 requires no of iterations (-n N) **\n")
 
         if self.minp in ['min2', 'min3'] and self.mint is None:
-            self.usage("** Min2 requires a time duration (-t N seconds) **\n")
+            self.usage("** duration (-t) to run minimisation for **\n")
 
         if self.minp in ['min4']:
             if self.ambijarp is None:
-                self.usage("** path to ambidexter jar? **\n")
+                self.usage("** path (-j) to ambidexter jar? **\n")
 
             if self.jvmheap is None:
-                self.usage("** heap size? for running ambidexter **\n")
+                self.usage("** heap size (-X) for running ambidexter **\n")
 
             if self.ambit is None:
-                self.usage("*** duration to run ambidexter for? **\n")
+                self.usage("*** duration (-T) to run ambidexter for **\n")
 
         self.gp, self.lp = args[0], args[1]
         self.check_file(self.gp)
         self.check_file(self.lp)
+        # check if lex has a symbol for whitespace
+        self.lex_ws = False
+        _lex = Lexer.parse(open(self.lp, 'r').read())
+        if 'WS' in _lex:
+            self.lex_ws = True
+
         amb, sen, ptrees = self.find_ambiguity(self.gp, self.lp, self.backend)
 
         if self.minp is not None:
@@ -128,7 +135,7 @@ class Sinbad:
             "\n-t <minimisation duration in secs> " \
             "\n-n <no of iterations for minimising> " \
             "\n-j <absolute path to ambidexter jar> " \
-            "\n-X <JVM heap size for ambidexter>\n" \
+            "\n-X <JVM heap size for ambidexter>" \
             "\n-T <duration to run ambidexter for>\n")
 
             sys.exit(1)
@@ -162,16 +169,18 @@ class Sinbad:
             os.mkdir(self.td)
 
         # save the minimised cfg, lex to target files
-        self.ambi_parse = AmbiParse.parse(self, ptrees)
+        _lex = Lexer.parse(open(self.lp, 'r').read())
+        self.ambi_parse = AmbiParse.parse(_lex, self.lex_ws, ptrees)
         self.mingp = os.path.join(self.td, "%s.acc" % 0)
         self.minlp = os.path.join(self.td, "%s.lex" % 0)
         print "mingp: %s" % self.mingp
         print "minlp: %s" % self.minlp
         MiniUtils.write_cfg_lex(self.ambi_parse.min_cfg, self.mingp,
-                                self.lp, self.minlp)
+                                self.lp, self.minlp, self.lex_ws)
 
         m = Minimisers.MINIMISERS[self.minp](self)
         m.minimise()
+
 
 
 Sinbad()

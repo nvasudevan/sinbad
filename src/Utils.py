@@ -181,7 +181,7 @@ def find_rule(cfg, subseq):
             if found:
                 return rule.name, i, j
 
-    return False, None, None
+    return None, None, None
 
 
 def file_copy(source, target):

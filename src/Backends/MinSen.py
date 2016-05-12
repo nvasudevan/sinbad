@@ -27,8 +27,10 @@ class Insert(object):
 
     def __init__(self, mincfg, minsen):
         self.subseq = mincfg.get_rule('root').seqs[0] # take out [0] for all seqs
+        print "cfg: \n%s\n--" % self._cfg
         self.r, self.seqi, self.symi = Utils.find_rule(self._cfg, self.subseq)
-        self.minsen = minsen.split()
+        assert self.r is not None
+        self.minsen = minsen
         print "=> %s, %s, %s => %s" % (self.r, self.seqi, self.symi, self.subseq)
         print "=> minsen: %s" % self.minsen
         self.found = False
@@ -46,6 +48,6 @@ class Insert(object):
                     self._s.append(self._cfg.gen_token(e.tok))
                 j += 1
             else:
-                self._s += self.minsen
+                self._s += [self.minsen]
                 j += len(self.subseq) 
 

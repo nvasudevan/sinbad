@@ -31,8 +31,9 @@ _RE_TOKEN = re.compile("""'(.*?)'|"(.*?)\"""")
 
 
 class CFG:
-    def __init__(self, tokens, rules):
+    def __init__(self, tokens, sym_tokens, rules):
         self.tokens = tokens
+        self.sym_tokens = sym_tokens
         self.rules = rules
         self.start_rulen = self.rules[0].name
         self._rules_dict = {}
@@ -143,7 +144,7 @@ class _Parser:
                 i = j
                 continue
 
-        return CFG(self._toks, rules)
+        return CFG(self._toks, self._sym_toks, rules)
 
 
     def _ws(self, i):
@@ -263,6 +264,16 @@ class _Parser:
 def parse(lex, cfg):
     return _Parser().parse(lex, cfg)
 
+
+def write(cfg, gp):
+    print "==> writing cfg to %s" % gp
+    token_line = ""
+    if len(cfg.sym_tokens) > 0:
+        token_str = "%s;" % (", ".join(t for t in cfg.sym_tokens))
+
+    with open(gp, 'w') as gf:
+        gf.write(("%token " + '%s\n\n' % token_str) + "%nodefault\n\n")
+        gf.write("%s\n" % cfg)
 
 
 if __name__ == "__main__":

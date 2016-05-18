@@ -84,6 +84,33 @@ def parse(lexer):
     return _Parser().parse(lexer)
 
 
+def write(sym_toks, toks, ws, lp):
+    print "==> writing lex to %s" % lp
+    headers = '%{\n#include "yygrammar.h"\n%}\n%%\n'
+    footer1 = '" "  { /* blank */ }\n'
+    footer2 = '\\r  { yypos++; /* adjust line no and skip newline */ }\n'
+    footer3 = '\\n  { yypos++; /* adjust line no and skip newline */ }\n'
+    footer4 = '.    { printf("\\n error : %s", yytext); yyerror(""); }\n'
+
+    with open(lp, 'w') as lf:
+        lf.write(headers)
+        for t in toks:
+            _t = "'%s'" % t
+            lf.write('"%s"  { return %s; }\n' % (toks[t], _t))
+
+        for t in sym_toks.keys():
+            lf.write('"%s"  { return %s; }\n' % (sym_toks[t], t))
+
+        # CSS lex has a WS for single whitespace, so no need for another
+        # blank rule. Add " " only where lex does't already have one
+        if not ws:
+            lf.write(footer1)
+
+        lf.write(footer2)
+        lf.write(footer3)
+        lf.write(footer4)
+
+
 
 if __name__ == "__main__":
     import sys

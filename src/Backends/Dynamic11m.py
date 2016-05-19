@@ -20,38 +20,25 @@
 # IN THE SOFTWARE.
 
 
-import Purerandom, Random2, Random3, Random4
-import Dynamic1, Dynamic2, Dynamic3 
-import Dynamic2a, Dynamic4, Dynamic4a
-import Dynamic5, Dynamic6, Dynamic7, Dynamic7a
-import Dynamic8, Dynamic9, Dynamic10, Dynamic11
-import Dynamic12
-import Dynamic1m, Dynamic4m, Dynamic7m
-import Dynamic11m, Dynamic12m
+import Dynamic11
+import MinSen
 
-BACKENDS = {
-  "purerandom"  : Purerandom.Calc,
-  "random2"  : Random2.Calc,
-  "random3"  : Random3.Calc,
-  "random4"  : Random4.Calc,
-  "dynamic1" : Dynamic1.Calc,
-  "dynamic2" : Dynamic2.Calc,
-  "dynamic2a" : Dynamic2a.Calc,
-  "dynamic3" : Dynamic3.Calc,
-  "dynamic4" : Dynamic4.Calc,
-  "dynamic4a" : Dynamic4a.Calc,
-  "dynamic5" : Dynamic5.Calc,
-  "dynamic6" : Dynamic6.Calc,
-  "dynamic7" : Dynamic7.Calc,
-  "dynamic7a" : Dynamic7a.Calc,
-  "dynamic8" : Dynamic8.Calc,
-  "dynamic9" : Dynamic9.Calc,
-  "dynamic10" : Dynamic10.Calc,
-  "dynamic11" : Dynamic11.Calc,
-  "dynamic12" : Dynamic12.Calc,
-  "dynamic1m" : Dynamic1m.Calc,
-  "dynamic4m" : Dynamic4m.Calc,
-  "dynamic7m" : Dynamic7m.Calc,
-  "dynamic11m" : Dynamic11m.Calc,
-  "dynamic12m" : Dynamic12m.Calc,
-}
+
+class Calc(Dynamic11.Calc, MinSen.Insert):
+    def __init__(self, sin, mincfg, minsen):
+        Dynamic11.Calc.__init__(self, sin)
+        MinSen.Insert.__init__(self, mincfg, minsen)
+
+
+    def _dive(self, rule, depth, wgt):
+        if (not self.found) and (rule.name == self.r): 
+            self._depth += 1
+            rule.entered += 1
+            self.found = True
+            print "found -> True"
+            self.insert_minsen(rule, depth, wgt)
+            rule.exited += 1
+            self._depth -= 1
+        else:
+            Dynamic11.Calc._dive(self, rule, depth, wgt)
+

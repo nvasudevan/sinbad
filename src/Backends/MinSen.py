@@ -26,8 +26,7 @@ import Utils
 class Insert(object):
 
     def __init__(self, mincfg, minsen):
-        self.subseq = mincfg.get_rule('root').seqs[0] # take out [0] for all seqs
-        print "cfg: \n%s\n--" % self._cfg
+        self.subseq = mincfg.get_rule('root').seqs[0]
         self.r, self.seqi, self.symi = Utils.find_rule(self._cfg, self.subseq)
         assert self.r is not None
         self.minsen = minsen

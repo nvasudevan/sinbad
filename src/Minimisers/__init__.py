@@ -19,9 +19,9 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-import Min1, Min1a
-import Min2, Min2a
-import Min3, Min3a
+import Min1
+import Min2
+import Min3
 import Min4, Min5, Min6
 import MinAD
 

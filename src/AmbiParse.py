@@ -22,8 +22,10 @@
 # IN THE SOFTWARE.
 
 
-import sys, re
+import sys, re, tempfile
 from sets import Set
+import CFG, Lexer
+
 
 VERTICAL_AMBIGUITY = "Two different ``[a-zA-Z0-9_-]*'' derivation trees for the same phrase."
 TERM_TOK = "'(.)'"
@@ -31,12 +33,12 @@ TERM_TOK = "'(.)'"
 
 class AmbiParse:
 
-    def __init__(self, lex, lex_ws, out):
-        self.lex = lex
+    def __init__(self, lp, lex_ws, ptrees):
+        self.lex = Lexer.parse(open(lp, 'r').read())
         self.lex_ws = lex_ws
-        self.parse_out = out
+        self.ptrees = ptrees
         self.amb_type = 'horizontal'
-        for l in iter(out.splitlines()):
+        for l in iter(self.ptrees.splitlines()):
             if re.match(VERTICAL_AMBIGUITY, l):
                 self.amb_type = 'vertical'
                 break
@@ -47,13 +49,80 @@ class AmbiParse:
         else:
             amb1, amb2 = self.parse_hamb()
 
+        # extract the ambiguous string from sentence
         amb1s = self.ambiguous_string(amb1)
         amb2s = self.ambiguous_string(amb2)
         assert amb1s == amb2s
-        # extract the ambiguous grammar rules from parse trees
-        self.min_cfg = self.ambiguous_cfg_subset(amb1, amb2)
-        # extract the ambiguous string from sentence
         self.amb_str = amb1s
+
+        # extract the ambiguous grammar rules from parse trees
+        _cfg = self.ambiguous_cfg_subset(amb1, amb2)
+        # first, minimise the lex based on the cfg
+        self.sym_toks, self.toks = self.minimise_lex(_cfg)
+        tp = tempfile.mktemp()
+        Lexer.write(self.sym_toks, self.toks, self.lex_ws, tp)
+        lex = Lexer.parse(open(tp, 'r').read())
+
+        # convert _cfg to a CFG instance.
+        self.min_cfg = self.to_CFG(_cfg, lex)
+
+
+    def minimise_lex(self, cfg):
+        """ Iterate through the cfg's rules and build the lex tokens. """
+        _sym_tokens = Set()
+        _tokens = Set()
+        for key in cfg.keys():
+            seqs = cfg[key]
+            for seq in seqs:
+                for e in seq:
+                    if e.startswith("'"):
+                        _tokens.add(e.replace("'", ""))
+                    else:
+                        if e in self.lex.keys():
+                            _sym_tokens.add(e)
+
+        sym_toks, toks = {}, {}
+        for e in _sym_tokens:
+            sym_toks[e] = self.lex[e]
+
+        for e in _tokens:
+            toks[e] = e
+
+        return sym_toks, toks
+
+
+    def to_CFG(self, cfg, lex):
+        """ At present, I have taken an easier approach to create CFG.
+            I write the token line and the rules to a temp file and
+            read that back. An alternative way (without I/O) would be
+            to iterate through the rules and build your CFG instance.
+        """
+        tp = tempfile.mktemp()
+        header = ""
+        if len(self.sym_toks) > 0:
+            header = "%token " + "%s;" % (", ".join(t for t in self.sym_toks))
+
+        with open(tp, 'w') as tf:
+            tf.write(('%s\n\n' % header) + "%nodefault\n\n")
+            pp_seqs = Set()
+            for seq in cfg['root']:
+                seq_s = " ".join(str(e) for e in seq)
+                pp_seqs.add(seq_s)
+
+            tf.write("%s : %s\n;\n" % ('root', " | ".join(pp_seqs)))
+
+            nt_list = [nt for nt in cfg.keys() if nt != 'root']
+            nt_list.sort()
+            for k in nt_list:
+                pp_seqs = []
+                seqs = cfg[k]
+                for seq in seqs:
+                    seq_s = " ".join(str(e) for e in seq)
+                    pp_seqs.append(seq_s)
+
+                tf.write("%s : %s\n;\n" % (k, " | ".join(pp_seqs)))
+
+        return CFG.parse(lex, open(tp, 'r').read())
 
 
     def ambiguous_string(self, ambtokl):
@@ -64,6 +133,7 @@ class AmbiParse:
                 if (tok in self.lex):
                     _terms.append(self.lex[tok])
                 elif (re.match(TERM_TOK, tok)):
+                    ## CHECK!! ##
                     _terms.append(tok.replace("'", ""))
 
         if self.lex_ws:
@@ -126,15 +196,15 @@ class AmbiParse:
 
 
     def parse_vamb(self):
-        tree1 = self.parse_output(self.parse_out, "TREE 1", "TREE 2")
-        tree2 = self.parse_output(self.parse_out, "TREE 2", "------")
+        tree1 = self.parse_output(self.ptrees, "TREE 1", "TREE 2")
+        tree2 = self.parse_output(self.ptrees, "TREE 2", "------")
 
         return self.min_amb_tokens(tree1), self.min_amb_tokens(tree2)
 
 
     def parse_hamb(self):
-        tree1 = self.parse_output(self.parse_out, "PARSE 1", "PARSE 2")
-        tree2 = self.parse_output(self.parse_out, "PARSE 2", "------")
+        tree1 = self.parse_output(self.ptrees, "PARSE 1", "PARSE 2")
+        tree2 = self.parse_output(self.ptrees, "PARSE 2", "------")
 
         return self.min_amb_tokens(tree1), self.min_amb_tokens(tree2)
 

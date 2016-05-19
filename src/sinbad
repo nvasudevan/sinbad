@@ -24,14 +24,17 @@
 
 import time, getopt, os, sys
 import Accent, Backends, CFG, Lexer
-import tempfile
-import Minimisers, AmbiParse, MiniUtils
+import Minimisers, AmbiParse
 
 
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:r:m:x:n:t:j:X:T:vs")
+        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:r:m:x:n:t:j:X:T:s")
+
+        if len(args) == 0:
+            self.usage("** Not enough arguments. **")
+
         self.backend = None
         self.t_depth = None
         self.wgt = None
@@ -40,7 +43,7 @@ class Sinbad:
         self.mint = None
         self.save_min_cfg = False
         self.td = None
-        self.verify = False
+        self.verify = True
         self.ambijarp = None
         self.jvmheap = None
         self.ambit = None
@@ -63,8 +66,6 @@ class Sinbad:
                 self.mincnt = int(opt[1])
             elif opt[0] == "-t":
                 self.mint = int(opt[1])
-            elif opt[0] == "-v":
-                self.verify = True
             elif opt[0] == "-s":
                 self.save_min_cfg = True
             elif opt[0] == "-j":
@@ -78,35 +79,13 @@ class Sinbad:
             else:
                 self.usage("Unknown argument '%s'" % opt[0])
 
-        if self.backend is None:
-            self.usage("** No backend specified. **")
+        self.validate_input()
 
-        if len(args) == 0:
-            self.usage("** Not enough arguments. **")
-
-        # dynamic backends require threshold depth
-        if self.backend != 'purerandom' and self.t_depth is None:
-            self.usage("*** threshold depth (-d N) to favour alts is not set.")
-
-        if self.minp == 'min1' and self.mincnt is None:
-            self.usage("** Min1 requires no of iterations (-n N) **\n")
-
-        if self.minp in ['min2', 'min3'] and self.mint is None:
-            self.usage("** duration (-t) to run minimisation for **\n")
-
-        if self.minp in ['min4']:
-            if self.ambijarp is None:
-                self.usage("** path (-j) to ambidexter jar? **\n")
-
-            if self.jvmheap is None:
-                self.usage("** heap size (-X) for running ambidexter **\n")
-
-            if self.ambit is None:
-                self.usage("*** duration (-T) to run ambidexter for **\n")
-
+        # run the ambiguity program
         self.gp, self.lp = args[0], args[1]
         self.check_file(self.gp)
         self.check_file(self.lp)
+
         # check if lex has a symbol for whitespace
         self.lex_ws = False
         _lex = Lexer.parse(open(self.lp, 'r').read())
@@ -114,10 +93,39 @@ class Sinbad:
             self.lex_ws = True
 
         amb, sen, ptrees = self.find_ambiguity(self.gp, self.lp, self.backend)
-
         if self.minp is not None:
             assert amb
             self.run_minimiser(ptrees)
+
+
+    def validate_input(self):
+        if self.backend is None:
+            self.usage("** No backend specified. **")
+
+        # validate backends
+        if self.backend != 'purerandom' and self.t_depth is None:
+            self.usage("*** threshold depth (-d N) is not set.")
+
+        wgtb = ['dynamic4', 'dynamic7', 'dynamic11', 'dynamic12']
+        if self.backend in wgtb and self.wgt is None:
+            self.usage("*** backends %s require weight (-w 0.x)." % wgtb)
+
+        # validate minisers
+        if self.minp in ['min1', 'min4'] and self.mincnt is None:
+            self.usage("** Min1 requires no of iterations (-n N). **\n")
+
+        if self.minp in ['min2', 'min3'] and self.mint is None:
+            self.usage("** duration (-t) to run minimisation for? **\n")
+
+        if self.minp in ['min4']:
+            if self.ambijarp is None:
+                self.usage("** path (-j) to ambidexter jar is not set. **\n")
+
+            if self.jvmheap is None:
+                self.usage("** heap size (-X) for ambidexter is not set. **\n")
+
+            if self.ambit is None:
+                self.usage("*** duration (-T) to run ambidexter is not set. **\n")
 
 
     def usage(self, msg = None):
@@ -135,8 +143,8 @@ class Sinbad:
             "\n-t <minimisation duration in secs> " \
             "\n-n <no of iterations for minimising> " \
             "\n-j <absolute path to ambidexter jar> " \
-            "\n-X <JVM heap size for ambidexter>" \
-            "\n-T <duration to run ambidexter for>\n")
+            "\n-X <JVM heap size for ambidexter (default: 1g)>" \
+            "\n-T <duration (secs) to run ambidexter for>\n")
 
             sys.exit(1)
 
@@ -160,24 +168,8 @@ class Sinbad:
 
 
     def run_minimiser(self, ptrees):
-        # we use td as the temporary workding dir for minimised
-        # grammars
-        if self.td is None:
-            self.td = tempfile.mkdtemp()
-
-        if not os.path.exists(self.td):
-            os.mkdir(self.td)
-
-        # save the minimised cfg, lex to target files
-        _lex = Lexer.parse(open(self.lp, 'r').read())
-        self.ambi_parse = AmbiParse.parse(_lex, self.lex_ws, ptrees)
-        self.mingp = os.path.join(self.td, "%s.acc" % 0)
-        self.minlp = os.path.join(self.td, "%s.lex" % 0)
-        print "mingp: %s" % self.mingp
-        print "minlp: %s" % self.minlp
-        MiniUtils.write_cfg_lex(self.ambi_parse.min_cfg, self.mingp,
-                                self.lp, self.minlp, self.lex_ws)
-
+        """ Using the initial parse trees, run the minimiser. """
+        self.ambi_parse = AmbiParse.parse(self.lp, self.lex_ws, ptrees)
         m = Minimisers.MINIMISERS[self.minp](self)
         m.minimise()
 

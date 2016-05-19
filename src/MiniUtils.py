@@ -23,7 +23,7 @@ from sets import Set
 import os, sys, copy
 import tempfile
 import CFG, Lexer
-
+import Utils
 
 def remove_terminals(cfg):
     """ does two things:
@@ -98,26 +98,6 @@ def cyclic(cfg):
     return False
 
 
-def valid_cfg(gp, lp):
-    lex = Lexer.parse(open(lp, "r").read())
-    cfg = CFG.parse(lex, open(gp, "r").read())
-    if cyclic(cfg):
-        return False
-
-    return True
-
-
-def cfg_minus_alt(cfg, rule_name, i):
-    """ Create a new cfg without the respective alternative
-        (rule.name.seqs[i])"""
-
-    _cfg = copy.deepcopy(cfg)
-    _rule_seqs = _cfg[rule_name]
-    del _rule_seqs[i]
-
-    return _cfg
-
-
 def purge_dangling_refs(cfg, rule):
     """ keep purging dangling refs until there are no more
         dangling refs. Start with 'rule'
@@ -157,20 +137,16 @@ def purge_dangling_refs(cfg, rule):
     print "**cfg: ", currcfg
 
 
-def unreachable_rules(gp, lp):
+def unreachable_rules(cfg):
     """ Checks if every non-terminal is reachable from start symbol
         we build this reachable non-terms in two phases:
         1) build the initial list from root rule;
         2) now iterate through the list, and add reachable non-term
     """
-
-    _lex = Lexer.parse(open(lp, "r").read())
-    _cfg = CFG.parse(_lex, open(gp, "r").read())
-    _root = _cfg.rules[0]
-    nonterms = [(rule.name) for rule in _cfg.rules if rule.name != _root.name]
-
+    root = cfg.rules[0]
+    nonterms = [(rule.name) for rule in cfg.rules if rule.name != root.name]
     reach_nonterms = Set()
-    for seq in _root.seqs:
+    for seq in root.seqs:
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
                 reach_nonterms.add(e.name)
@@ -182,7 +158,7 @@ def unreachable_rules(gp, lp):
     while len(exploring) > 0:
         name = exploring.pop()
         explored.add(name)
-        rule = _cfg.get_rule(name)
+        rule = cfg.get_rule(name)
         for seq in rule.seqs:
             for e in seq:
                 if isinstance(e, CFG.Non_Term_Ref):
@@ -191,109 +167,3 @@ def unreachable_rules(gp, lp):
                         exploring.add(e.name)
 
     return set(nonterms) - set(reach_nonterms)
-
-
-def pruned_cfg(cfg, gp, lp):
-    """ Given a grammar (gp), prune the unreachable rules."""
-
-    unreachable = unreachable_rules(gp, lp)
-    if len(unreachable) > 0:
-        print "=> unreachable: ", unreachable
-        for rule in unreachable:
-            del cfg[rule]
-
-        _dir, _gf = os.path.split(gp)
-        _, _lf = os.path.split(lp)
-        _gp = os.path.join(_dir, "pruned.%s" % _gf)
-        _lp = os.path.join(_dir, "pruned.%s" % _lf)
-        write_cfg_lex(cfg, _gp, lp, _lp)
-        return _gp, _lp
-
-    return gp, lp
-
-
-def write_cfg_lex(cfg, tgp, lp, tlp, lex_ws):
-    """ Write the given cfg, along with the respective headers to
-        the target file (tgp).
-        Additionally, create the minmised lex file (tlp) too.
-    """
-
-    print "\n=> writing to %s" % tgp
-    lex = Lexer.parse(open(lp, "r").read())
-    sym_tokens, tokens = minimise_lex(cfg, lex)
-    write_lex(sym_tokens, tokens, lex, tlp, lex_ws)
-
-    token_line = ""
-    if len(sym_tokens) > 0:
-        token_line = "%token " + "%s;" % (", ".join(t for t in sym_tokens))
-
-    # minimised cfg stuff
-    with open(tgp, 'w') as tgf:
-        tgf.write(('%s\n\n' % token_line) + "%nodefault\n\n")
-
-        pp_seqs = Set()
-        for seq in cfg['root']:
-            seq_s = " ".join(str(e) for e in seq)
-            pp_seqs.add(seq_s)
-
-        tgf.write("%s : %s\n;\n" % ('root', " | ".join(pp_seqs)))
-
-        nt_list = [nt for nt in cfg.keys() if nt != 'root']
-        nt_list.sort()
-        for k in nt_list:
-            pp_seqs = []
-            seqs = cfg[k]
-            for seq in seqs:
-                seq_s = " ".join(str(e) for e in seq)
-                pp_seqs.append(seq_s)
-
-            tgf.write("%s : %s\n;\n" % (k, " | ".join(pp_seqs)))
-
-
-def minimise_lex(cfg, lex):
-    """ From the given cfg and the current lex file (lp),
-        figure out the set of tokens and symbolic tokens,
-        write to the target lex file (tlp)
-    """
-    _sym_tokens = Set()
-    _tokens = Set()
-    for key in cfg.keys():
-        seqs = cfg[key]
-        for seq in seqs:
-            for e in seq:
-                if e.startswith("'"):
-                    _tokens.add(e.replace("'", ""))
-                else:
-                    if e in lex.keys():
-                        _sym_tokens.add(e)
-
-    return _sym_tokens, _tokens
-
-
-def write_lex(sym_tokens, tokens, lex, lp, lex_ws):
-    # minimised lex stiff
-    if lp is not None:
-        headers = '%{\n#include "yygrammar.h"\n%}\n%%\n'
-        footer1 = '" "  { /* blank */ }\n'
-        footer2 = '\\r  { yypos++; /* adjust line no and skip newline */ }\n'
-        footer3 = '\\n  { yypos++; /* adjust line no and skip newline */ }\n'
-        footer4 = '.    { printf("\\n error : %s", yytext); yyerror(""); }\n'
-
-        with open(lp, 'w') as lf:
-            lf.write(headers)
-            for tok in sym_tokens:
-                if tok in lex.keys():
-                    lf.write('"%s"  { return %s; }\n' % (lex[tok], tok))
-
-            for tok in tokens:
-                _tok = "'%s'" % tok
-                lf.write('"%s"  { return %s; }\n' % (lex[tok], _tok))
-
-            # CSS lex has a WS for single whitespace, so no need for another
-            # blank rule. Add " " only where lex does't already have one
-            if not lex_ws:
-                lf.write(footer1)
-
-            lf.write(footer2)
-            lf.write(footer3)
-            lf.write(footer4)

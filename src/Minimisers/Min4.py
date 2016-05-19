@@ -33,26 +33,45 @@ class Min4(Minimiser.Simple):
     def __init__(self, sin):
         Minimiser.Simple.__init__(self, sin)
         self.ambidxt = AmbiDexter.AmbiDexter(self._sin.ambijarp,
-                                             ['-q', '-pg', '-ik', '0'],
-                                             self.lex_ws, self._sin.jvmheap)
+                                         ['-q', '-pg', '-ik', '0'],
+                                         self._sin.jvmheap)
 
 
     def run_accent(self, sen, gp, lp):
         """ build parser in td using gp+lp, and parse sentence sen."""
 
         parser = Accent.compile(gp, lp)
-        out = Accent.run(parser, sen)
-        _ambip = AmbiParse.parse(self, out)
+        ptrees = Accent.run(parser, sen)
+        ambi_parse = AmbiParse.parse(lp, self._sin.lex_ws, ptrees)
         _gp = tempfile.mktemp('.acc', dir=self._sin.td)
         _lp = tempfile.mktemp('.lex', dir=self._sin.td)
-        MiniUtils.write_cfg_lex(_ambip.min_cfg, _gp, lp, _lp)
+        self.write_cfg_lex(ambi_parse, _gp, _lp)
 
-        return _gp, _lp, _ambip
+        return _gp, _lp, ambi_parse
+
+
+    def to_accent(self, sen, lp):
+        """ sen contains symbolic tokens, convert to 'actual' tokens using
+            the lex
+        """
+        lex = Lexer.parse(open(lp, "r").read())
+        _sen = []
+        for tok in sen.split():
+            if tok in lex.keys():
+                _sen.append(lex[tok])
+            else:
+                # single char quoted tokens
+                _sen.append(tok.replace("'", ""))
+
+        if not self._sin.lex_ws:
+            return " ".join(_sen)
+
+        return "".join(_sen)
 
 
     def run(self):
-        currgp = self._sin.mingp
-        currlp = self._sin.minlp
+        currgp = self.mingp
+        currlp = self.minlp
         currparse = self._sin.ambi_parse
         n = 1
 
@@ -60,12 +79,12 @@ class Min4(Minimiser.Simple):
             amb, sen, ptrees = self._sin.find_ambiguity(currgp, currlp,
                                                         self._sin.backend)
             assert amb
-            ambi_parse = AmbiParse.parse(self, ptrees)
+            ambi_parse = AmbiParse.parse(currlp, self._sin.lex_ws, ptrees)
             # save the minimised cfg, lex to target files
             _gp = os.path.join(self._sin.td, "%s.acc" % n)
             _lp = os.path.join(self._sin.td, "%s.lex" % n)
             print "currgp: %s, _gp: %s " % (currgp, _gp)
-            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp)
+            self.write_cfg_lex(ambi_parse, _gp, _lp)
             self.write_stat(_gp, _lp)
 
             currgp = _gp
@@ -74,11 +93,11 @@ class Min4(Minimiser.Simple):
             n += 1
 
         # run ambidexter on the minimised grammar
-        sen = self.ambidxt.ambiguous(currgp, str(self._sin.ambit))
-        accsen = self.ambidxt.sen_in_accent(sen, currlp)
-        print "ambisen: " , sen
-        print "accsen: " , accsen
-        if accsen is not None:
+        ambisen = self.ambidxt.ambiguous(currgp, str(self._sin.ambit))
+        if ambisen is not None:
+            accsen = self.to_accent(ambisen, currlp)
+            print "ambisen: " , ambisen
+            print "accsen: " , accsen
             # pass the string from ambidexter to accent,
             # to minimise the grammar even further
             _gp, _lp, _ambip = self.run_accent(accsen, currgp, currlp)

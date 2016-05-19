@@ -21,8 +21,8 @@
 
 
 import os
-import CFG
-import Minimiser, AmbiParse, MiniUtils
+import CFG, Lexer
+import Minimiser, AmbiParse
 
 
 class Min2(Minimiser.Simple):
@@ -32,43 +32,41 @@ class Min2(Minimiser.Simple):
 
 
     def run(self):
-        currgp = self._sin.mingp
-        currlp = self._sin.minlp
+        currgp = self.mingp
+        currlp = self.minlp
         currparse = self._sin.ambi_parse
         n = 1
         found = True
 
         while found:
             found = False
+            lex = Lexer.parse(open(currlp, 'r').read())
+            cfg = CFG.parse(lex, open(currgp, 'r').read())
             # work on rules with no of alts > 1
-            keys = [k for k in currparse.min_cfg.keys() \
-                    if len(currparse.min_cfg[k]) > 1]
+            keys = [r.name for r in cfg.rules if len(r.seqs) > 1]
             for key in keys:
-                seqs = currparse.min_cfg[key]
+                seqs = cfg.get_rule(key).seqs
                 for i in range(len(seqs)):
-                    _cfg = MiniUtils.cfg_minus_alt(currparse.min_cfg, key, i)
-                    _gf, _lf = "%s.acc" % n, "%s.lex" % n
-                    _gp = os.path.join(self._sin.td, _gf)
-                    _lp = os.path.join(self._sin.td, _lf)
-                    MiniUtils.write_cfg_lex(_cfg, _gp, currlp, _lp)
-                    n += 1
-
-                    if MiniUtils.valid_cfg(_gp, _lp):
-                        __gp, __lp = MiniUtils.pruned_cfg(_cfg, _gp, _lp)
-                        amb, _, ptrees = self._sin.find_ambiguity(__gp, __lp,
+                    _cfg = self.cfg_minus_alt(cfg, key, i)
+                    if self.valid_cfg(_cfg):
+                        # we could minimise lex first before pruning
+                        _cfg_p = self.prune_cfg(_cfg, lex)
+                        _gf, _lf = "%s.acc" % n, "%s.lex" % n
+                        _gp = os.path.join(self._sin.td, "pruned.%s" % _gf)
+                        CFG.write(_cfg_p, _gp)
+                        n += 1
+                        amb, _, ptrees = self._sin.find_ambiguity(_gp, currlp,
                                            self._sin.backend, self._sin.mint)
                         if amb:
-                            ambi_parse = AmbiParse.parse(self, ptrees)
-                            _min_gp = os.path.join(self._sin.td, "min.%s" % _gf)
-                            _min_lp = os.path.join(self._sin.td, "min.%s" % _lf)
-                            MiniUtils.write_cfg_lex(ambi_parse.min_cfg,
-                                                    _min_gp, __lp, _min_lp)
-                            self.write_stat(_min_gp, _min_lp)
+                            ambi_parse = AmbiParse.parse(currlp, self._sin.lex_ws, ptrees)
+                            __gp = os.path.join(self._sin.td, "min.%s" % _gf)
+                            __lp = os.path.join(self._sin.td, "min.%s" % _lf)
+                            self.write_cfg_lex(ambi_parse, __gp, __lp)
+                            self.write_stat(__gp, __lp)
                             found = True
                             currparse = ambi_parse
-                            currgp = _min_gp
-                            currlp = _min_lp
-                            print "==> currp: %s " % currgp
+                            currgp = __gp
+                            currlp = __lp
                             break
 
                 if found:

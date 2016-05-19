@@ -22,7 +22,7 @@
 
 import os
 import CFG, Lexer
-import Minimiser, AmbiParse, MiniUtils
+import Minimiser, AmbiParse
 
 
 class Min1(Minimiser.Simple):
@@ -32,23 +32,21 @@ class Min1(Minimiser.Simple):
 
 
     def run(self):
-        currgp = self._sin.mingp
-        currlp = self._sin.minlp
+        currgp = self.mingp
+        currlp = self.minlp
         currparse = self._sin.ambi_parse
         n = 1
 
         while n <= self._sin.mincnt:
-            amb, sen, ptrees = self._sin.find_ambiguity(currgp, currlp,
-                                                        self._sin.backend)
+            amb, _, ptrees = self._sin.find_ambiguity(currgp, currlp,
+                                                      self._sin.backend)
             assert amb
-            _lex = Lexer.parse(open(currlp, 'r').read())
-            ambi_parse = AmbiParse.parse(_lex, self._sin.lex_ws, ptrees)
+            ambi_parse = AmbiParse.parse(currlp, self._sin.lex_ws, ptrees)
             # save the minimised cfg, lex to target files
             _gp = os.path.join(self._sin.td, "%s.acc" % n)
             _lp = os.path.join(self._sin.td, "%s.lex" % n)
             print "currgp: %s, _gp: %s " % (currgp, _gp)
-            MiniUtils.write_cfg_lex(ambi_parse.min_cfg, _gp, currlp, _lp,
-                                    self._sin.lex_ws)
+            self.write_cfg_lex(ambi_parse, _gp, _lp)
             self.write_stat(_gp, _lp)
 
             currgp = _gp

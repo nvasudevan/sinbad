@@ -20,31 +20,71 @@
 # IN THE SOFTWARE.
 
 
-import os, sys
+import os, sys, copy, tempfile
 import Lexer, CFG, Backends, Accent
 import AmbiParse
-import Utils
+import MiniUtils, Utils
 
 
 class Simple:
 
     def __init__(self, sin):
         self._sin = sin
+        if self._sin.td is None:
+            self._sin.td = tempfile.mkdtemp()
+
+        if not os.path.exists(self._sin.td):
+            os.mkdir(self._sin.td)
+
+        self.mingp = os.path.join(self._sin.td, "%s.acc" % 0)
+        self.minlp = os.path.join(self._sin.td, "%s.lex" % 0)
+        self.write_cfg_lex(self._sin.ambi_parse, self.mingp, self.minlp)
+
+        # write stats to the log for initial cfg and minimised cfg
         self.statslog = "%s/log" % self._sin.td
         open(self.statslog, "w").close()
         print "=> writing stats to %s" % self._sin.td
         self.write_stat(self._sin.gp, self._sin.lp)
-        self.write_stat(self._sin.mingp, self._sin.minlp)
-        self.symtokens = []
+        self.write_stat(self.mingp, self.minlp)
 
-        # keep note of symbolic tokens
-        for l in open(self._sin.mingp, 'r'):
-            if l.startswith('%token'):
-                token_line = l
-                tok_str = token_line[7:len(token_line)-2]
-                self.sym_tokens = tok_str.replace(' ', '').split(',')
 
-        self.cfg_min_stats = []
+    def write_cfg_lex(self, ambi_parse, gp, lp):
+        CFG.write(ambi_parse.min_cfg, gp)
+        Lexer.write(ambi_parse.sym_toks, ambi_parse.toks, self._sin.lex_ws, lp)
+
+
+    def cfg_minus_alt(self, cfg, rule_name, i):
+        """ Create a new cfg without the respective alternative
+            (rule.name.seqs[i])
+        """
+        _cfg = copy.deepcopy(cfg)
+        _seqs = _cfg.get_rule(rule_name).seqs
+        del _seqs[i]
+        return _cfg
+
+
+    def valid_cfg(self, cfg):
+        if MiniUtils.cyclic(cfg):
+            return False
+
+        return True
+
+
+    def prune_cfg(self, cfg, lex):
+        """ Given a grammar (gp), prune the unreachable rules.
+            The cfg is directly manipulated.
+        """
+        unreachable = MiniUtils.unreachable_rules(cfg)
+        if len(unreachable) > 0:
+            print "=> unreachable: ", unreachable
+            _rules = []
+            for rule in cfg.rules:
+                if rule.name not in unreachable:
+                    _rules.append(rule)
+
+            return CFG.CFG(lex, cfg.sym_tokens, _rules)
+
+        return cfg
 
 
     def minimise(self):
@@ -60,13 +100,13 @@ class Simple:
 
         # verify the minimised sentence
         if self._sin.verify:
+            print "==> verify cfg %s with minimiser %s" % (gp, self._sin.minp)
             r = self.verify_ambiguity(gp, lp, ambstr)
             if r:
-                print "** minimisation with %s verified **" % self._sin.minp
+                print "** verified **"
 
 
     def verify_ambiguity(self, mingp, minlp, minsen, duration=None):
-        print "\n===> [verify] %s : %s" % (self._sin.gp, self._sin.backend)
         self._sin.lex = Lexer.parse(open(self._sin.lp, 'r').read())
         self._sin.cfg = CFG.parse(self._sin.lex, open(self._sin.gp, "r").read())
         self._sin.parser = Accent.compile(self._sin.gp, self._sin.lp)

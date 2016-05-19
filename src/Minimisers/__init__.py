@@ -28,12 +28,9 @@ import MinAD
 MINIMISERS = {
     'min1': Min1.Min1,
     'min2': Min2.Min2,
-    'min2a': Min2a.Min2a,
     'min3': Min3.Min3,
-    'min3a': Min3a.Min3a,
     'min4': Min4.Min4,
     'min5': Min5.Min5,
     'min6': Min6.Min6,
     'minad': MinAD.MinAD,
-    'min1a': Min1a.Min1a,
 }

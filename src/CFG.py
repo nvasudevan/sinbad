@@ -267,12 +267,12 @@ def parse(lex, cfg):
 
 def write(cfg, gp):
     print "==> writing cfg to %s" % gp
-    token_line = ""
+    headers = ""
     if len(cfg.sym_tokens) > 0:
-        token_str = "%s;" % (", ".join(t for t in cfg.sym_tokens))
+        headers = "%s %s;" % ('%token', ", ".join(t for t in cfg.sym_tokens))
 
     with open(gp, 'w') as gf:
-        gf.write(("%token " + '%s\n\n' % token_str) + "%nodefault\n\n")
+        gf.write(('%s\n\n' % headers) + "%nodefault\n\n")
         gf.write("%s\n" % cfg)
 
 

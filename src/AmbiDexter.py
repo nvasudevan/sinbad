@@ -27,10 +27,9 @@ import Lexer
 
 class AmbiDexter:
 
-    def __init__(self, jarp, opts=None, ws=False, heap='1g'):
+    def __init__(self, jarp, opts=None, heap='1g'):
         self.jarp = jarp
         self.opts = opts
-        self.ws = ws
         self.heap = heap
         self.javacmd = ['/usr/bin/java', '-Xss8m', '-Xmx%s' % (self.heap),\
                         '-jar', self.jarp]
@@ -62,29 +61,6 @@ class AmbiDexter:
         out, err =  p.communicate()
         r = p.returncode
         return out, err, r
-
-
-    def sen_in_accent(self, sen, lp):
-        """ sen contains symbolic tokens, convert to 'actual' tokens using
-            the lex
-        """
-        lex = Lexer.parse(open(lp, "r").read())
-        _sen = []
-        for tok in sen.split():
-            if tok in lex.keys():
-                _sen.append(lex[tok])
-            else:
-                # single char quoted tokens
-                _sen.append(tok.replace("'", ""))
-
-        if "WS" in lex.keys():
-            return "".join(_sen)
-        else:
-            # the origingal grammar had WS rule but not anymore.
-            if self.ws:
-                return "".join(_sen)
-
-            return " ".join(_sen)
 
 
     def ambiguous(self, gp, duration='30', xtra_opts=[]):

@@ -100,13 +100,11 @@ class Simple:
 
         # verify the minimised sentence
         if self._sin.verify:
-            print "==> verify cfg %s with minimiser %s" % (gp, self._sin.minp)
-            r = self.verify_ambiguity(gp, lp, ambstr)
-            if r:
-                print "** verified **"
+            self.verify_ambiguity(gp, lp, ambstr)
 
 
     def verify_ambiguity(self, mingp, minlp, minsen, duration=None):
+        print "==> verify cfg %s with minimiser %s" % (mingp, self._sin.minp)
         self._sin.lex = Lexer.parse(open(self._sin.lp, 'r').read())
         self._sin.cfg = CFG.parse(self._sin.lex, open(self._sin.gp, "r").read())
         self._sin.parser = Accent.compile(self._sin.gp, self._sin.lp)
@@ -118,7 +116,7 @@ class Simple:
         if (len(seq) == 1) and (str(seq[0]) == self._sin.cfg.start_rulen):
             out = Accent.run(self._sin.parser, minsen)
             if Accent.was_ambiguous(out):
-                return True
+                print "** verified **"
 
         minbend = "%sm" % self._sin.backend
         bend = Backends.BACKENDS[minbend](self._sin, mincfg, minsen)
@@ -126,7 +124,7 @@ class Simple:
         while not bend.found:
             bend.run(self._sin.t_depth, self._sin.wgt, duration)
 
-        return True
+        print "** verified **"
 
 
     def save_min_cfg(self, gp, lp):

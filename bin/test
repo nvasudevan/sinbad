@@ -1,8 +1,0 @@
-#!/bin/bash
-
-# A simple test script that can be invoked on it own or from CI
-
-# What is needed?
-# 1) Download accent and build
-# 2) export ACCENT_DIR
-# 3) run sinbad for amb2 and check if ambiguity was found

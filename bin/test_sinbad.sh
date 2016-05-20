@@ -14,5 +14,6 @@ patch -b -p0 ~/accent/entire/entire.c < ~/entire.c.patch
 export ACCENT_DIR=${HOME}/accent
 echo $ACCENT_DIR
 
+pwd
 # run sinbad against various backends on an example grammar
-python ../src/sinbad -b dynamic1 -d 10 bin/amb2.acc bin/general.lex
+python src/sinbad -b dynamic1 -d 10 bin/amb2.acc bin/general.lex

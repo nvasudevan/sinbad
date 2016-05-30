@@ -22,64 +22,36 @@
 # IN THE SOFTWARE.
 
 
-import time, getopt, os, sys
+import time, optparse, os, sys
 import Accent, Backends, CFG, Lexer
 import Minimisers, AmbiParse
+import tempfile
 
 
 class Sinbad:
 
     def __init__(self):
-        opts, args = getopt.getopt(sys.argv[1:], "hb:d:w:r:m:x:n:t:j:X:T:s")
+        parser = self.process_input()
+        opts, args = parser.parse_args()
+        # do some quick validation on the input
+        msg, valid = self.validate_input(opts, args)
+        if not valid:
+            sys.stderr.write("** %s **\n\n" % msg)
+            parser.print_help()
+            sys.exit(1)
 
-        if len(args) == 0:
-            self.usage("** Not enough arguments. **")
-
-        self.backend = None
-        self.t_depth = None
-        self.wgt = None
-        self.minp = None
-        self.mincnt = None
-        self.mint = None
-        self.save_min_cfg = False
-        self.td = None
+        self.backend = opts.backend
+        self.t_depth = opts.depth
+        self.wgt = opts.wgt
+        self.minp = opts.minp
+        self.mincnt = opts.mincnt
+        self.mint = opts.mint
+        self.save_min_cfg = opts.save_min_cfg
+        self.td = opts.tempdir
+        self.ambijarp = opts.ambijarp
+        self.jvmheap = opts.jvmheap
+        self.ambit = opts.ambi_time
         self.verify = True
-        self.ambijarp = None
-        self.jvmheap = None
-        self.ambit = None
-        for opt in opts:
-            if opt[0] == "-b":
-                if opt[1] not in Backends.BACKENDS:
-                    self.usage("Unknown backend '%s'." % opt[1])
-                self.backend = opt[1]
-            elif opt[0] == "-d":
-                self.t_depth = int(opt[1])  
-            elif opt[0] == "-w":
-                self.wgt = float(opt[1])             
-            elif opt[0] == "-r":
-                sys.setrecursionlimit(int(opt[1]))
-            elif opt[0] == "-m":
-                self.minp = opt[1]
-            elif opt[0] == "-x":
-                self.td = opt[1]
-            elif opt[0] == "-n":
-                self.mincnt = int(opt[1])
-            elif opt[0] == "-t":
-                self.mint = int(opt[1])
-            elif opt[0] == "-s":
-                self.save_min_cfg = True
-            elif opt[0] == "-j":
-                self.ambijarp = opt[1]
-            elif opt[0] == "-X":
-                self.jvmheap = opt[1]
-            elif opt[0] == "-T":
-                self.ambit = int(opt[1])
-            elif opt[0] == "-h":
-                self.usage()
-            else:
-                self.usage("Unknown argument '%s'" % opt[0])
-
-        self.validate_input()
 
         # run the ambiguity program
         self.gp, self.lp = args[0], args[1]
@@ -98,55 +70,90 @@ class Sinbad:
             self.run_minimiser(ptrees)
 
 
-    def validate_input(self):
-        if self.backend is None:
-            self.usage("** No backend specified. **")
+    def process_input(self):
+        parser = optparse.OptionParser(usage="Usage: %prog <options>" + \
+            " <grammar> <lex>")
+        bendgroup = optparse.OptionGroup(parser, 'Backend Options:')
+        bendgroup.add_option('-b', dest='backend', metavar='<backend>',\
+            help='which backend to run?')
+        bendgroup.add_option('-d', dest='depth', type='int', \
+            metavar='<N>', help='threshold depth')
+        bendgroup.add_option('-w', dest='wgt', type='float', metavar='<wgt>', \
+                help='weight (0.n) to apply to unpick favoured alternatives')
+        parser.add_option_group(bendgroup)
 
-        # validate backends
-        if self.backend != 'purerandom' and self.t_depth is None:
-            self.usage("*** threshold depth (-d N) is not set.")
+        mingroup = optparse.OptionGroup(parser, 'Minimiser Options:')
+        minims=['min1', 'min2', 'min3', 'min4']
+        minims_s = "<" + "|".join(m for m in minims) + ">"
+        mingroup.add_option('-m', dest='minp', type='choice', \
+            metavar='<minimiser>', choices=minims, help="which minimiser? %s" % minims_s)
+        mingroup.add_option('-n', dest='mincnt', type='int', metavar='<N>', \
+            help='number of minimisations to apply (min1)')
 
-        wgtb = ['dynamic4', 'dynamic7', 'dynamic11', 'dynamic12']
-        if self.backend in wgtb and self.wgt is None:
-            self.usage("*** backends %s require weight (-w 0.x)." % wgtb)
+        # min2, min3
+        mingroup.add_option('-t', dest='mint', type='int', metavar='<time>', \
+            help='duration (in secs) to apply minimisation for? (min2, min3)')
 
-        # validate minisers
-        if self.minp in ['min1', 'min4'] and self.mincnt is None:
-            self.usage("** Min1 requires no of iterations (-n N). **\n")
+        # min4
+        mingroup.add_option('-j', dest='ambijarp', default=None, \
+            metavar='<jar path>', help='path to the ambidexter jar (min4)')
+        mingroup.add_option('-X', dest='jvmheap', metavar='<heap>', \
+             default='1g', help='JVM heap for running ambidexter. Default: 1g')
+        mingroup.add_option('-T', dest='ambi_time', default=None, \
+            metavar='<time>', help='duration (in secs) to run ambidexter for')
 
-        if self.minp in ['min2', 'min3'] and self.mint is None:
-            self.usage("** duration (-t) to run minimisation for? **\n")
+        # others
+        mingroup.add_option('-x', dest='tempdir', default=tempfile.mkdtemp(), \
+            metavar='<temp dir>', help='temporary directory to use')
+        mingroup.add_option('-s', dest='save_min_cfg', default=False, \
+            action='store_true', help='save the minimised grammar')
+        parser.add_option_group(mingroup)
 
-        if self.minp in ['min4']:
-            if self.ambijarp is None:
-                self.usage("** path (-j) to ambidexter jar is not set. **\n")
-
-            if self.jvmheap is None:
-                self.usage("** heap size (-X) for ambidexter is not set. **\n")
-
-            if self.ambit is None:
-                self.usage("*** duration (-T) to run ambidexter is not set. **\n")
+        return parser
 
 
-    def usage(self, msg = None):
-        if msg is not None:
-            sys.stderr.write(msg + "\n\n")
+    def validate_input(self, opts, args):
+        msg = ""
+        if len(args) == 0:
+            msg = "Not enough arguments."
+            return msg, False
 
-            sys.stderr.write("sinbad <backend options> <minimiser options> "
-            "<grammar> <lexer>" \
-            "\n\nOptions for backend: " \
-            "\n-b <backend> \n-d <threshold depth> "
-            "\n-w <weight to apply to unpick favoured alternatives> " \
-            "\n\nOptions for minimiser: " \
-            "\n-m <minimiser to run> " \
-            "\n-s (save minimised grammar) " \
-            "\n-t <minimisation duration in secs> " \
-            "\n-n <no of iterations for minimising> " \
-            "\n-j <absolute path to ambidexter jar> " \
-            "\n-X <JVM heap size for ambidexter (default: 1g)>" \
-            "\n-T <duration (secs) to run ambidexter for>\n")
+        if opts.backend not in Backends.BACKENDS:
+            msg = "Unknown backend '%s'." % opts.backend
+            return msg, False
 
-            sys.exit(1)
+        if opts.backend != 'purerandom' and opts.depth is None:
+            msg = "Threshold depth is not set."
+            return msg, False
+
+        wgtbends = ['dynamic4', 'dynamic7', 'dynamic11', 'dynamic12']
+        _s = "|".join(wb for wb in wgtbends)
+        if opts.backend in wgtbends and opts.wgt is None:
+            msg = "Backends (%s) require weight (-w 0.x)." % _s
+            return msg, False
+
+        if opts.minp in ['min1', 'min4'] and opts.mincnt is None:
+            msg = "Min1|Min4 requires no (-n N) of iterations."
+            return msg, False
+
+        if opts.minp in ['min2', 'min3'] and opts.mint is None:
+            msg = "Min2|Min3 require duration (-t) to run minimisation for?"
+            return msg, False
+
+        if opts.minp in ['min4']:
+            if opts.ambijarp is None:
+                msg = "path (-j) to ambidexter jar is not set."
+                return msg, False
+
+            if opts.jvmheap is None:
+                msg = "heap size (-X) for ambidexter is not set."
+                return msg, False
+
+            if opts.ambi_time is None:
+                msg = "duration (-T) to run ambidexter is not set."
+                return msg, False
+
+        return msg, True
 
 
     def check_file(self, p):

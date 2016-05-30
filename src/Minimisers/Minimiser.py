@@ -119,7 +119,11 @@ class Simple:
                 print "** verified **"
 
         minbend = "%sm" % self._sin.backend
-        bend = Backends.BACKENDS[minbend](self._sin, mincfg, minsen)
+        if minbend in Backends.BACKENDS:
+            bend = Backends.BACKENDS[minbend](self._sin, mincfg, minsen)
+        else:
+            bend = Backends.WGTBACKENDS[minbend](self._sin, mincfg, minsen)
+
         # we keep trying until we hit the subseq
         while not bend.found:
             bend.run(self._sin.t_depth, self._sin.wgt, duration)

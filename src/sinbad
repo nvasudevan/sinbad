@@ -114,11 +114,13 @@ class Sinbad:
 
     def validate_input(self, opts, args):
         msg = ""
-        if len(args) == 0:
+        print "args: " , args
+        if len(args) < 2:
             msg = "Not enough arguments."
             return msg, False
 
-        if opts.backend not in Backends.BACKENDS:
+        backends = Backends.BACKENDS.keys() + Backends.WGTBACKENDS.keys()
+        if opts.backend not in backends:
             msg = "Unknown backend '%s'." % opts.backend
             return msg, False
 
@@ -126,10 +128,8 @@ class Sinbad:
             msg = "Threshold depth is not set."
             return msg, False
 
-        wgtbends = ['dynamic4', 'dynamic7', 'dynamic11', 'dynamic12']
-        _s = "|".join(wb for wb in wgtbends)
-        if opts.backend in wgtbends and opts.wgt is None:
-            msg = "Backends (%s) require weight (-w 0.x)." % _s
+        if opts.backend in Backends.WGTBACKENDS and opts.wgt is None:
+            msg = "Backend (%s) require weight (-w 0.x)." % opts.backend
             return msg, False
 
         if opts.minp in ['min1', 'min4'] and opts.mincnt is None:
@@ -170,8 +170,12 @@ class Sinbad:
         self.parser = Accent.compile(gp, lp)
         t1 = time.time()
         print "accent compile time (secs): %.6f" % (t1-t0) 
+        if bend_name in Backends.WGTBACKENDS:
+            bend = Backends.WGTBACKENDS[bend_name](self)
+            return bend.run(self.t_depth, self.wgt, duration)
+
         bend = Backends.BACKENDS[bend_name](self)
-        return bend.run(self.t_depth, self.wgt, duration)
+        return bend.run(self.t_depth, None, duration)
 
 
     def run_minimiser(self, ptrees):

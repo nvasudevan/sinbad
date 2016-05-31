@@ -114,7 +114,6 @@ class Sinbad:
 
     def validate_input(self, opts, args):
         msg = ""
-        print "args: " , args
         if len(args) < 2:
             msg = "Not enough arguments."
             return msg, False
@@ -142,15 +141,15 @@ class Sinbad:
 
         if opts.minp in ['min4']:
             if opts.ambijarp is None:
-                msg = "path (-j) to ambidexter jar is not set."
+                msg = "Path (-j) to ambidexter jar is not set."
                 return msg, False
 
             if opts.jvmheap is None:
-                msg = "heap size (-X) for ambidexter is not set."
+                msg = "Heap size (-X) for ambidexter is not set."
                 return msg, False
 
             if opts.ambi_time is None:
-                msg = "duration (-T) to run ambidexter is not set."
+                msg = "Duration (-T) to run ambidexter is not set."
                 return msg, False
 
         return msg, True

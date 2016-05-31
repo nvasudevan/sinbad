@@ -104,7 +104,8 @@ class Simple:
 
 
     def verify_ambiguity(self, mingp, minlp, minsen, duration=None):
-        print "==> verify cfg %s with minimiser %s" % (mingp, self._sin.minp)
+        print "==> verify grammar %s with minimiser %s \n" % \
+                (mingp, self._sin.minp)
         self._sin.lex = Lexer.parse(open(self._sin.lp, 'r').read())
         self._sin.cfg = CFG.parse(self._sin.lex, open(self._sin.gp, "r").read())
         self._sin.parser = Accent.compile(self._sin.gp, self._sin.lp)

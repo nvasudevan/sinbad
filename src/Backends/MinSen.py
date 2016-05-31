@@ -27,7 +27,8 @@ class Insert(object):
 
     def __init__(self, mincfg, minsen):
         self.subseq = mincfg.get_rule('root').seqs[0]
-        print "Replacing %s with string %s" % (self.subseq, minsen)
+        _s = " ".join(str(e) for e in self.subseq)
+        print "=> Replace *%s* with string: %s" % (_s, minsen)
         self.r, self.seqi, self.symi = Utils.find_rule(self._cfg, self.subseq)
         assert self.r is not None
         self.minsen = minsen

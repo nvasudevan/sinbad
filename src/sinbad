@@ -79,7 +79,7 @@ class Sinbad:
         bendgroup.add_option('-d', dest='depth', type='int', \
             metavar='<N>', help='threshold depth')
         bendgroup.add_option('-w', dest='wgt', type='float', metavar='<wgt>', \
-                help='weight (0.n) to apply to unpick favoured alternatives')
+            help='apply weight (0.0 < W < 1.0) to unpick favoured alternatives')
         parser.add_option_group(bendgroup)
 
         mingroup = optparse.OptionGroup(parser, 'Minimiser Options:')

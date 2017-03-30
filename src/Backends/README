@@ -53,32 +53,49 @@ Dynamic3 [based on Dynamic1]
   we identify and use the max score associated with one of the non-terminals for an 
   alternative
 
+WEIGHTED BACKENDS
+=================
+
 Dynamic4 [builds on Dynamic3]
   Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
   To favour an Randomly select a number in [0,1). 
-  If number < wgt, use RWS, else follow Dynamic3
+  If number < wgt, use RWS on the scores, else follow Dynamic3
+  ** Dynamic4 = Dynamic3 + roulette(scores) **
+
+Dynamic6 [builds on  Dynamic3]
+  Approach is same as Dynamic5 but the deterministic part to favour alternatives is
+  slightly different: whereas in case of Dynamic5, we had only one sequence to choose 
+  from, in case of Dynamic6, where possible, we may have multiple sequences.
+  ** Dynamic6 = Dynamic3 + Dynamic2 (pick one of the terminating path randomly) **
+
+Dynamic7 [builds on Dynamic1]
+  Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
+  To favour an Randomly select a number in [0,1). 
+  If number < wgt, use RWS, else follow Dynamic1
+  ** Dynamic7 = Dynamic1 + roulette(scores) **
+   
+Dynamic11 [builds on Dynamic3]
+  Use scoring mechanism, to favour alternatives
+  Calculate which sequences are of finite depth during sentence generation
+  When weight is applied, use seqs with finite depth
+  ** Dynamic11 = Dynamic3 + finite depth seq found during sentence generatio **
+
+** EXPERIMENTAL BACKENDS **
+===========================
 
 Dynamic5 [builds on Dynamic3]
   Uses a weight to favour an alternative based on the deterministic approach used
   in Dynamic2: for each rule, we know exactly which sequence to choose that guarantees
   termination.
   If number < wgt, use deterministic approach to select sequence, otherwise use Dynamic3
+  ** Dynamic5 = Dynamic3 + Dynamic2 **
 
-Dynamic6 [builds on  Dynamic3]
-  Approach is same as Dynamic5 but the deterministic part to favour alternatives is
-  slightly different: whereas in case of Dynamic5, we had only one sequence to choose 
-  from, in case of Dynamic6, where possible, we may have multiple sequences.
-
-Dynamic7 [builds on Dynamic1]
-  Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
-  To favour an Randomly select a number in [0,1). 
-  If number < wgt, use RWS, else follow Dynamic1
-   
 Dynamic8 [builds on Dynamic3]
   Uses a weight to favour an alternative based on rank based roulette wheel selection
   To favour an Randomly select a number in [0,1).
   If number < wgt, rank the scores, and then use roulette wheel selection on the ranked 
   scores
+  ** Dynamic8 = Dynamic3 + rank based roulette(scores) **
 
 Dynamic9 [builds on Dynamic3]
   Uses a weight to favour an alternative based on average scores
@@ -94,11 +111,6 @@ Dynamic10 [builds on Dynamic9]
   If < wgt, calculate inverse scores (1/seq.entered), and then use 
   roulette wheel selection on the inverse scores
   For > wgt, use Dynamic3
-
-Dynamic11 [builds on Dynamic4]
-  Use scoring mechanism, to favour alternatives
-  Calculate which sequences are of finite depth during sentence generation
-  When probabilistic weight is applied, use seqs with finite depth
 
 Dynamic12 [builds on Dynamic11]
   One difference to Dynamic11: the part which calculates alternatives

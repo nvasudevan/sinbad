@@ -52,6 +52,7 @@ class Sinbad:
         self.jvmheap = opts.jvmheap
         self.ambit = opts.ambi_time
         self.verify = True
+        self.cfg_parser = opts.cfg_parser
 
         # run the ambiguity program
         self.gp, self.lp = args[0], args[1]
@@ -80,6 +81,8 @@ class Sinbad:
             metavar='<N>', help='threshold depth')
         bendgroup.add_option('-w', dest='wgt', type='float', metavar='<wgt>', \
             help='apply weight (0.0 < W < 1.0) to unpick favoured alternatives')
+        bendgroup.add_option('-p', dest='cfg_parser', metavar='<parser path>', \
+            default=None, help='absolute path to the grammar parser')
         opt_parser.add_option_group(bendgroup)
 
         # for minimiser
@@ -166,10 +169,14 @@ class Sinbad:
         print "===> %s : %s" % (gp, bend_name)
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
-        t0 = time.time()
-        self.cfg_parser = Accent.compile(gp, lp)
-        t1 = time.time()
-        print "accent compile time (secs): %.6f" % (t1-t0)
+        if self.cfg_parser is None:
+            print "generating parser ..."
+	    t0 = time.time()
+            self.cfg_parser = Accent.compile(gp, lp)
+	    t1 = time.time()
+	    print "accent compile time (secs): %.6f" % (t1-t0)
+
+        print "parser => " , self.cfg_parser
         if bend_name in Backends.WGTBACKENDS:
             bend = Backends.WGTBACKENDS[bend_name](self)
             return bend.run(self.t_depth, self.wgt, duration)

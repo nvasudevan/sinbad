@@ -73,7 +73,7 @@ class Sinbad:
     def process_input(self):
         opt_parser = optparse.OptionParser(usage="Usage: %prog <options>" + \
             " <grammar> <lex>")
-        bendgroup = optparse.OptionGroup(parser, 'Backend Options:')
+        bendgroup = optparse.OptionGroup(opt_parser, 'Backend Options:')
         bendgroup.add_option('-b', dest='backend', metavar='<backend>',\
             help='which backend to run?')
         bendgroup.add_option('-d', dest='depth', type='int', \
@@ -83,7 +83,7 @@ class Sinbad:
         opt_parser.add_option_group(bendgroup)
 
         # for minimiser
-        mingroup = optparse.OptionGroup(parser, 'Minimiser Options:')
+        mingroup = optparse.OptionGroup(opt_parser, 'Minimiser Options:')
         minims=['min1', 'min2', 'min3', 'min4']
         minims_s = "<" + "|".join(m for m in minims) + ">"
         mingroup.add_option('-m', dest='minp', type='choice', \

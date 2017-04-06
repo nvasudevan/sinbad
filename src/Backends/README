@@ -80,6 +80,10 @@ Dynamic11 [builds on Dynamic3]
   When weight is applied, use seqs with finite depth
   ** Dynamic11 = Dynamic3 + finite depth seq found during sentence generatio **
 
+Dynamic12 [builds on Dynamic11]
+  One difference to Dynamic11: the part which calculates alternatives
+  of finite depth is reset for every sentence.
+
 ** EXPERIMENTAL BACKENDS **
 ===========================
 
@@ -112,6 +116,3 @@ Dynamic10 [builds on Dynamic9]
   roulette wheel selection on the inverse scores
   For > wgt, use Dynamic3
 
-Dynamic12 [builds on Dynamic11]
-  One difference to Dynamic11: the part which calculates alternatives
-  with finite depth is reset for every sentence.

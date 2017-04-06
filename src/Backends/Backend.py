@@ -45,7 +45,7 @@ class Simple:
                 t2 = time.time()
                 s = self.next(depth, wgt)
                 t3 = time.time()
-                out = Accent.run(self._sin.parser, s)
+                out = Accent.run(self._sin.cfg_parser, s)
                 t4 = time.time()
                 if Accent.was_ambiguous(out):
                     print "\n==> sentence[gen=%.6f parse=%.6f (secs)]: %s" % \

@@ -31,13 +31,13 @@ import tempfile
 class Sinbad:
 
     def __init__(self):
-        parser = self.process_input()
-        opts, args = parser.parse_args()
+        cli_opt_parser = self.process_input()
+        opts, args = cli_opt_parser.parse_args()
         # do some quick validation on the input
         msg, valid = self.validate_input(opts, args)
         if not valid:
             sys.stderr.write("** %s **\n\n" % msg)
-            parser.print_help()
+            cli_opt_parser.print_help()
             sys.exit(1)
 
         self.backend = opts.backend
@@ -71,7 +71,7 @@ class Sinbad:
 
 
     def process_input(self):
-        parser = optparse.OptionParser(usage="Usage: %prog <options>" + \
+        opt_parser = optparse.OptionParser(usage="Usage: %prog <options>" + \
             " <grammar> <lex>")
         bendgroup = optparse.OptionGroup(parser, 'Backend Options:')
         bendgroup.add_option('-b', dest='backend', metavar='<backend>',\
@@ -80,8 +80,9 @@ class Sinbad:
             metavar='<N>', help='threshold depth')
         bendgroup.add_option('-w', dest='wgt', type='float', metavar='<wgt>', \
             help='apply weight (0.0 < W < 1.0) to unpick favoured alternatives')
-        parser.add_option_group(bendgroup)
+        opt_parser.add_option_group(bendgroup)
 
+        # for minimiser
         mingroup = optparse.OptionGroup(parser, 'Minimiser Options:')
         minims=['min1', 'min2', 'min3', 'min4']
         minims_s = "<" + "|".join(m for m in minims) + ">"
@@ -107,9 +108,9 @@ class Sinbad:
             metavar='<temp dir>', help='temporary directory to use')
         mingroup.add_option('-s', dest='save_min_cfg', default=False, \
             action='store_true', help='save the minimised grammar')
-        parser.add_option_group(mingroup)
+        opt_parser.add_option_group(mingroup)
 
-        return parser
+        return opt_parser
 
 
     def validate_input(self, opts, args):
@@ -166,9 +167,9 @@ class Sinbad:
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
         t0 = time.time()
-        self.parser = Accent.compile(gp, lp)
+        self.cfg_parser = Accent.compile(gp, lp)
         t1 = time.time()
-        print "accent compile time (secs): %.6f" % (t1-t0) 
+        print "accent compile time (secs): %.6f" % (t1-t0)
         if bend_name in Backends.WGTBACKENDS:
             bend = Backends.WGTBACKENDS[bend_name](self)
             return bend.run(self.t_depth, self.wgt, duration)

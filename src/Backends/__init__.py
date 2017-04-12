@@ -21,11 +21,11 @@
 
 
 import Purerandom, Random2, Random3, Random4
-import Dynamic1, Dynamic2, Dynamic3 
+import Dynamic1, Dynamic2, Dynamic3
 import Dynamic2a, Dynamic4, Dynamic4a
 import Dynamic5, Dynamic6, Dynamic7, Dynamic7a
 import Dynamic8, Dynamic9, Dynamic10, Dynamic11
-import Dynamic12
+import Dynamic12, Dynamic13
 import Dynamic1m, Dynamic3m, Dynamic4m, Dynamic7m
 import Dynamic11m, Dynamic12m
 
@@ -47,6 +47,7 @@ BACKENDS = {
   "dynamic10" : Dynamic10.Calc,
   "dynamic1m" : Dynamic1m.Calc,
   "dynamic3m" : Dynamic3m.Calc,
+  "dynamic13" : Dynamic13.Calc,
 }
 
 WGTBACKENDS = {

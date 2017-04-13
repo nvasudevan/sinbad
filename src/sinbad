@@ -107,7 +107,7 @@ class Sinbad:
             metavar='<time>', help='duration (in secs) to run ambidexter for')
 
         # others
-        mingroup.add_option('-x', dest='tempdir', default=tempfile.mkdtemp(), \
+        mingroup.add_option('-x', dest='tempdir', default=None, \
             metavar='<temp dir>', help='temporary directory to use')
         mingroup.add_option('-s', dest='save_min_cfg', default=False, \
             action='store_true', help='save the minimised grammar')
@@ -171,10 +171,10 @@ class Sinbad:
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
         if self.cfg_parser is None:
             print "generating parser ..."
-	    t0 = time.time()
+            t0 = time.time()
             self.cfg_parser = Accent.compile(gp, lp)
-	    t1 = time.time()
-	    print "accent compile time (secs): %.6f" % (t1-t0)
+            t1 = time.time()
+            print "accent compile time (secs): %.6f" % (t1-t0)
 
         print "parser => " , self.cfg_parser
         if bend_name in Backends.WGTBACKENDS:

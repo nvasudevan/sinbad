@@ -20,13 +20,13 @@
 # IN THE SOFTWARE.
 
 
-import Dynamic4
+import Dynamic1rws
 import MinSen
 
 
-class Calc(Dynamic4.Calc, MinSen.Insert):
+class Calc(Dynamic1rws.Calc, MinSen.Insert):
     def __init__(self, sin, mincfg, minsen):
-        Dynamic4.Calc.__init__(self, sin)
+        Dynamic1rws.Calc.__init__(self, sin)
         MinSen.Insert.__init__(self, mincfg, minsen)
 
 
@@ -40,4 +40,4 @@ class Calc(Dynamic4.Calc, MinSen.Insert):
             rule.exited += 1
             self._depth -= 1
         else:
-            Dynamic4.Calc._dive(self, rule, depth, wgt)
+            Dynamic1rws.Calc._dive(self, rule, depth, wgt)

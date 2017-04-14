@@ -21,42 +21,55 @@
 
 
 import Purerandom, Random2, Random3, Random4
-import Dynamic1, Dynamic2, Dynamic3
-import Dynamic2a, Dynamic4, Dynamic4a
-import Dynamic5, Dynamic6, Dynamic7, Dynamic7a
-import Dynamic8, Dynamic9, Dynamic10, Dynamic11
+
+import Dynamic1, Dynamic1rws
+import Dynamic2, Dynamic2rws
+import Dynamic3
+
+import Dynamic2rwsMin, Dynamic1rwsMin
+
 import Dynamic12, Dynamic13
-import Dynamic1m, Dynamic3m, Dynamic4m, Dynamic7m
+import Dynamic1m, Dynamic3m
 import Dynamic11m, Dynamic12m
 
+import Dynamic2a, Dynamic4a
+import Dynamic5, Dynamic6, Dynamic7a
+import Dynamic8, Dynamic9, Dynamic10, Dynamic11
+
 BACKENDS = {
-  "purerandom"  : Purerandom.Calc,
-  "random2"  : Random2.Calc,
-  "random3"  : Random3.Calc,
-  "random4"  : Random4.Calc,
-  "dynamic1" : Dynamic1.Calc,
-  "dynamic2" : Dynamic2.Calc,
-  "dynamic2a" : Dynamic2a.Calc,
-  "dynamic3" : Dynamic3.Calc,
-  "dynamic4a" : Dynamic4a.Calc,
-  "dynamic5" : Dynamic5.Calc,
-  "dynamic6" : Dynamic6.Calc,
-  "dynamic7a" : Dynamic7a.Calc,
-  "dynamic8" : Dynamic8.Calc,
-  "dynamic9" : Dynamic9.Calc,
-  "dynamic10" : Dynamic10.Calc,
-  "dynamic1m" : Dynamic1m.Calc,
-  "dynamic3m" : Dynamic3m.Calc,
-  "dynamic13" : Dynamic13.Calc,
+  "purerandom" : Purerandom.Calc,
+  "random2"    : Random2.Calc,
+  "random3"    : Random3.Calc,
+  "random4"    : Random4.Calc,
+  "dynamic1"   : Dynamic1.Calc,
+  "dynamic2"   : Dynamic2.Calc,
+  "dynamic3"   : Dynamic3.Calc,
+  "dynamic6"   : Dynamic6.Calc,
+  "dynamic1m"  : Dynamic1m.Calc,
+  "dynamic3m"  : Dynamic3m.Calc,
+  "dynamic13"  : Dynamic13.Calc,
 }
 
 WGTBACKENDS = {
-  "dynamic4" : Dynamic4.Calc,
-  "dynamic7" : Dynamic7.Calc,
-  "dynamic11" : Dynamic11.Calc,
-  "dynamic12" : Dynamic12.Calc,
-  "dynamic4m" : Dynamic4m.Calc,
-  "dynamic7m" : Dynamic7m.Calc,
-  "dynamic11m" : Dynamic11m.Calc,
-  "dynamic12m" : Dynamic12m.Calc,
+  "dynamic1rws"    : Dynamic1rws.Calc,
+  "dynamic2rws"    : Dynamic2rws.Calc,
+  "dynamic11"      : Dynamic11.Calc,
+  "dynamic12"      : Dynamic12.Calc,
+  "dynamic11m"     : Dynamic11m.Calc,
+  "dynamic12m"     : Dynamic12m.Calc,
+}
+
+MINIMISER_BACKENDS = {
+  "dynamic2rwsMin" : Dynamic2rwsMin.Calc,
+  "dynamic1rwsMin" : Dynamic1rwsMin.Calc,
+}
+
+EXPERIMENTAL_BACKENDS = {
+  "dynamic2a" : Dynamic2a.Calc,
+  "dynamic4a" : Dynamic4a.Calc,
+  "dynamic5"  : Dynamic5.Calc,
+  "dynamic7a" : Dynamic7a.Calc,
+  "dynamic8"  : Dynamic8.Calc,
+  "dynamic9"  : Dynamic9.Calc,
+  "dynamic10" : Dynamic10.Calc,
 }

@@ -20,19 +20,24 @@
 # IN THE SOFTWARE.
 
 
-import math, random, sys
-import Accent, Backend, CFG, Utils, sets
+import random
+import Backend, CFG
+
 
 
 class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
-        self.terminating_indices = Utils.find_terminating_indices(self._cfg.rules)
-        
+
+        for rule in self._cfg.rules:
+            rule.entered = rule.exited = 0
+
 
     def next(self, depth, wgt = None):
+        print "wgt=> " , wgt
         self._s = []
         self._depth = 0
+
         self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)
 
         # if whitespace exists, then join the token as is, otherwise join 
@@ -43,20 +48,49 @@ class Calc(Backend.Simple):
             return " ".join(self._s)
 
 
-
     def _dive(self, rule, depth):
         self._depth += 1
 
+        rule.entered += 1
         if self._depth > depth:
-            # On exceeding the depth threshold, favour alternatives
-            seq = rule.seqs[self.terminating_indices[rule.name]]
+            # If we've exceeded the depth threshold, see if there are sequences
+            # which only contain terminals, to ensure that we don't recurse any
+            # further. If so, pick one of those randomly; otherwise, pick one of
+            # the other sequences randomly.
+            scores, wgtscores = [],[]
+            for seq in rule.seqs:
+                maxscore = 0
+                for e in seq:
+                    score = 0
+                    if isinstance(e, CFG.Non_Term_Ref):
+                        ref_rule = self._cfg.get_rule(e.name)
+                        if ref_rule.entered == 0:
+                            score = 0
+                        else:
+                            score = 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
+
+                    if score > maxscore:
+                        maxscore = score
+
+                scores.append(maxscore)
+
+            minsc = min(scores)
+            min_seqs = []
+            for i in range(len(rule.seqs)):
+                if scores[i] == minsc:
+                    min_seqs.append(rule.seqs[i])
+
+            seq = random.choice(min_seqs)
         else:
             seq = random.choice(rule.seqs)
+
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
                 self._dive(self._cfg.get_rule(e.name), depth)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
+
+        rule.exited += 1
 
         self._depth -= 1

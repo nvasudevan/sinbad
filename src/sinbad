@@ -167,6 +167,7 @@ class Sinbad:
 
     def find_ambiguity(self, gp, lp, bend_name, duration=None):
         print "===> %s : %s" % (gp, bend_name)
+        print "D=%s,wgt=%s" % (self.t_depth, self.wgt)
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
         if self.cfg_parser is None:

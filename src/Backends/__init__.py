@@ -47,16 +47,16 @@ BACKENDS = {
   "dynamic6"   : Dynamic6.Calc,
   "dynamic1m"  : Dynamic1m.Calc,
   "dynamic3m"  : Dynamic3m.Calc,
-  "dynamic13"  : Dynamic13.Calc,
 }
 
 WGTBACKENDS = {
-  "dynamic1rws"    : Dynamic1rws.Calc,
-  "dynamic2rws"    : Dynamic2rws.Calc,
-  "dynamic11"      : Dynamic11.Calc,
-  "dynamic12"      : Dynamic12.Calc,
-  "dynamic11m"     : Dynamic11m.Calc,
-  "dynamic12m"     : Dynamic12m.Calc,
+  "dynamic1rws" : Dynamic1rws.Calc,
+  "dynamic2rws" : Dynamic2rws.Calc,
+  "dynamic2fd"  : Dynamic2fd.Calc,
+  "dynamic11"   : Dynamic11.Calc,
+  "dynamic12"   : Dynamic12.Calc,
+  "dynamic11m"  : Dynamic11m.Calc,
+  "dynamic12m"  : Dynamic12m.Calc,
 }
 
 MINIMISER_BACKENDS = {

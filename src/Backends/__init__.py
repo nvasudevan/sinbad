@@ -26,8 +26,10 @@ import Dynamic1, Dynamic1rws
 import Dynamic2, Dynamic2rws
 import Dynamic3
 
+import Dynamic2rwsMin, Dynamic1rwsMin
+
 import Dynamic12, Dynamic13
-import Dynamic1m, Dynamic3m, Dynamic4m, Dynamic7m
+import Dynamic1m, Dynamic3m
 import Dynamic11m, Dynamic12m
 
 import Dynamic2a, Dynamic4a
@@ -49,14 +51,17 @@ BACKENDS = {
 }
 
 WGTBACKENDS = {
-  "dynamic1rws" : Dynamic1rws.Calc,
-  "dynamic2rws" : Dynamic2rws.Calc,
-  "dynamic11"   : Dynamic11.Calc,
-  "dynamic12"   : Dynamic12.Calc,
-  "dynamic4m"   : Dynamic4m.Calc,
-  "dynamic7m"   : Dynamic7m.Calc,
-  "dynamic11m"  : Dynamic11m.Calc,
-  "dynamic12m"  : Dynamic12m.Calc,
+  "dynamic1rws"    : Dynamic1rws.Calc,
+  "dynamic2rws"    : Dynamic2rws.Calc,
+  "dynamic11"      : Dynamic11.Calc,
+  "dynamic12"      : Dynamic12.Calc,
+  "dynamic11m"     : Dynamic11m.Calc,
+  "dynamic12m"     : Dynamic12m.Calc,
+}
+
+MINIMISER_BACKENDS = {
+  "dynamic2rwsMin" : Dynamic2rwsMin.Calc,
+  "dynamic1rwsMin" : Dynamic1rwsMin.Calc,
 }
 
 EXPERIMENTAL_BACKENDS = {

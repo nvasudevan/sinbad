@@ -30,7 +30,7 @@ import Dynamic4
 import Dynamic1rwsMin
 import Dynamic2rwsMin, Dynamic2fdMin
 
-import Dynamic1m, Dynamic3m
+import Dynamic1m, Dynamic2m
 import Dynamic11m
 
 import Dynamic2a, Dynamic4a

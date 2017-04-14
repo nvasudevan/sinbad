@@ -48,7 +48,7 @@ BACKENDS = {
   "dynamic4"   : Dynamic4.Calc,
   "dynamic6"   : Dynamic6.Calc,
   "dynamic1m"  : Dynamic1m.Calc,
-  "dynamic3m"  : Dynamic3m.Calc,
+  "dynamic2m"  : Dynamic2m.Calc,
 }
 
 WGTBACKENDS = {

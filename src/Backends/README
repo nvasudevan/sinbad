@@ -43,15 +43,15 @@ Dynamic1 [builds, more or less, on Random2]
     ~ Very sensitive to when the call stack depth is "enough"
     - Runs out of stack on few examples.
 
-Dynamic2 [builds, more or less, on Dynamic1]
-  Generate a dict, which for each non-term, will map to a sequence that will 
-  terminate the quickest.   
-    + We apply the above mapping when we have reached a certain threshold depth.
-
-Dynamic3 [based on Dynamic1]
+Dynamic2 [based on Dynamic1]
   Whereas in Dynamic1 we used a cumulative score to favour an alternative, in Dynamic3 
   we identify and use the max score associated with one of the non-terminals for an 
   alternative
+
+Dynamic3 [builds, more or less, on Dynamic1]
+  Generate a dict, which for each non-term, will map to a sequence that will
+  terminate the quickest.
+    + We apply the above mapping when we have reached a certain threshold depth.
 
 WEIGHTED BACKENDS
 =================

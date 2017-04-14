@@ -122,8 +122,9 @@ class Sinbad:
             msg = "Not enough arguments."
             return msg, False
 
-        backends = Backends.BACKENDS.keys() + Backends.WGTBACKENDS.keys()
-                   Backends.MINIMISER_BACKENDS.keys()
+        backends = Backends.BACKENDS.keys()
+                   + Backends.WGTBACKENDS.keys()
+                   + Backends.MINIMISER_BACKENDS.keys()
         if opts.backend not in backends:
             msg = "Unknown backend '%s'." % opts.backend
             return msg, False

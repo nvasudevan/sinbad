@@ -36,14 +36,14 @@ class Calc(Backend.Simple):
     def next(self, depth, wgt = None):
         self._s = []
         self._depth = 0
-        # the finite_depth part is reset at
+        # the finite_depth part is reset at 
         # every sentence generation
         for rule in self._cfg.rules:
             rule.finite_depth = None
 
         self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth, wgt)
 
-        # if whitespace exists, then join the token as is, otherwise join
+        # if whitespace exists, then join the token as is, otherwise join 
         # with a space
         if "WS" in self._sin.lex.keys():
             return "".join(self._s)
@@ -57,11 +57,41 @@ class Calc(Backend.Simple):
         rule.entered += 1
 
         if self._depth > depth:
-            # use seq with finite depth
-            if rule.finite_depth is not None:
-                seq = rule.finite_depth
+            # If we've exceeded the depth threshold, see if there are sequences
+            # which only contain terminals, to ensure that we don't recurse any
+            # further. If so, pick one of those randomly; otherwise, pick one of
+            # the other sequences randomly.
+            if random.random() < wgt:
+                # use seq with finite depth
+                if rule.finite_depth is not None:
+                    seq = rule.finite_depth
+                else:
+                    seq = random.choice(rule.seqs)
             else:
-                seq = random.choice(rule.seqs)
+                scores = []
+                for seq in rule.seqs:
+                    maxscore = 0
+                    for e in seq:
+                        score = 0
+                        if isinstance(e, CFG.Non_Term_Ref):
+                            ref_rule = self._cfg.get_rule(e.name)
+                            if ref_rule.entered == 0:
+                                score = 0
+                            else:
+                                score = 1 - (ref_rule.exited * 1.0/ ref_rule.entered)
+
+                        if score > maxscore:
+                            maxscore = score
+
+                    scores.append(maxscore)
+
+                minsc = min(scores)
+                min_seqs = []
+                for i in range(len(rule.seqs)):
+                    if scores[i] == minsc:
+                        min_seqs.append(rule.seqs[i])
+
+                seq = random.choice(min_seqs)
 
         else:
             seq = random.choice(rule.seqs)
@@ -74,7 +104,6 @@ class Calc(Backend.Simple):
                     ref_r = self._cfg.get_rule(e.name)
                     if ref_r.finite_depth == None:
                         finite_depth = False
-                        break
 
             if finite_depth:
                 rule.finite_depth = seq
@@ -86,5 +115,5 @@ class Calc(Backend.Simple):
                 self._s.append(self._cfg.gen_token(e.tok))
 
         rule.exited += 1
-
+        
         self._depth -= 1

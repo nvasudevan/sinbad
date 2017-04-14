@@ -49,13 +49,22 @@ Dynamic2 [based on Dynamic1]
   alternative
 
 Dynamic3 [builds, more or less, on Dynamic1]
-  Generate a dict, which for each non-term, will map to a sequence that will
-  terminate the quickest.
-    + We apply the above mapping when we have reached a certain threshold depth.
+  Calculate sequences of finite depth for each non-term *during* sentence generation.
+    + On reaching threshold depth, apply seq of finite depth.
+
+Dynamic4 [builds, more or less, on Dynamic1]
+  Calculate sequences of finite depth for each non-term *pre* sentence generation.
+    + On reaching threshold depth, apply seq of finite depth.
 
 WEIGHTED BACKENDS
 =================
 
+Dynamic1rws [builds on Dynamic1]
+  Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
+  To favour an Randomly select a number in [0,1). 
+  If number < wgt, use RWS, else follow Dynamic1
+  ** Dynamic1rws = Dynamic1 + roulette(scores) **
+   
 Dynamic2rws [builds on Dynamic2]
   Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
   To favour an Randomly select a number in [0,1). 
@@ -64,17 +73,10 @@ Dynamic2rws [builds on Dynamic2]
 
 Dynamic2fd [builds on Dynamic2]
   Use scoring mechanism, to favour alternatives
-  Calculate which sequences are of finite depth for each non-terminal during
-  each sentence generation.
+  During sentence generation, sequences of finite depth are noted.
   When weight is applied, use seqs with finite depth
   ** Dynamic2fd = Dynamic2 + finite depth seq **
 
-Dynamic1rws [builds on Dynamic1]
-  Uses a weight to favour an alternative based on Roulette Wheel Selection (RWS)
-  To favour an Randomly select a number in [0,1). 
-  If number < wgt, use RWS, else follow Dynamic1
-  ** Dynamic1rws = Dynamic1 + roulette(scores) **
-   
 ** EXPERIMENTAL BACKENDS **
 ===========================
 
@@ -82,7 +84,6 @@ Dynamic2fdx [builds on Dynamic2fd]
   One difference to Dynamic2fd: the part which calculates alternatives
   of finite depth is generated only once and re-used for subsequence sentence
   generation
-
 
 Dynamic2detx [builds on Dynamic2]
   Uses a weight to favour an alternative based on the deterministic approach used

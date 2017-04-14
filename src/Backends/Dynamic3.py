@@ -20,22 +20,30 @@
 # IN THE SOFTWARE.
 
 
-import random, sys
-import Accent, Backend, CFG, Utils, sets
+import math, random, sys
+import Accent, Backend, CFG, Utils
+
 
 
 class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
-        self.terminating_indices = Utils.find_terminating_indices(self._cfg.rules)
+
+        for rule in self._cfg.rules:
+            rule.entered = rule.exited = 0
 
 
     def next(self, depth, wgt = None):
         self._s = []
         self._depth = 0
-        self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)
+        # the finite_depth part is reset at
+        # every sentence generation
+        for rule in self._cfg.rules:
+            rule.finite_depth = None
 
-        # if whitespace exists, then join the token as is, otherwise join 
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth, wgt)
+
+        # if whitespace exists, then join the token as is, otherwise join
         # with a space
         if "WS" in self._sin.lex.keys():
             return "".join(self._s)
@@ -43,20 +51,40 @@ class Calc(Backend.Simple):
             return " ".join(self._s)
 
 
-
-    def _dive(self, rule, depth):
+    def _dive(self, rule, depth, wgt):
         self._depth += 1
 
+        rule.entered += 1
+
         if self._depth > depth:
-            # On exceeding the depth threshold, favour alternatives
-            seq = rule.seqs[self.terminating_indices[rule.name]]
+            # use seq with finite depth
+            if rule.finite_depth is not None:
+                seq = rule.finite_depth
+            else:
+                seq = random.choice(rule.seqs)
+
         else:
             seq = random.choice(rule.seqs)
 
+        # check for finite depth
+        if rule.finite_depth is None:
+            finite_depth = True
+            for e in seq:
+                if isinstance(e, CFG.Non_Term_Ref):
+                    ref_r = self._cfg.get_rule(e.name)
+                    if ref_r.finite_depth == None:
+                        finite_depth = False
+                        break
+
+            if finite_depth:
+                rule.finite_depth = seq
+
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):
-                self._dive(self._cfg.get_rule(e.name), depth)
+                self._dive(self._cfg.get_rule(e.name), depth, wgt)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
+
+        rule.exited += 1
 
         self._depth -= 1

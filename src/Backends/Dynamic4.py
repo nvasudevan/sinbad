@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-#
 # Copyright (c) 2012 King's College London
 # created by Laurence Tratt and Naveneetha Vasudevan
 #
@@ -21,25 +19,44 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-import Dynamic3
-import MinSen
+
+import random, sys
+import Accent, Backend, CFG, Utils, sets
 
 
-class Calc(Dynamic3.Calc, MinSen.Insert):
-    def __init__(self, sin, mincfg, minsen):
-        Dynamic3.Calc.__init__(self, sin)
-        MinSen.Insert.__init__(self, mincfg, minsen)
+class Calc(Backend.Simple):
+    def __init__(self, sin):
+        Backend.Simple.__init__(self, sin)
+        self.terminating_indices = Utils.find_terminating_indices(self._cfg.rules)
 
 
-    def _dive(self, rule, depth, wgt=None):
-        if (not self.found) and (rule.name == self.r): 
-            self._depth += 1
-            rule.entered += 1
-            self.found = True
-            print "found -> True"
-            self.insert_minsen(rule, depth)
-            rule.exited += 1
-            self._depth -= 1
+    def next(self, depth, wgt = None):
+        self._s = []
+        self._depth = 0
+        self._dive(self._cfg.get_rule(self._cfg.start_rulen), depth)
+
+        # if whitespace exists, then join the token as is, otherwise join 
+        # with a space
+        if "WS" in self._sin.lex.keys():
+            return "".join(self._s)
         else:
-            Dynamic3.Calc._dive(self, rule, depth)
+            return " ".join(self._s)
 
+
+
+    def _dive(self, rule, depth):
+        self._depth += 1
+
+        if self._depth > depth:
+            # On exceeding the depth threshold, favour alternatives
+            seq = rule.seqs[self.terminating_indices[rule.name]]
+        else:
+            seq = random.choice(rule.seqs)
+
+        for e in seq:
+            if isinstance(e, CFG.Non_Term_Ref):
+                self._dive(self._cfg.get_rule(e.name), depth)
+            else:
+                self._s.append(self._cfg.gen_token(e.tok))
+
+        self._depth -= 1

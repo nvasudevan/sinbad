@@ -29,9 +29,6 @@ class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
 
-        for rule in self._cfg.rules:
-            rule.entered = rule.exited = 0
-
 
     def next(self, depth, wgt = None):
         self._s = []
@@ -53,8 +50,6 @@ class Calc(Backend.Simple):
 
     def _dive(self, rule, depth, wgt):
         self._depth += 1
-
-        rule.entered += 1
 
         if self._depth > depth:
             # use seq with finite depth
@@ -84,7 +79,5 @@ class Calc(Backend.Simple):
                 self._dive(self._cfg.get_rule(e.name), depth, wgt)
             else:
                 self._s.append(self._cfg.gen_token(e.tok))
-
-        rule.exited += 1
 
         self._depth -= 1

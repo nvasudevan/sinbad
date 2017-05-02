@@ -33,7 +33,7 @@ import Dynamic2rwsMin, Dynamic2fdMin
 import Dynamic1m, Dynamic2m
 import Dynamic11m
 
-import Dynamic2a, Dynamic4a
+import Dynamic2a, Dynamic4a, Dynamic4b
 import Dynamic5, Dynamic6, Dynamic7a
 import Dynamic8, Dynamic9, Dynamic10, Dynamic11
 
@@ -68,6 +68,7 @@ MINIMISER_BACKENDS = {
 EXPERIMENTAL_BACKENDS = {
   "dynamic2a" : Dynamic2a.Calc,
   "dynamic4a" : Dynamic4a.Calc,
+  "dynamic4b" : Dynamic4b.Calc,
   "dynamic5"  : Dynamic5.Calc,
   "dynamic7a" : Dynamic7a.Calc,
   "dynamic8"  : Dynamic8.Calc,

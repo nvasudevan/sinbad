@@ -27,7 +27,7 @@ import Accent, Backend, CFG, Utils, sets
 class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
-        Utils.calc_seq_finite_depth(self._cfg)
+        Utils.calc_multi_seqs_finite_depth(self._cfg)
 
 
     def next(self, depth, wgt = None):
@@ -49,7 +49,8 @@ class Calc(Backend.Simple):
 
         if self._depth > depth:
             # On exceeding the depth threshold, favour alternatives
-            seq = rule.seqs[rule.seqs_finite_depth[0]]
+            # Pick one of the finite depth alternative randomly
+            seq = rule.seqs[random.choice(rule.seqs_finite_depth[0])]
         else:
             seq = random.choice(rule.seqs)
 

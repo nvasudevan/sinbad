@@ -124,6 +124,7 @@ class Sinbad:
 
         backends = Backends.BACKENDS.keys() \
             + Backends.WGTBACKENDS.keys() \
+            + Backends.EXPERIMENTAL_BACKENDS.keys() \
             + Backends.MINIMISER_BACKENDS.keys()
         if opts.backend not in backends:
             msg = "Unknown backend '%s'." % opts.backend

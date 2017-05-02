@@ -50,7 +50,7 @@ class Calc(Backend.Simple):
         if self._depth > depth:
             # On exceeding the depth threshold, favour alternatives
             # Pick one of the finite depth alternative randomly
-            seq = rule.seqs[random.choice(rule.seqs_finite_depth[0])]
+            seq = rule.seqs[random.choice(rule.seqs_finite_depth)]
         else:
             seq = random.choice(rule.seqs)
 

@@ -22,7 +22,7 @@
 
 import os, subprocess, sys, random, re, time
 import CFG, Lexer
-
+from sets import Set
 
 def error(msg, c=1):
     sys.stderr.write(msg)
@@ -169,6 +169,33 @@ def calc_seq_finite_depth(cfg):
 
         if not changed:
             break
+
+
+def calc_seq_finite_depth_2(cfg):
+    nonterms = Set()
+    for rule in cfg.rules:
+        rule.seqs_finite_depth = []
+        nonterms.add(rule.name)
+
+    while (len(nonterms) == 0):
+        for rule in cfg.rules:
+            if len(rule.seqs_finite_depth) > 0:
+                continue
+
+            for i,seq in enumerate(rule.seqs):
+                _seq = []
+                for e in seq:
+                    if isinstance(e, CFG.Non_Term_Ref):
+                        ref_rule = cfg.get_rule(e.name)
+                        if len(ref_rule.seqs_finite_depth) == 0:
+                            _seq.append(e.name)
+                            break
+
+                if len(_seq) == 0:
+                    changed = True
+                    rule.seqs_finite_depth.append(i)
+                    nonterms.remove(rule.name)
+                    break
 
 
 def calc_multi_seqs_finite_depth(cfg):

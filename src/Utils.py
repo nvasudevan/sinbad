@@ -142,7 +142,7 @@ def find_terminating_indices2(cfg_rules):
     return terminating_indices
 
 
-def calc_seq_finite_depth(cfg):
+def calc_seq_finite_depth_x(cfg):
     for rule in cfg.rules:
         rule.seqs_finite_depth = []
 
@@ -171,13 +171,17 @@ def calc_seq_finite_depth(cfg):
             break
 
 
-def calc_seq_finite_depth_2(cfg):
+def calc_seq_finite_depth(cfg):
+    """ For each rule, find alternative with finite depth.
+        Keep iterating until we have found an alternative with finite depth
+        for each non-terminal
+    """
     nonterms = Set()
     for rule in cfg.rules:
         rule.seqs_finite_depth = []
         nonterms.add(rule.name)
 
-    while (len(nonterms) == 0):
+    while (len(nonterms) > 0):
         for rule in cfg.rules:
             if len(rule.seqs_finite_depth) > 0:
                 continue
@@ -192,7 +196,6 @@ def calc_seq_finite_depth_2(cfg):
                             break
 
                 if len(_seq) == 0:
-                    changed = True
                     rule.seqs_finite_depth.append(i)
                     nonterms.remove(rule.name)
                     break

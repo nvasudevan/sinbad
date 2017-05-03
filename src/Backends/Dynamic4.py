@@ -27,16 +27,7 @@ import Accent, Backend, CFG, Utils, sets
 class Calc(Backend.Simple):
     def __init__(self, sin):
         Backend.Simple.__init__(self, sin)
-        Utils.calc_seq_finite_depth_2(self._cfg)
-        i=0
-        for r in self._cfg.rules:
-            #print "[%s] :: %s" % (r.seqs_finite_depth[0], r)
-            if len(r.seqs_finite_depth) >= 1:
-                i+=1
-
-        j=len(self._cfg.rules)
-        print "%s,%s,%s,%s" % (sin.gp, j, i, i-j)
-        sys.exit(0)
+        Utils.calc_seq_finite_depth(self._cfg)
 
 
     def next(self, depth, wgt = None):

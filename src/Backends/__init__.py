@@ -30,7 +30,7 @@ import Dynamic4
 import Dynamic1rwsMin
 import Dynamic2rwsMin, Dynamic2fdMin
 
-import Dynamic1m, Dynamic2m
+import Dynamic1m, Dynamic2m, Dynamic3m, Dynamic2rwsm
 import Dynamic11m
 
 import Dynamic2a, Dynamic4a, Dynamic4b
@@ -49,11 +49,13 @@ BACKENDS = {
   "dynamic6"   : Dynamic6.Calc,
   "dynamic1m"  : Dynamic1m.Calc,
   "dynamic2m"  : Dynamic2m.Calc,
+  "dynamic3m"  : Dynamic3m.Calc,
 }
 
 WGTBACKENDS = {
   "dynamic1rws" : Dynamic1rws.Calc,
   "dynamic2rws" : Dynamic2rws.Calc,
+  "dynamic2rwsm" : Dynamic2rwsm.Calc,
   "dynamic2fd"  : Dynamic2fd.Calc,
   "dynamic11"   : Dynamic11.Calc,
 }

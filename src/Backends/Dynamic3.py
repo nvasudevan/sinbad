@@ -56,23 +56,25 @@ class Calc(Backend.Simple):
             if rule.finite_depth is not None:
                 seq = rule.finite_depth
             else:
-                seq = random.choice(rule.seqs)
+                for _seq in rule.seqs:
+                    _fd = True
+                    for _e in _seq:
+                        if isinstance(_e, CFG.Non_Term_Ref):
+                            _ref_r = self._cfg.get_rule(_e.name)
+                            if _ref_r.finite_depth == None:
+                                _fd = False
+                                break
+
+                    if _fd:
+                        rule.finite_depth = _seq
+                        break;
+                if rule.finite_depth is not None:
+                    seq = rule.finite_depth
+                else:
+                    seq = random.choice(rule.seqs)
 
         else:
             seq = random.choice(rule.seqs)
-
-        # check for finite depth
-        if rule.finite_depth is None:
-            finite_depth = True
-            for e in seq:
-                if isinstance(e, CFG.Non_Term_Ref):
-                    ref_r = self._cfg.get_rule(e.name)
-                    if ref_r.finite_depth == None:
-                        finite_depth = False
-                        break
-
-            if finite_depth:
-                rule.finite_depth = seq
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):

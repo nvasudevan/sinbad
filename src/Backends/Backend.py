@@ -31,7 +31,7 @@ class Simple:
         self._cfg = sin.cfg.clone()
 
 
-    def run(self, depth, wgt=None, duration=None):
+    def run(self, depth, wgt=None, duration=None, parserp=None):
         rec = 0
         timer = False
         if duration is not None:
@@ -45,7 +45,7 @@ class Simple:
                 t2 = time.time()
                 s = self.next(depth, wgt)
                 t3 = time.time()
-                out = Accent.run(self._sin.cfg_parser, s)
+                out = Accent.run(parserp, s)
                 t4 = time.time()
                 if Accent.was_ambiguous(out):
                     print "\n==> sentence[gen=%.6f parse=%.6f (secs)]: %s" % \

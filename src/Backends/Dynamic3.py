@@ -30,7 +30,7 @@ class Calc(Backend.Simple):
         Backend.Simple.__init__(self, sin)
 
 
-    def next(self, depth, wgt = None):
+    def next(self, depth, wgt=None):
         self._s = []
         self._depth = 0
         # the finite_depth part is reset at
@@ -48,7 +48,7 @@ class Calc(Backend.Simple):
             return " ".join(self._s)
 
 
-    def _dive(self, rule, depth, wgt):
+    def _dive(self, rule, depth, wgt=None):
         self._depth += 1
 
         if self._depth > depth:

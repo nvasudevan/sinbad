@@ -52,7 +52,8 @@ class Sinbad:
         self.jvmheap = opts.jvmheap
         self.ambit = opts.ambi_time
         self.verify = True
-        self.cfg_parser = opts.cfg_parser
+
+        self.parserp = opts.cfg_parser
 
         # run the ambiguity program
         self.gp, self.lp = args[0], args[1]
@@ -173,25 +174,28 @@ class Sinbad:
         print "D=%s,wgt=%s" % (self.t_depth, self.wgt)
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
-        if self.cfg_parser is None:
+
+        parserp = self.parserp
+        if parserp is None:
             print "generating parser ..."
             t0 = time.time()
-            self.cfg_parser = Accent.compile(gp, lp)
+            parserp = Accent.compile(gp, lp)
             t1 = time.time()
             print "accent compile time (secs): %.6f" % (t1-t0)
 
-        print "parser => " , self.cfg_parser
+        print "=> parserp: " , parserp
+
         if bend_name in Backends.WGTBACKENDS:
             bend = Backends.WGTBACKENDS[bend_name](self)
-            return bend.run(self.t_depth, self.wgt, duration)
+            return bend.run(parserp, self.t_depth, self.wgt, duration)
 
         if bend_name in Backends.BACKENDS:
             bend = Backends.BACKENDS[bend_name](self)
-            return bend.run(self.t_depth, None, duration)
+            return bend.run(parserp, self.t_depth, None, duration)
 
         if bend_name in Backends.EXPERIMENTAL_BACKENDS:
             bend = Backends.EXPERIMENTAL_BACKENDS[bend_name](self)
-            return bend.run(self.t_depth, None, duration)
+            return bend.run(parserp, self.t_depth, None, duration)
 
 
     def run_minimiser(self, ptrees):

@@ -108,14 +108,15 @@ class Simple:
                 (mingp, self._sin.minp)
         self._sin.lex = Lexer.parse(open(self._sin.lp, 'r').read())
         self._sin.cfg = CFG.parse(self._sin.lex, open(self._sin.gp, "r").read())
-        self._sin.parser = Accent.compile(self._sin.gp, self._sin.lp)
+        parserp = Accent.compile(self._sin.gp, self._sin.lp)
 
         minlex = Lexer.parse(open(minlp, 'r').read())
         mincfg = CFG.parse(minlex, open(mingp, 'r').read())
         seq = mincfg.get_rule('root').seqs[0]
         # check if the root rule of minimised cfg == root of original cfg
+        # if so, parse the sentence as is. 
         if (len(seq) == 1) and (str(seq[0]) == self._sin.cfg.start_rulen):
-            out = Accent.run(self._sin.parser, minsen)
+            out = Accent.run(parserp, minsen)
             if Accent.was_ambiguous(out):
                 print "** verified **"
 
@@ -127,7 +128,7 @@ class Simple:
 
         # we keep trying until we hit the subseq
         while not bend.found:
-            bend.run(self._sin.t_depth, self._sin.wgt, duration)
+            bend.run(parserp, self._sin.t_depth, self._sin.wgt, duration)
 
         print "** verified **"
 
@@ -137,11 +138,13 @@ class Simple:
         gname, gext = os.path.splitext(gf)
         _gf = "%s.%s%s" % (gname, self._sin.minp, gext)
         _gp = os.path.join(gd, _gf)
+        Utils.file_copy(gp, _gp)
+
         ld, lf = os.path.split(self._sin.lp)
         lname, lext = os.path.splitext(lf)
         _lf = "%s.%s%s" % (lname, self._sin.minp, lext)
         _lp = os.path.join(ld, _lf)
-        Utils.file_copy(gp, _gp)
+
         Utils.file_copy(lp, _lp)
 
 

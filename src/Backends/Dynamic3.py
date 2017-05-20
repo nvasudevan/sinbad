@@ -50,13 +50,11 @@ class Calc(Backend.Simple):
 
     def _dive(self, rule, depth, wgt):
         self._depth += 1
-        #print "[%s]:: %s" % (self._depth, rule)
 
         if self._depth > depth:
             # use seq with finite depth
             if rule.finite_depth is not None:
                 seq = rule.finite_depth
-                #print "[fd:%s][%s]:: %s" % (self._depth, rule.finite_depth, rule)
             else:
                 for _seq in rule.seqs:
                     _fd = True
@@ -69,32 +67,14 @@ class Calc(Backend.Simple):
 
                     if _fd:
                         rule.finite_depth = _seq
-                        #print "XXXXfd found: %s, %s" % (rule.finite_depth, rule)
-                        #sys.exit(0)
                         break;
                 if rule.finite_depth is not None:
                     seq = rule.finite_depth
-                    #print "[fd:%s][%s]:: %s" % (self._depth, rule.finite_depth, rule)
                 else:
                     seq = random.choice(rule.seqs)
-                    #print "fd:rnd:[%s][%s]:: %s" % (self._depth, seq, rule)
 
         else:
             seq = random.choice(rule.seqs)
-
-        # check for finite depth
-        #if rule.finite_depth is None:
-        #    finite_depth = True
-        #    for e in seq:
-        #        if isinstance(e, CFG.Non_Term_Ref):
-        #            ref_r = self._cfg.get_rule(e.name)
-        #            if ref_r.finite_depth == None:
-        #                finite_depth = False
-        #                break
-
-        #    if finite_depth:
-        #        rule.finite_depth = seq
-        #        print "fd found: %s, %s" % (rule.finite_depth, rule)
 
         for e in seq:
             if isinstance(e, CFG.Non_Term_Ref):

@@ -58,10 +58,13 @@ class Simple:
                     rec += 1
                     sys.stderr.write("\nr:%s\n" % rec)
                     sys.stderr.flush()
-                    print "======="
-                    for rule in self._cfg.rules:
-                        if rule.finite_depth is not None:
-                            print "[%s], %s" % (rule.finite_depth, rule)
+                    # useful to know what dynamic3 found before hitting recursion
+                    if self._sin.backend in ['dynamic3']:
+                        print "======="
+                        for rule in self._cfg.rules:
+                            if rule.finite_depth is not None:
+                                print "[%s], %s" % (rule.finite_depth, rule)
+
                     sys.exit(0)
                 else:
                     # track other errors

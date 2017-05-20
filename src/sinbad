@@ -187,15 +187,15 @@ class Sinbad:
 
         if bend_name in Backends.WGTBACKENDS:
             bend = Backends.WGTBACKENDS[bend_name](self)
-            return bend.run(self.t_depth, self.wgt, duration, parserp)
+            return bend.run(parserp, self.t_depth, self.wgt, duration)
 
         if bend_name in Backends.BACKENDS:
             bend = Backends.BACKENDS[bend_name](self)
-            return bend.run(self.t_depth, None, duration, parserp)
+            return bend.run(parserp, self.t_depth, None, duration)
 
         if bend_name in Backends.EXPERIMENTAL_BACKENDS:
             bend = Backends.EXPERIMENTAL_BACKENDS[bend_name](self)
-            return bend.run(self.t_depth, None, duration, parserp)
+            return bend.run(parserp, self.t_depth, None, duration)
 
 
     def run_minimiser(self, ptrees):

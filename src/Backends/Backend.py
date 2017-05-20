@@ -31,7 +31,7 @@ class Simple:
         self._cfg = sin.cfg.clone()
 
 
-    def run(self, depth, wgt=None, duration=None, parserp=None):
+    def run(self, parserp, depth, wgt=None, duration=None):
         rec = 0
         timer = False
         if duration is not None:

@@ -33,10 +33,11 @@ TERM_TOK = "'(.)'"
 
 class AmbiParse:
 
-    def __init__(self, lp, lex_ws, ptrees):
+    def __init__(self, lp, lex_ws, ptrees, sen=None):
         self.lex = Lexer.parse(open(lp, 'r').read())
         self.lex_ws = lex_ws
         self.ptrees = ptrees
+        self.sen = sen
         self.amb_type = 'horizontal'
         for l in iter(self.ptrees.splitlines()):
             if re.match(VERTICAL_AMBIGUITY, l):
@@ -277,7 +278,7 @@ class AmbiParse:
         return cfg
 
 
-def parse(lex, lex_ws, out):
-    ambiparse = AmbiParse(lex, lex_ws, out)
+def parse(lex, lex_ws, out, sen):
+    ambiparse = AmbiParse(lex, lex_ws, out, sen)
 
     return ambiparse

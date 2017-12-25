@@ -65,7 +65,6 @@ class Simple:
                             if rule.finite_depth is not None:
                                 print "[%s], %s" % (rule.finite_depth, rule)
 
-                    sys.exit(0)
                 else:
                     # track other errors
                     print "error: \n"

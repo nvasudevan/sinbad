@@ -30,27 +30,17 @@ class Simple:
 
     def __init__(self, sin):
         self._sin = sin
-        if self._sin.td is None:
-            self._sin.td = tempfile.mkdtemp()
-
-        if not os.path.exists(self._sin.td):
-            os.mkdir(self._sin.td)
-
-        self.mingp = os.path.join(self._sin.td, "%s.acc" % 0)
-        self.minlp = os.path.join(self._sin.td, "%s.lex" % 0)
-        self.write_cfg_lex(self._sin.ambi_parse, self.mingp, self.minlp)
-
-        # write stats to the log for initial cfg and minimised cfg
-        self.statslog = "%s/log" % self._sin.td
-        open(self.statslog, "w").close()
-        print "=> writing stats to %s" % self._sin.td
-        self.write_stat(self._sin.gp, self._sin.lp)
-        self.write_stat(self.mingp, self.minlp)
 
 
-    def write_cfg_lex(self, ambi_parse, gp, lp):
-        CFG.write(ambi_parse.min_cfg, gp)
-        Lexer.write(ambi_parse.sym_toks, ambi_parse.toks, self._sin.lex_ws, lp)
+    def write_cfg_lex(self, ambi_parse, gf, lf, senstrf, ambstrf):
+        CFG.write(ambi_parse.min_cfg, gf)
+        Lexer.write(ambi_parse.sym_toks, ambi_parse.toks, self._sin.lex_ws, lf)
+
+        with open(ambstrf, 'w') as ambstrp:
+            ambstrp.write(ambi_parse.amb_str)
+
+        with open(senstrf, 'w') as senstrp:
+            senstrp.write(ambi_parse.sen)
 
 
     def cfg_minus_alt(self, cfg, rule_name, i):
@@ -99,7 +89,7 @@ class Simple:
         print "stats: %s\n" % (open(self.statslog, 'r').read())
 
         # verify the minimised sentence
-        if self._sin.verify:
+        if self._sin.min_verify:
             self.verify_ambiguity(gp, lp, ambstr)
 
 
@@ -148,10 +138,8 @@ class Simple:
         Utils.file_copy(lp, _lp)
 
 
-    def write_stat(self, gp, lp, tag=''):
-        """ write no of rules, alts, symbols
-            Use the tag to mark the final line
-        """
+    def write_stat(self, gp, lp, senstrp='', ambstrp=''):
+        """ write the stats (size of the grammar and sentence) out """
         s = "-,-,-" 
         if gp is not None:
             lex = Lexer.parse(open(lp, 'r').read())
@@ -160,5 +148,5 @@ class Simple:
             s = "%s,%s,%s" % (rules, alts, syms)
 
         with open(self.statslog, "a") as logp:
-            logp.write("%s%s\n" % (tag, s))
+            logp.write("%s,%s,%s,%s,%s\n" % (gp, lp, ambstrp, senstrp, s))
 

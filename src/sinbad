@@ -51,7 +51,7 @@ class Sinbad:
         self.ambijarp = opts.ambijarp
         self.jvmheap = opts.jvmheap
         self.ambit = opts.ambi_time
-        self.verify = True
+        self.min_verify = opts.min_verify
 
         self.parserp = opts.cfg_parser
 
@@ -66,10 +66,20 @@ class Sinbad:
         if 'WS' in _lex:
             self.lex_ws = True
 
-        amb, sen, ptrees = self.find_ambiguity(self.gp, self.lp, self.backend)
-        if self.minp is not None:
-            assert amb
-            self.run_minimiser(ptrees)
+        if self.min_verify:
+            if self.td is None:
+                sys.stderr.write("Provide path to directory (-x <tmp dir>) containing minimised grammar\n")
+                sys.exit(1)
+
+            print "====> verifying from " , self.td 
+            self.run_minimiser_verify()
+        else:
+            if self.minp is not None:
+                m = Minimisers.MINIMISERS[self.minp](self)
+                m.minimise()
+            else:
+                amb, sen, ptrees = self.find_ambiguity(self.gp, self.lp, self.backend)
+
 
 
     def process_input(self):
@@ -112,6 +122,8 @@ class Sinbad:
             metavar='<temp dir>', help='temporary directory to use')
         mingroup.add_option('-s', dest='save_min_cfg', default=False, \
             action='store_true', help='save the minimised grammar')
+        mingroup.add_option('-k', dest='min_verify', default=False, \
+            action='store_true', help='verify the minimised grammar')
         opt_parser.add_option_group(mingroup)
 
         return opt_parser
@@ -137,10 +149,6 @@ class Sinbad:
 
         if opts.backend in Backends.WGTBACKENDS and opts.wgt is None:
             msg = "Backend (%s) require weight (-w 0.x)." % opts.backend
-            return msg, False
-
-        if opts.minp in ['min1', 'min4'] and opts.mincnt is None:
-            msg = "Min1|Min4 requires no (-n N) of iterations."
             return msg, False
 
         if opts.minp in ['min2', 'min3'] and opts.mint is None:
@@ -198,11 +206,35 @@ class Sinbad:
             return bend.run(parserp, self.t_depth, None, duration)
 
 
-    def run_minimiser(self, ptrees):
+    def run_minimiser(self):
         """ Using the initial parse trees, run the minimiser. """
-        self.ambi_parse = AmbiParse.parse(self.lp, self.lex_ws, ptrees)
+
+
+    def run_minimiser_verify(self):
+        """ Run the verfier on the final minimised cfg. """
+        # read log from self.td
         m = Minimisers.MINIMISERS[self.minp](self)
-        m.minimise()
+        logf = os.path.join(self.td, "log")
+        if not os.path.exists(logf):
+            sys.stderr.write("ERROR: %s doesn't exist. exiting ...\n" % logf)
+            sys.exit(1)
+
+        with open(logf, 'r') as logp:
+            loglines = logp.readlines()
+
+        if len(loglines) > 1:
+            for l in loglines:
+                finalstatsl = l
+
+            _l = finalstatsl.split(',')[0:3]
+            print "files to use: " , _l
+            mingp = _l[0]
+            minlp = _l[1]
+            ambstrp = _l[2]
+            _ambp = open(ambstrp, 'r')
+            ambstr = _ambp.readline().replace('\n','')
+            _ambp.close()
+            m.verify_ambiguity(mingp, minlp, ambstr)
 
 
 

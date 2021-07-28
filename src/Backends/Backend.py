@@ -48,10 +48,10 @@ class Simple:
                 out = Accent.run(parserp, s)
                 t4 = time.time()
                 if Accent.was_ambiguous(out):
-                    print "\n==> sentence[gen=%.6f parse=%.6f (secs)]: %s" % \
-                                    ((t3-t2), (t4-t3), s)
-                    print
-                    print "".join(out)
+                    print("\n==> sentence[gen=%.6f parse=%.6f (secs)]: %s" % \
+                                    ((t3-t2), (t4-t3), s))
+                    print()
+                    print("".join(out))
                     return True, s, out
             except RuntimeError as err:
                 if "maximum recursion depth exceeded" in err.message:
@@ -60,15 +60,15 @@ class Simple:
                     sys.stderr.flush()
                     # useful to know what dynamic3 found before hitting recursion
                     if self._sin.backend in ['dynamic3']:
-                        print "======="
+                        print("=======")
                         for rule in self._cfg.rules:
                             if rule.finite_depth is not None:
-                                print "[%s], %s" % (rule.finite_depth, rule)
+                                printr("[%s], %s" % (rule.finite_depth, rule))
 
                 else:
                     # track other errors
-                    print "error: \n"
-                    print traceback.format_exc()
+                    print("error: \n")
+                    print(traceback.format_exc())
                     sys.exit(2)
 
         return False, None, None

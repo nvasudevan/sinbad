@@ -23,7 +23,6 @@
 
 
 import sys, re, tempfile
-from sets import Set
 import CFG, Lexer
 
 
@@ -70,8 +69,8 @@ class AmbiParse:
 
     def minimise_lex(self, cfg):
         """ Iterate through the cfg's rules and build the lex tokens. """
-        _sym_tokens = Set()
-        _tokens = Set()
+        _sym_tokens = set()
+        _tokens = set()
         for key in cfg.keys():
             seqs = cfg[key]
             for seq in seqs:
@@ -105,7 +104,7 @@ class AmbiParse:
 
         with open(tp, 'w') as tf:
             tf.write(('%s\n\n' % header) + "%nodefault\n\n")
-            pp_seqs = Set()
+            pp_seqs = set()
             for seq in cfg['root']:
                 seq_s = " ".join(str(e) for e in seq)
                 pp_seqs.add(seq_s)

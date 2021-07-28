@@ -85,7 +85,7 @@ def parse(lexer):
 
 
 def write(sym_toks, toks, ws, lp):
-    print "==> writing lex to %s" % lp
+    print("==> writing lex to %s" % lp)
     headers = '%{\n#include "yygrammar.h"\n%}\n%%\n'
     footer1 = '" "  { /* blank */ }\n'
     footer2 = '\\r  { yypos++; /* adjust line no and skip newline */ }\n'
@@ -116,4 +116,4 @@ if __name__ == "__main__":
     import sys
     for p in sys.argv[1:]:
         toks = parse(open(p, "r").read())
-        print toks.keys()
+        print(toks.keys())

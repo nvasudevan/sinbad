@@ -22,7 +22,6 @@
 
 import os, subprocess, sys, random, re, time
 import CFG, Lexer
-from sets import Set
 
 def error(msg, c=1):
     sys.stderr.write(msg)
@@ -176,7 +175,7 @@ def calc_seq_finite_depth(cfg):
         Keep iterating until we have found an alternative with finite depth
         for each non-terminal
     """
-    nonterms = Set()
+    nonterms = set()
     for rule in cfg.rules:
         rule.seqs_finite_depth = []
         nonterms.add(rule.name)
@@ -246,7 +245,7 @@ def file_copy(source, target):
     if r != 0:
         Utils.error("Copy of %s -> %s failed!\n" % (source, target), r)
 
-    print "Copied: %s -> %s\n" % (source, target)
+    print("Copied: %s -> %s\n" % (source, target))
 
 
 

@@ -21,7 +21,8 @@
 
 
 import random
-import Backend, CFG
+import CFG
+from Backends import Backend
 
 
 

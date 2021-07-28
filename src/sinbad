@@ -26,7 +26,7 @@ import time, optparse, os, sys
 import Accent, Backends, CFG, Lexer
 import Minimisers, AmbiParse
 import tempfile
-
+from Backends import Config
 
 class Sinbad:
 
@@ -71,7 +71,7 @@ class Sinbad:
                 sys.stderr.write("Provide path to directory (-x <tmp dir>) containing minimised grammar\n")
                 sys.exit(1)
 
-            print "====> verifying from " , self.td 
+            print("====> verifying from " , self.td) 
             self.run_minimiser_verify()
         else:
             if self.minp is not None:
@@ -135,10 +135,10 @@ class Sinbad:
             msg = "Not enough arguments."
             return msg, False
 
-        backends = Backends.BACKENDS.keys() \
-            + Backends.WGTBACKENDS.keys() \
-            + Backends.EXPERIMENTAL_BACKENDS.keys() \
-            + Backends.MINIMISER_BACKENDS.keys()
+        backends = list(Backends.Config.BACKENDS.keys()) \
+                + list(Backends.Config.WGTBACKENDS.keys()) \
+                + list(Backends.Config.EXPERIMENTAL_BACKENDS.keys())
+
         if opts.backend not in backends:
             msg = "Unknown backend '%s'." % opts.backend
             return msg, False
@@ -147,7 +147,7 @@ class Sinbad:
             msg = "Threshold depth is not set."
             return msg, False
 
-        if opts.backend in Backends.WGTBACKENDS and opts.wgt is None:
+        if opts.backend in Backends.Config.WGTBACKENDS and opts.wgt is None:
             msg = "Backend (%s) require weight (-w 0.x)." % opts.backend
             return msg, False
 
@@ -178,31 +178,31 @@ class Sinbad:
 
 
     def find_ambiguity(self, gp, lp, bend_name, duration=None):
-        print "===> %s : %s" % (gp, bend_name)
-        print "D=%s,wgt=%s" % (self.t_depth, self.wgt)
+        print("===> %s : %s" % (gp, bend_name))
+        print("D=%s,wgt=%s" % (self.t_depth, self.wgt))
         self.lex = Lexer.parse(open(lp, "r").read())
         self.cfg = CFG.parse(self.lex, open(gp, "r").read())
 
         parserp = self.parserp
         if parserp is None:
-            print "generating parser ..."
+            print("generating parser ...")
             t0 = time.time()
             parserp = Accent.compile(gp, lp)
             t1 = time.time()
-            print "accent compile time (secs): %.6f" % (t1-t0)
+            print("accent compile time (secs): %.6f" % (t1-t0))
 
-        print "=> parserp: " , parserp
+        print("=> parserp: " , parserp)
 
-        if bend_name in Backends.WGTBACKENDS:
-            bend = Backends.WGTBACKENDS[bend_name](self)
+        if bend_name in Backends.Config.WGTBACKENDS:
+            bend = Backends.Config.WGTBACKENDS[bend_name](self)
             return bend.run(parserp, self.t_depth, self.wgt, duration)
 
-        if bend_name in Backends.BACKENDS:
-            bend = Backends.BACKENDS[bend_name](self)
+        if bend_name in Backends.Config.BACKENDS:
+            bend = Backends.Config.BACKENDS[bend_name](self)
             return bend.run(parserp, self.t_depth, None, duration)
 
-        if bend_name in Backends.EXPERIMENTAL_BACKENDS:
-            bend = Backends.EXPERIMENTAL_BACKENDS[bend_name](self)
+        if bend_name in Backends.Config.EXPERIMENTAL_BACKENDS:
+            bend = Backends.Config.EXPERIMENTAL_BACKENDS[bend_name](self)
             return bend.run(parserp, self.t_depth, None, duration)
 
 
@@ -227,7 +227,7 @@ class Sinbad:
                 finalstatsl = l
 
             _l = finalstatsl.split(',')[0:3]
-            print "files to use: " , _l
+            print("files to use: " , _l)
             mingp = _l[0]
             minlp = _l[1]
             ambstrp = _l[2]

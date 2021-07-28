@@ -71,15 +71,16 @@ def compile(old_gp, old_lp):
 
 
 def run(parser, s):
-
     p = subprocess.Popen(parser, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    out = p.communicate(s)
+    outs, errs = p.communicate(s.encode())
+    out_s = outs.decode("utf-8")
     r = p.returncode
     # 0 - normal exit; 2 - ambiguous case
     if r not in [0,2]:
-        Utils.error("accent failed for sentence:\n%s\n\nwith error: %s" % (s,out),r)
+        Utils.error("accent failed for sentence:\n%s\n\nwith error: %s" % \
+                (s, out_s),r)
 
-    return "".join(out[0])
+    return "".join(out_s)
 
 
 def was_ambiguous(out):

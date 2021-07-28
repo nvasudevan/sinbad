@@ -21,7 +21,8 @@
 
 
 import random
-import Backend, CFG
+import CFG
+from Backends import Backend
 
 
 
@@ -34,7 +35,7 @@ class Calc(Backend.Simple):
 
 
     def next(self, depth, wgt = None):
-        print "wgt=> " , wgt
+        print("wgt=> " , wgt)
         self._s = []
         self._depth = 0
 

@@ -1,3 +1,4 @@
+
 # Copyright (c) 2012 King's College London
 # created by Laurence Tratt and Naveneetha Vasudevan
 #
@@ -19,18 +20,25 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-#import Min1
-#import Min2
-#import Min3
-#import Min4, Min5, Min6
-#import MinAD
-#
-#MINIMISERS = {
-#    'min1': Min1.Min1,
-#    'min2': Min2.Min2,
-#    'min3': Min3.Min3,
-#    'min4': Min4.Min4,
-#    'min5': Min5.Min5,
-#    'min6': Min6.Min6,
-#    'minad': MinAD.MinAD,
-#}
+
+
+from Backends import Dynamic1, Dynamic2, Dynamic3
+from Backends import Dynamic11
+from Backends import Dynamic8, Dynamic9, Dynamic10
+
+
+BACKENDS = {
+  "dynamic1"   : Dynamic1.Calc,
+  "dynamic2"   : Dynamic2.Calc,
+  "dynamic3"   : Dynamic3.Calc,
+}
+
+WGTBACKENDS = {
+  "dynamic11"   : Dynamic11.Calc,
+}
+
+EXPERIMENTAL_BACKENDS = {
+  "dynamic8"  : Dynamic8.Calc,
+  "dynamic9"  : Dynamic9.Calc,
+  "dynamic10" : Dynamic10.Calc,
+}

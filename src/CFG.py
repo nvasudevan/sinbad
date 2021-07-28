@@ -266,7 +266,7 @@ def parse(lex, cfg):
 
 
 def write(cfg, gp):
-    print "==> writing cfg to %s" % gp
+    print("==> writing cfg to %s" % gp)
     headers = ""
     if len(cfg.sym_tokens) > 0:
         headers = "%s %s;" % ('%token', ", ".join(t for t in cfg.sym_tokens))
@@ -280,4 +280,4 @@ if __name__ == "__main__":
     import sys
     import Lexer
     lex = Lexer.parse(open(sys.argv[2],"r").read())
-    print parse(lex, open(sys.argv[1], "r").read())
+    print(parse(lex, open(sys.argv[1], "r").read()))

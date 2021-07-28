@@ -20,8 +20,9 @@
 # IN THE SOFTWARE.
 
 
-import math, random, sys
-import Accent, Backend, CFG, Utils
+import math, random
+import CFG
+from Backends import Backend
 
 
 

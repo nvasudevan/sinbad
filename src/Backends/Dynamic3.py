@@ -21,7 +21,8 @@
 
 
 import math, random, sys
-import Accent, Backend, CFG, Utils
+import CFG
+from Backends import Backend
 
 
 

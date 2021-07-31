@@ -39,7 +39,7 @@ class Simple:
 
         start = time.time()
         while ((not timer) or (not Utils.time_elapsed(start, duration))):
-            sys.stdout.write(".\n=====>\n")
+            sys.stdout.write(".")
             sys.stdout.flush()
             try:
                 t2 = time.time()
